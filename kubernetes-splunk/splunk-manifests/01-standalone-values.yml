@@ -1,0 +1,14 @@
+# values.yaml fuer den splunk/splunk-enterprise Helm-Chart
+# Deployt eine einzelne Splunk-Standalone-Instanz (S1 / Single Server Deployment) ueber
+# den Splunk Operator. Setzt voraus, dass der Splunk Operator bereits separat installiert
+# ist (siehe uebungen/10-optional-splunk-operator-installieren.md), deshalb bleibt die im Chart
+# gebuendelte Operator-Dependency hier deaktiviert.
+#
+# helm install --values 01-standalone-values.yml splunk-enterprise-test splunk/splunk-enterprise -n splunk-operator
+
+sva:
+  s1:
+    enabled: true
+
+splunk-operator:
+  enabled: false

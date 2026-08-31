@@ -1,0 +1,23 @@
+# values.yaml fuer splunk-otel/splunk-otel-collector
+# Variante B: Splunk laeuft AUSSERHALB des Kubernetes-Clusters (eigene VM,
+# terraform-external-splunk/). Der Cluster enthaelt nur noch den leichten
+# Log-Forwarder - das ist die typischere Architektur fuer "ein Splunk sammelt
+# mehrere Cluster ein" (siehe README > Architektur).
+#
+# Der HEC-Token wird NICHT hier eingetragen, sondern beim helm install per
+# zweite -f Datei uebergeben (siehe uebungen/03-forwarder-an-externe-splunk.md).
+
+clusterName: splunk-training
+
+splunkPlatform:
+  # Oeffentliche IP/DNS der externen Splunk-VM. Die private VPC-IP waere die
+  # sauberere Wahl, aber Pod-Traffic (Cilium/DOKS) wird beim Verlassen des
+  # Clusters nicht auf die Node-IP maskiert, wenn das Ziel eine private
+  # VPC-Adresse ist - deshalb kommt HEC hier nicht an, wenn die private IP
+  # verwendet wird (siehe cloud-init-splunk-external.sh.tpl fuer Details).
+  endpoint: "https://splunk-external.do.t3isp.de:8088/services/collector"
+  index: main
+  insecureSkipVerify: true
+  # token: wird per -f hec-token-values.yml gesetzt
+  # logsEnabled/metricsEnabled/tracesEnabled liegen unter splunkPlatform, nicht top-level -
+  # Default ist bereits "nur Logs" (logsEnabled: true, Rest false), daher hier nicht noetig

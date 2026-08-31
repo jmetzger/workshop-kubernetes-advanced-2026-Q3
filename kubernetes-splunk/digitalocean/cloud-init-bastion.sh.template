@@ -1,0 +1,162 @@
+#!/bin/bash
+
+# Token needs access to dns
+DIGITALOCEAN_TOKEN=__DO_TOKEN__
+
+VERSION_K9S="v0.50.15"
+# please without v before the version
+VERSION_STERN="1.33.0"
+
+groupadd sshadmin
+USERS="11trainingdo $(echo tln{1..20})"
+echo $USERS
+for USER in $USERS
+do
+  echo "Adding user $USER"
+  useradd -s /bin/bash --create-home $USER
+  usermod -aG sshadmin $USER
+  echo "$USER:11dortmund22" | chpasswd
+done
+
+# We can sudo with 11trainingdo
+usermod -aG sudo 11trainingdo
+
+# 20.04 and 22.04 this will be in the subfolder
+if [ -f /etc/ssh/sshd_config.d/50-cloud-init.conf ]
+then
+  sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config.d/50-cloud-init.conf
+fi
+
+# seen this in ubuntu 24.04 important here
+if [ -f /etc/ssh/sshd_config.d/60-cloudimg-settings.conf ]
+then
+  sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+fi
+
+## both is needed
+sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" /etc/ssh/sshd_config
+usermod -aG sshadmin root
+
+# TBD - Delete AllowUsers Entries with sed
+# otherwice we cannot login by group
+echo "AllowGroups sshadmin" >> /etc/ssh/sshd_config
+
+###########################################
+# Phase 0.5: Configure prompt
+# - White color, Black background
+# - only for trainer (tln1)
+###########################################
+
+echo 'export PS1="\[\033[1;37;40m\]\u@\h:\w\$ \[\033[0m\] "' >> /home/tln1/.bashrc
+
+###########################################
+# Phase 1: Install bash completion
+###########################################
+
+apt-get update
+apt-get install -y bash-completion
+source /usr/share/bash-completion/bash_completion
+# is it installed properly
+type _init_completion
+
+###########################################
+# Phase 2: Install kubectl
+# - install   kubectl - binary
+# - configure kubectl - completion
+###########################################
+
+echo "Installing kubectl"
+snap install --classic kubectl
+kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl > /dev/null
+
+###########################################
+# Phase 3: Install helm & helm completion
+# - install   helm - binary
+# - configure helm - completion
+###########################################
+
+echo "Installing helm"
+snap install --classic helm
+helm completion bash | sudo tee /etc/bash_completion.d/helm > /dev/null
+
+# Install nfs-common for mounting, just in case we need it for persistant storage exercise
+# tree
+apt-get install -y nfs-common tree
+
+# Looks like it takes a while till ssh is running
+date > /var/log/training_reload_ssh
+systemctl restart ssh
+
+####################################
+# Phase 4: Install k9s
+####################################
+
+cd /usr/src
+wget https://github.com/derailed/k9s/releases/download/$VERSION_K9S/k9s_linux_amd64.deb
+dpkg -i k9s_linux_amd64.deb
+
+###################################
+# Phase 5: Install stern
+###################################
+
+cd /usr/src
+wget https://github.com/stern/stern/releases/download/v$VERSION_STERN/stern_${VERSION_STERN}_linux_amd64.tar.gz
+tar xvf stern_${VERSION_STERN}_linux_amd64.tar.gz
+install stern /usr/local/bin
+
+###################################
+# Phase 8: Configure vi
+###################################
+
+# Activate syntax - stuff for vim
+# Tested on Ubuntu
+echo "hi CursorColumn cterm=NONE ctermbg=lightred ctermfg=white" >> /etc/vim/vimrc.local
+echo "autocmd FileType y?ml setlocal ts=2 sts=2 sw=2 ai number expandtab cursorline cursorcolumn" >> /etc/vim/vimrc.local
+echo "set paste" >> /etc/vim/vimrc.local
+
+###################################
+# Phase 9: Configure - nano
+###################################
+
+echo "include /usr/share/nano/yaml.nanorc" >> /etc/nanorc
+echo "set autoindent" >> /etc/nanorc
+echo "set tabsize 2" >> /etc/nanorc
+echo "set tabstospaces" >> /etc/nanorc
+
+#####################################
+# Phase 11: Register DNS now
+#####################################
+
+# doctl installieren
+cd /tmp
+wget https://github.com/digitalocean/doctl/releases/download/v1.104.0/doctl-1.104.0-linux-amd64.tar.gz
+tar xf doctl-*.tar.gz
+mv doctl /usr/local/bin/
+chmod +x /usr/local/bin/doctl
+
+# Home needs to be set for doctl, but it is not yet set
+export HOME=/root
+
+# API Token konfigurieren (Token muss als cloud-init Variable übergeben werden)
+doctl auth init --access-token "${DIGITALOCEAN_TOKEN}" || echo "access token init failed"
+
+# Hostname und IP ermitteln
+HOSTNAME=$(hostname -s)
+PUBLIC_IP=$(curl -s http://169.254.169.254/metadata/v1/interfaces/public/0/ipv4/address)
+
+# DNS-Konfiguration
+DOMAIN="do.t3isp.de"
+DNS_NAME="${HOSTNAME}"
+
+# DNS-Record erstellen
+RECORD_ID=$(doctl compute domain records list ${DOMAIN} --format ID,Name --no-header | grep " ${DNS_NAME}$" | awk '{print $1}')
+
+if [ -n "$RECORD_ID" ]; then
+    # Aktualisieren
+    doctl compute domain records update ${DOMAIN} --record-id ${RECORD_ID} --record-data ${PUBLIC_IP}
+else
+    # Neu erstellen
+    doctl compute domain records create ${DOMAIN} --record-type A --record-name "${DNS_NAME}" --record-data ${PUBLIC_IP} --record-ttl 300
+fi
+
+echo "DNS: ${DNS_NAME}.${DOMAIN} -> ${PUBLIC_IP}"

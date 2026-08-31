@@ -1,0 +1,22 @@
+# values.yaml fuer splunk-otel/splunk-otel-collector
+# Installiert den offiziellen Splunk OpenTelemetry Collector als DaemonSet und schickt nur
+# Container-Logs (keine Metrics/Traces) per HEC an unsere Splunk-Standalone-Instanz.
+#
+# Hinweis: Das aeltere "Splunk Connect for Kubernetes" (fluentd-basiert) ist inzwischen
+# archiviert, sein Docker-Image wurde von Docker Hub entfernt (ImagePullBackOff). Der
+# OpenTelemetry Collector ist der aktuell von Splunk gepflegte Nachfolger.
+#
+# Der HEC-Token wird NICHT hier eingetragen, sondern beim helm install per --set uebergeben
+# (siehe uebungen/13-optional-log-forwarding-in-cluster.md) - so landet er nicht im Klartext im Repo.
+
+clusterName: splunk-training
+
+splunkPlatform:
+  # HEC (Port 8088) verlangt HTTPS, auch wenn die Web-UI (Port 8000) in diesem Deployment
+  # nur HTTP spricht. Zertifikat ist selbstsigniert -> insecureSkipVerify: true.
+  endpoint: "https://splunk-stdln-standalone-service.splunk-operator.svc.cluster.local:8088/services/collector"
+  index: main
+  insecureSkipVerify: true
+  # token: wird per --set splunkPlatform.token=<TOKEN> gesetzt
+  # logsEnabled/metricsEnabled/tracesEnabled liegen unter splunkPlatform, nicht top-level -
+  # Default ist bereits "nur Logs" (logsEnabled: true, Rest false), daher hier nicht noetig

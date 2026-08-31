@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 640" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="980" height="640" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="490" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Splunk auf Kubernetes - Architektur der Teststellung</text>
+
+  <!-- User / Browser -->
+  <rect x="20" y="470" width="180" height="90" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="110" y="500" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">Dein Browser</text>
+  <text x="110" y="520" text-anchor="middle" font-size="11" fill="#475569">SSH-Tunnel</text>
+  <text x="110" y="536" text-anchor="middle" font-size="11" fill="#475569">localhost:8000</text>
+
+  <!-- Bastion -->
+  <rect x="20" y="70" width="180" height="120" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+  <text x="110" y="95" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">Bastion</text>
+  <text x="110" y="112" text-anchor="middle" font-size="11" fill="#475569">client-splunk.do.t3isp.de</text>
+  <text x="110" y="135" text-anchor="middle" font-size="11" fill="#475569">kubectl / helm</text>
+  <text x="110" y="151" text-anchor="middle" font-size="11" fill="#475569">Steuerung des Clusters,</text>
+  <text x="110" y="166" text-anchor="middle" font-size="11" fill="#475569">selbst laeuft hier kein Splunk</text>
+
+  <!-- DOKS Cluster outer -->
+  <rect x="240" y="60" width="700" height="500" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="590" y="85" text-anchor="middle" font-size="14" font-weight="700" fill="#334155">DOKS-Cluster "splunk-training" (DigitalOcean, fra1)</text>
+
+  <!-- Namespace splunk-operator -->
+  <rect x="265" y="105" width="380" height="330" rx="8" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="455" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">Namespace: splunk-operator</text>
+
+  <!-- Splunk Operator -->
+  <rect x="285" y="140" width="340" height="55" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.2"/>
+  <text x="455" y="160" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Splunk Operator</text>
+  <text x="455" y="177" text-anchor="middle" font-size="10.5" fill="#475569">watcht Standalone-CR, erzeugt StatefulSet/PVCs/Secrets</text>
+
+  <!-- Splunk Standalone -->
+  <rect x="285" y="210" width="340" height="95" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.2"/>
+  <text x="455" y="230" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Splunk Standalone Pod (stdln)</text>
+  <text x="455" y="248" text-anchor="middle" font-size="10.5" fill="#475569">Web-UI :8000 (HTTP)   HEC :8088 (HTTPS)</text>
+  <text x="455" y="264" text-anchor="middle" font-size="10.5" fill="#475569">PVC /etc 10GB   PVC /var 100GB</text>
+  <text x="455" y="282" text-anchor="middle" font-size="10.5" fill="#475569">Index "main"</text>
+
+  <!-- Log Forwarder DaemonSet -->
+  <rect x="285" y="325" width="340" height="90" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.2"/>
+  <text x="455" y="345" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">Log-Forwarder (splunk-otel-collector)</text>
+  <text x="455" y="363" text-anchor="middle" font-size="10.5" fill="#475569">DaemonSet - 1 Agent-Pod pro Node</text>
+  <text x="455" y="379" text-anchor="middle" font-size="10.5" fill="#475569">liest /var/log/pods/*/*.log, sendet per HEC</text>
+  <text x="455" y="398" text-anchor="middle" font-size="10.5" fill="#475569">+ Kubernetes-Events (BackOff, OOMKilled, ...)</text>
+
+  <!-- Namespace crashloop-demo -->
+  <rect x="665" y="105" width="255" height="140" rx="8" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="792" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="#991b1b">Namespace: crashloop-demo</text>
+  <rect x="680" y="140" width="225" height="90" rx="6" fill="#ffffff" stroke="#ef4444" stroke-width="1.2"/>
+  <text x="792" y="162" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">payment-service Pod</text>
+  <text x="792" y="180" text-anchor="middle" font-size="10.5" fill="#475569">CrashLoopBackOff</text>
+  <text x="792" y="196" text-anchor="middle" font-size="10.5" fill="#475569">"DB nicht erreichbar" -&gt;</text>
+  <text x="792" y="212" text-anchor="middle" font-size="10.5" fill="#475569">exit 1, Neustart, wiederholt</text>
+
+  <!-- Node filesystem -->
+  <rect x="665" y="270" width="255" height="80" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5"/>
+  <text x="792" y="292" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">Node-Dateisystem</text>
+  <text x="792" y="310" text-anchor="middle" font-size="10.5" fill="#78350f">/var/log/pods/&lt;namespace&gt;_&lt;pod&gt;/</text>
+  <text x="792" y="326" text-anchor="middle" font-size="10.5" fill="#78350f">stdout/stderr aller Container</text>
+
+  <!-- Kubernetes API -->
+  <rect x="665" y="365" width="255" height="55" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="792" y="387" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">Kubernetes API</text>
+  <text x="792" y="404" text-anchor="middle" font-size="10.5" fill="#14532d">Events (BackOff, Scheduled, ...)</text>
+
+  <!-- Arrows -->
+  <!-- Bastion -> Splunk Operator Namespace -->
+  <line x1="200" y1="150" x2="263" y2="150" stroke="#334155" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="230" y="142" text-anchor="middle" font-size="9.5" fill="#334155">kubectl/helm</text>
+
+  <!-- payment-service -> node fs -->
+  <line x1="792" y1="230" x2="792" y2="268" stroke="#d97706" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="845" y="252" text-anchor="middle" font-size="9.5" fill="#92400e">stdout</text>
+
+  <!-- k8s API -> node fs / operator context: events flow separately, arrow from API to log forwarder -->
+  <line x1="663" y1="392" x2="627" y2="380" stroke="#16a34a" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- node fs -> log forwarder -->
+  <line x1="663" y1="310" x2="627" y2="365" stroke="#d97706" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text x="648" y="335" text-anchor="middle" font-size="9.5" fill="#78350f">tailt Logs</text>
+
+  <!-- log forwarder -> splunk standalone (HEC) -->
+  <line x1="455" y1="323" x2="455" y2="307" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="540" y="317" text-anchor="middle" font-size="9.5" fill="#1d4ed8">HEC POST https :8088</text>
+
+  <!-- operator -> standalone (manages) -->
+  <line x1="455" y1="197" x2="455" y2="208" stroke="#6366f1" stroke-width="1.6" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+  <text x="540" y="205" text-anchor="middle" font-size="9.5" fill="#4338ca">erzeugt/verwaltet</text>
+
+  <!-- browser -> bastion -->
+  <line x1="110" y1="470" x2="110" y2="192" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="60" y="330" text-anchor="middle" font-size="9.5" fill="#1d4ed8" transform="rotate(-90 60 330)">SSH -L 8000</text>
+
+  <!-- bastion -> splunk standalone web ui -->
+  <path d="M200,150 C220,260 260,260 283,255" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="235" y="250" text-anchor="middle" font-size="9.5" fill="#1d4ed8">kubectl port-forward :8000</text>
+
+  <!-- Legend -->
+  <rect x="240" y="580" width="700" height="50" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
+  <line x1="255" y1="595" x2="280" y2="595" stroke="#2563eb" stroke-width="2"/>
+  <text x="286" y="599" font-size="10.5" fill="#0f172a">Zugriff / Log-Versand (HEC)</text>
+  <line x1="470" y1="595" x2="495" y2="595" stroke="#d97706" stroke-width="1.6"/>
+  <text x="501" y="599" font-size="10.5" fill="#0f172a">Container-Logs</text>
+  <line x1="640" y1="595" x2="665" y2="595" stroke="#6366f1" stroke-width="1.6" stroke-dasharray="4,3"/>
+  <text x="671" y="599" font-size="10.5" fill="#0f172a">Operator verwaltet</text>
+  <line x1="255" y1="615" x2="280" y2="615" stroke="#16a34a" stroke-width="1.6"/>
+  <text x="286" y="619" font-size="10.5" fill="#0f172a">Kubernetes-Events</text>
+</svg>

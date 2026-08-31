@@ -1,0 +1,4 @@
+.terraform*
+*.tfstate*
+.env
+hec-token-values.yml
