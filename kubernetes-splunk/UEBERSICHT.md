@@ -102,3 +102,7 @@ Hands-on zur optionalen In-Cluster-Variante: [uebungen/10](uebungen/10-optional-
 bis [uebungen/14](uebungen/14-optional-aufraeumen-in-cluster.md).
 
 Infrastruktur-Aufbau und Kosten: siehe [README](README.md).
+
+Welche Splunk-Menuepunkte davon in der Uebung tatsaechlich vorkommen (und welche bewusst
+aussen vor bleiben, weil sie den Betrieb von Splunk selbst statt die Kubernetes-Anbindung
+betreffen): [menues-und-ihre-funktion.md](menues-und-ihre-funktion.md).
