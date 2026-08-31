@@ -35,6 +35,14 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
 
 ## Offene Punkte
 
+- GitOps-Kapitel (Tag 2) wird umgebaut: `gitops/argocd-vs-flux.md` bleibt,
+  die ArgoCD-Hands-on-Punkte (`istio/argocd/was-ist-argocd.md`,
+  `istio/argocd/argocd-istio-bookinfo.md`) fliegen aus der Agenda, stattdessen
+  kommt eine FluxCD-Uebung. Quellmaterial:
+  `jmetzger/workshop-kubernetes-helmholtz` -> `gitops/flux/` (01-06:
+  Overview, Installation per Helm/CLI, HelmRepository, HelmRelease,
+  OCI-Chart, eigenes Chart aus GitRepository). Vor Aufnahme in die Agenda
+  auf einem kubeadm-Testcluster testen (Skill `training-kubeadm-cluster`).
 - Vault/OpenBao: Operator-Variante (VSO) ist als Uebung da; eine explizite
   Sidecar/Agent-Injection-Uebung fehlt noch (wuerde Neubau + Cluster-Test brauchen).
 - README-Punkt "Abschluss" hat bewusst keine Links (freier Teil).
