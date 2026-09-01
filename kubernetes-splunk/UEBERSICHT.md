@@ -1,11 +1,5 @@
 # Splunk mit Kubernetes verbinden
 
-Architekturüberblick: was eine Splunk-Instanz braucht, um Daten aus einem
-Kubernetes-Cluster zu bekommen. Im Mittelpunkt steht hier die Anbindung an einen
-**externen** Splunk-Server — das ist der in der Praxis übliche Weg. Der Betrieb von Splunk
-**innerhalb** des Clusters ist als optionale Variante ausgelagert:
-[splunk-im-cluster-optional.md](splunk-im-cluster-optional.md).
-
 ## Was ist Splunk
 
 Eine Plattform zum Einsammeln, Durchsuchen und Korrelieren von Maschinendaten — Logs,
@@ -39,29 +33,10 @@ Splunk-Instanz überträgt.
 
 ![Architektur: Splunk extern auf eigener VM](uebungen/screenshots/05-architektur-variante-b.svg)
 
-Das hat drei praktische Vorteile gegenüber Splunk im Cluster:
+Unser Setup:
 
-- **Skaliert auf mehrere Cluster** — eine externe Splunk-Instanz kann Daten aus beliebig
-  vielen Clustern gleichzeitig einsammeln, statt 1:1 an einen Cluster gebunden zu sein
-- **Entkoppelter Lifecycle** — Node-Upgrades, Drains oder ein kompletter Cluster-Ausfall
-  betreffen die bereits gesendeten Logs nicht, sie liegen sicher außerhalb
-- **Kein Operator, keine PVCs im Cluster** — der Cluster selbst bleibt schlank, die
-  Splunk-spezifische Komplexität (Storage, Lifecycle, Lizenz) liegt vollständig auf der
-  externen Seite
-
-Die technischen Bausteine der externen Anbindung im Detail:
-
-- **HEC aktiviert + Token** — HTTP Event Collector auf Port `8088`, Token wird bei der
-  externen VM selbst gewählt (per Terraform-Variable), nicht von Splunk generiert
-- **Log-Forwarder als DaemonSet** — Splunk OpenTelemetry Collector, 1 Pod pro Node, liest
-  `/var/log/pods/*/*.log` und schickt sie über HEC (HTTP Event Collector) nach außen
-- **Netzwerkpfad Forwarder → HEC (HTTP Event Collector)** — Firewall/VPC-Routing der externen VM muss den
-  Pod-Traffic aus dem Cluster durchlassen; Pod-Traffic wird beim Verlassen des Clusters auf
-  die Node-IP maskiert, das VPC-CIDR muss das beruecksichtigen
-- **Reverse-Proxy + TLS-Zertifikat** — Web-UI selbst bleibt intern (Port 8000 gesperrt),
-  nginx terminiert HTTPS mit Let's-Encrypt-Zertifikat auf 80/443
-- **Eigene Server-Infrastruktur** — VM per Terraform/Cloud-Init, natives
-  Splunk-Enterprise-Paket (.deb), kein Docker, kein Kubernetes-Operator nötig
+- **Kubernetes-Cluster** — Logs werden per DaemonSet (ein Pod auf jedem Node) geforwarded
+- **Splunk-VM** — bereits ausgerollt (per Terraform/Cloud-Init)
 
 ## Hands-on: externe Anbindung
 
