@@ -2,15 +2,24 @@
 
 ## Hintergrund
 
+![Warum ein Log-Forwarder: der Weg eines Log-Eintrags](screenshots/06-forwarder-ablauf.svg)
+
+Diese Uebung installiert den **Splunk OpenTelemetry Collector** als DaemonSet und richtet
+ihn auf den HEC-Endpoint der externen VM aus Uebung 2 aus.
+
+<details>
+<summary>Ausfuehrlicher Text (optional)</summary>
+
 Container-Logs landen standardmaessig nur temporaer auf dem Node (stdout/stderr, von
 containerd rotiert). Nach einem Pod-Neustart oder Node-Wechsel sind sie weg. Ein Forwarder
 liest sie laufend ein und schickt sie ueber HEC (HTTP Event Collector) an Splunk, bevor sie
-verloren gehen. Diese Uebung installiert den **Splunk OpenTelemetry Collector** als
-DaemonSet und richtet ihn auf den HEC-Endpoint der externen VM aus Uebung 2 aus.
+verloren gehen.
 
 Da der HEC-Token in Uebung 2 selbst gewaehlt wurde (nicht von Splunk generiert), muss er
 hier nicht erst aus einem Kubernetes-Secret extrahiert werden - er steht bereits in der
 eigenen `.env`.
+
+</details>
 
 ## Schritt 1: Token in eine Secret-Values-Datei eintragen
 
