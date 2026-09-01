@@ -20,6 +20,7 @@ DigitalOcean-VM per Terraform + Cloud-Init auf.
 
 Zwei Werte werden gebraucht, beide **selbst gewaehlt statt von Splunk generiert** - das ist
 der Vorteil eines IaC-Ansatzes: der Trainer/Teilnehmer legt Admin-Passwort und HEC-Token
+(HEC = HTTP Event Collector, die Schnittstelle, ueber die spaeter Logs eingeliefert werden)
 selbst fest, bevor die VM ueberhaupt existiert, und muss sie hinterher nicht aus einem Secret
 extrahieren.
 
