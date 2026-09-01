@@ -2,7 +2,7 @@
 
 > **Optionaler Anhang.** Diese Uebung und die folgenden (10-14) betreiben Splunk selbst
 > **im Cluster**, als Alternative zur externen VM aus Uebung 2. Fuer den Praxisbetrieb ist
-> das der seltenere Weg (siehe [UEBERSICHT.md](../UEBERSICHT.md)) - hier aber lehrreich, weil
+> das der seltenere Weg (siehe [splunk-im-cluster-optional.md](../splunk-im-cluster-optional.md)) - hier aber lehrreich, weil
 > sichtbar wird, was der Splunk Operator im Hintergrund automatisiert.
 
 ## Hintergrund

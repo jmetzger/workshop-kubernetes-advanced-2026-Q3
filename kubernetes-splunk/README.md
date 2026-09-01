@@ -6,7 +6,8 @@ Splunk-Server — Splunk läuft auf eigener Infrastruktur außerhalb des Cluster
 selbst enthält nur einen leichten Log-Forwarder. Der Betrieb von Splunk **im Cluster** (über
 den Splunk Operator) wird zusätzlich als optionaler Anhang gezeigt.
 
-Konzeptioneller Hintergrund und Vergleich beider Wege: [UEBERSICHT.md](UEBERSICHT.md).
+Konzeptioneller Hintergrund: [UEBERSICHT.md](UEBERSICHT.md). Vergleich beider Wege:
+[splunk-im-cluster-optional.md](splunk-im-cluster-optional.md).
 
 ## Architektur
 

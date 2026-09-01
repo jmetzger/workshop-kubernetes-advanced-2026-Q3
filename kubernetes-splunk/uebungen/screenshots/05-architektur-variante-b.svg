@@ -14,7 +14,7 @@
   <rect x="0" y="0" width="980" height="660" fill="#ffffff"/>
 
   <!-- Title -->
-  <text x="490" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Splunk auf Kubernetes - Variante B: Splunk extern</text>
+  <text x="490" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Splunk auf Kubernetes - Variante: Splunk extern</text>
 
   <!-- Browser -->
   <rect x="20" y="500" width="180" height="90" rx="8" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
