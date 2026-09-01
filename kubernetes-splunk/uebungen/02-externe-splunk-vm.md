@@ -1,4 +1,8 @@
-# Uebung 2: Externe Splunk-VM per Terraform aufsetzen
+# Uebung 2 (Optional): Externe Splunk-VM per Terraform aufsetzen
+
+## Status
+
+Die Splunk-VM ist bereits eingerichtet und wird vom Trainer zur Verfuegung gestellt.
 
 ## Hintergrund
 
