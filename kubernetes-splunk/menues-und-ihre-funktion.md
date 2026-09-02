@@ -5,9 +5,7 @@ die Einschaetzung, ob das jeweilige Feature fuer *dieses* Kubernetes-Training ge
 
 Verifiziert an der laufenden externen Instanz aus [UEBERSICHT.md](UEBERSICHT.md) /
 [uebungen/02-externe-splunk-vm.md](uebungen/02-externe-splunk-vm.md):
-`https://splunk-external.do.t3isp.de`, Splunk 10.4.2, Stand 31.08.2026. Grundlagen (was
-Splunk ist, Standalone-Rolle, externe vs. In-Cluster-Anbindung) stehen in
-[UEBERSICHT.md](UEBERSICHT.md) - hier geht es nur um die Menuestruktur.
+`https://splunk-external.do.t3isp.de`, Splunk 10.4.2, Stand 31.08.2026. 
 
 ## App-Auswahl (linke Seitenleiste)
 
