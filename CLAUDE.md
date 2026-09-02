@@ -36,11 +36,6 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
 
 ## Offene Punkte
 
-- **Uncommitted:** Der komplette FluxCD-Umbau (CLAUDE.md, README.md,
-  `.gitignore`, `gitops/flux/*`) liegt noch unversioniert im Working Tree
-  (Stand 31.08.2026, `git status --short` zeigt `M CLAUDE.md`, `M README.md`,
-  `?? .gitignore`, `?? gitops/flux/`) - noch nicht committed/gepusht, da
-  nicht explizit angefragt.
 - Testcluster `tln1` (Projekt `intern`, siehe [[intern-kubeadm-testcluster]] in
   der User-Memory) laeuft noch auf DigitalOcean und kostet weiter Geld -
   Abbau war am Ende der FluxCD-Session noch offen, nicht vergessen.
