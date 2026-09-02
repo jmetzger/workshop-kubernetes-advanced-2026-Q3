@@ -23,6 +23,10 @@ mkdir -p manifests/crashloop-demo
 cd manifests/crashloop-demo
 ```
 
+```
+nano 01-crashloop-demo.yml
+```
+
 Das Manifest per Copy & Paste im Editor anlegen (wichtig: im Editor, nicht per
 `cat`-Heredoc - die `$(date ...)`-Aufrufe gehoeren zum Container und duerfen nicht
 schon lokal von der Shell ersetzt werden):
