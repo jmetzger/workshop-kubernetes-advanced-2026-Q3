@@ -4,6 +4,11 @@
 # Log-Forwarder - das ist die typischere Architektur fuer "ein Splunk sammelt
 # mehrere Cluster ein" (siehe README > Architektur).
 #
+# REFERENZ: In Uebung 3 legen die Teilnehmer diese Werte per Copy & Paste selbst
+# als collector-values.yml an, inkl. clusterName=$(whoami)
+# (uebungen/03-forwarder-an-externe-splunk.md, Schritt 3) - Aenderungen hier auch
+# dort nachziehen.
+#
 # Der HEC-Token wird NICHT hier eingetragen, sondern beim helm install per
 # zweite -f Datei uebergeben (siehe uebungen/03-forwarder-an-externe-splunk.md).
 

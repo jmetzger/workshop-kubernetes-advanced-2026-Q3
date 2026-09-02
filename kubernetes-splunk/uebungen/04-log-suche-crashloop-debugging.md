@@ -13,11 +13,56 @@ dort erhalten - genau das Sammelbecken-Prinzip aus der [Architektur-Uebersicht](
 Szenario: ein Service `payment-service` kann seine Datenbank nicht erreichen und beendet sich
 deshalb beim Start immer wieder selbst.
 
-## Schritt 1: Demo-Deployment ausrollen
+## Schritt 1: Demo-Deployment anlegen und ausrollen
+
+Arbeitsverzeichnis anlegen:
+
+```
+cd
+mkdir -p manifests/crashloop-demo
+cd manifests/crashloop-demo
+```
+
+Das Manifest per Copy & Paste im Editor anlegen (wichtig: im Editor, nicht per
+`cat`-Heredoc - die `$(date ...)`-Aufrufe gehoeren zum Container und duerfen nicht
+schon lokal von der Shell ersetzt werden):
+
+```
+# vi 01-crashloop-demo.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "$(date -Iseconds) INFO  payment-service startet..."
+              echo "$(date -Iseconds) INFO  Verbinde zu Datenbank db-payments.internal:5432 ..."
+              sleep 2
+              echo "$(date -Iseconds) ERROR Verbindung zu db-payments.internal:5432 fehlgeschlagen: Connection refused"
+              echo "$(date -Iseconds) ERROR payment-service kann ohne Datenbankverbindung nicht starten, beende Prozess"
+              exit 1
+```
+
+Ausrollen:
 
 ```
 kubectl create namespace crashloop-demo
-kubectl apply -f splunk-manifests/02-crashloop-demo.yml -n crashloop-demo
+kubectl apply -f . -n crashloop-demo
 ```
 
 ## Schritt 2: CrashLoopBackOff beobachten

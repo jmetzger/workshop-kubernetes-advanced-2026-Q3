@@ -2,6 +2,10 @@
 # um das Troubleshooting-Szenario "abstuerzender Pod ueber die Zeit" zu demonstrieren.
 # Simuliert einen Service, der beim Start seine Datenbank nicht erreicht.
 #
+# REFERENZ: In Uebung 4 legen die Teilnehmer diese Datei per Copy & Paste selbst an
+# (uebungen/04-log-suche-crashloop-debugging.md, Schritt 1) - Aenderungen hier auch
+# dort nachziehen.
+#
 # kubectl apply -f 02-crashloop-demo.yml -n crashloop-demo
 
 apiVersion: apps/v1
