@@ -36,9 +36,9 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
 
 ## Offene Punkte
 
-- Testcluster `tln1` (Projekt `intern`, siehe [[intern-kubeadm-testcluster]] in
-  der User-Memory) laeuft noch auf DigitalOcean und kostet weiter Geld -
-  Abbau war am Ende der FluxCD-Session noch offen, nicht vergessen.
+- Ein einzelner kubeadm-Testcluster (`tln1`) kann nach FluxCD-Testsessions noch
+  auf DigitalOcean laufen und Geld kosten - nach dem Testen nicht vergessen
+  abzubauen (`destroy-clusters.sh`).
 - `flux uninstall`-Fix (siehe unten) ist nur einzeln verifiziert, nicht in
   einem kompletten Bootstrap-bis-Uninstall-Durchlauf end-to-end nachgetestet
   (optional, nicht blockierend - der Finalizer-Mechanismus dahinter ist
@@ -72,11 +72,13 @@ in `Terminating`).
 ## Secrets-Handling
 
 Dieses Repo ist PUBLIC und haelt bewusst KEINE eigenen Secrets (kein
-`.env.enc` hier). Tokens fuer Uebungen mit externen Diensten (z.B.
-`GITLAB_PAT` fuer den FluxCD-Bootstrap) liegen verschluesselt im separaten
-intern-Infra-Repo. `.env`/`.env.enc` stehen in `.gitignore`, falls doch mal
-kurzzeitig eine Klartext-`.env` hier landet (z.B. zum Token-Uebergeben) -
-danach wieder loeschen, niemals committen.
+`.env.enc` hier). Trainingsspezifische Tokens fuer Uebungen mit externen
+Diensten (z.B. `GITLAB_PAT` fuer den FluxCD-Bootstrap) liegen verschluesselt
+im privaten Vorbereitungs-Repo (`.env.enc`); stabile Creds (Cloud-API-Token,
+Trainings-Passwort) zentral im privaten Auth-Repo und per `.env.sources`-Mapping
+eingebunden (siehe security-Skill). `.env`/`.env.enc` stehen in `.gitignore`,
+falls doch mal kurzzeitig eine Klartext-`.env` hier landet (z.B. zum
+Token-Uebergeben) - danach wieder loeschen, niemals committen.
 
 ## Konventionen (Kurzfassung Skill workshop-training)
 
