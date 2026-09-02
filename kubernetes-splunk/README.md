@@ -46,15 +46,13 @@ Details: `digitalocean/`.
 
 **Hauptpfad — Splunk extern anbinden**
 
-  1. Cluster-Zugang
-     * [Zugang zum bestehenden Cluster](uebungen/01-cluster-zugang.md)
-  2. Externe Splunk-Instanz
+  1. Externe Splunk-Instanz
      * [Externe Splunk-VM per Terraform aufsetzen](uebungen/02-externe-splunk-vm.md)
-  3. Log-Forwarding
+  2. Log-Forwarding
      * [Log-Forwarder an die externe Splunk-VM anbinden](uebungen/03-forwarder-an-externe-splunk.md)
-  4. Log-Suche & Troubleshooting
+  3. Log-Suche & Troubleshooting
      * [Abstürzenden Pod über Splunk debuggen (CrashLoopBackOff)](uebungen/04-log-suche-crashloop-debugging.md)
-  5. Aufräumen
+  4. Aufräumen
      * [Aufräumen](uebungen/05-aufraeumen.md)
 
 **Optionaler Anhang — Splunk im Cluster betreiben**
