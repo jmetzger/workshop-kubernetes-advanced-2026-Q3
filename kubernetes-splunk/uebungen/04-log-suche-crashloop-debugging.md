@@ -41,13 +41,32 @@ Zeigt u.a. `Warning BackOff ... Back-off restarting failed container payment-ser
 
 ## Schritt 3: In der Splunk-Web-UI nach den Kubernetes-Events suchen
 
-Login wie in [Uebung 2, Schritt 5](02-externe-splunk-vm.md) beschrieben:
-`https://splunk-external.do.t3isp.de`.
+Login unter `https://splunk-external.do.t3isp.de` - die Zugangsdaten (`admin` + Passwort)
+gibt der Trainer bekannt (Details zur VM: [Uebung 2, Schritt 5](02-externe-splunk-vm.md)).
 
 Suche in Splunk Web (Suche > Neue Suche):
 
 ```
 index=main k8s.container.name="payment-service"
+```
+
+**Laeuft die Uebung mit mehreren Clustern gleichzeitig gegen dieselbe externe Splunk-Instanz**
+(z.B. viele Teilnehmer parallel, jeder mit eigenem Cluster): obige Suche liefert dann die
+Events **aller** Cluster gemischt zurueck. Auf die eigenen Daten eingrenzen mit der
+Cluster-Kennung aus [Uebung 3, Schritt 2](03-forwarder-an-externe-splunk.md). Dabei
+`<dein-username>` durch den eigenen Bastion-Usernamen ersetzen (zeigt `whoami` auf dem
+Bastion, z.B. `tln5`) - die Splunk-Suche ersetzt hier nichts automatisch:
+
+```
+index=main k8s.container.name="payment-service" k8s.cluster.name="<dein-username>"
+```
+
+Alternativ ueber den Node-Hostnamen im `host`-Feld - die Node-Namen enthalten den eigenen
+Username (`k8s-tln5-cp`, `k8s-tln5-w1`, ...). Der Bindestrich vor dem `*` gehoert dazu,
+sonst wuerde z.B. die Suche von `tln1` auch die Nodes von `tln10`-`tln17` treffen:
+
+```
+index=main k8s.container.name="payment-service" host="k8s-<dein-username>-*"
 ```
 
 ![Kubernetes BackOff-Event in Splunk](screenshots/02-kube-events-backoff.jpg)
@@ -64,6 +83,9 @@ vorhanden, weil sie zentral in Splunk liegen statt nur auf dem Node):
 ```
 index=main payment
 ```
+
+(auch hier bei mehreren gleichzeitigen Clustern mit `k8s.cluster.name="<dein-username>"`
+eingrenzen, siehe oben)
 
 ![Container-Log-Zeilen mit der Fehlerursache](screenshots/03-container-logs-search.jpg)
 

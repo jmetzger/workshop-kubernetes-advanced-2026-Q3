@@ -11,15 +11,15 @@ variable "region" {
 }
 
 variable "droplet_size" {
-  description = "Droplet size fuer den externen Splunk-Server"
+  description = "Droplet size fuer den externen Splunk-Server. Ingest-Volumen ist bei einer Trainings-VM auch mit vielen gleichzeitig sendenden Clustern niedrig (s-4vcpu-8gb würde dafür reichen) - der eigentliche Engpass ist Splunks Default-Kontingent fuer gleichzeitig laufende interaktive Suchen, das mit der vCPU-Zahl skaliert. Bei einer groesseren Teilnehmerzahl, die in der Log-Suche-Uebung parallel in der Web-UI sucht, s-8vcpu-16gb oder groesser waehlen (siehe auch limits.conf-Anpassung in cloud-init-splunk-external.sh.tpl)."
   type        = string
-  default     = "s-4vcpu-8gb"
+  default     = "s-8vcpu-16gb"
 }
 
 variable "ssh_key_id" {
-  description = "DO SSH-Key-ID (claude-code-testing)"
+  description = "DO SSH-Key-ID (wsl-local-key = ~/.ssh/id_ed25519_nopass auf dem WSL-Rechner)"
   type        = string
-  default     = "53105908"
+  default     = "57115511"
 }
 
 variable "vpc_uuid" {

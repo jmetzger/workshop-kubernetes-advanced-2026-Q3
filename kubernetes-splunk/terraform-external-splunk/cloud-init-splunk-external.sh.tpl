@@ -9,13 +9,6 @@ set -e
 DOMAIN="do.t3isp.de"
 HOSTNAME_SHORT=$(hostname -s)
 
-# ── SSH ───────────────────────────────────────────────────────────────────────
-for CFG in /etc/ssh/sshd_config.d/50-cloud-init.conf \
-           /etc/ssh/sshd_config.d/60-cloudimg-settings.conf; do
-  [ -f "$CFG" ] && sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/g" "$CFG"
-done
-systemctl restart ssh
-
 # ── Firewall: SSH, HTTP/HTTPS (Reverse-Proxy) und HEC (8088) offen,
 #    Splunk-Web (8000) bleibt nur lokal auf dem Nginx-Host erreichbar ────────
 # Hinweis zu HEC: Traffic aus Kubernetes-Pods (Cilium/DOKS) wird beim Verlassen
@@ -63,6 +56,19 @@ disabled = 0
 token = ${splunk_hec_token}
 index = main
 HEC
+
+# ── Gleichzeitige Suchen hochsetzen: Splunks Default-Kontingent fuer parallel laufende
+#    Suchjobs skaliert mit der vCPU-Zahl und ist fuer ein einzelnes Admin-Konto ausgelegt,
+#    nicht fuer einen Trainings-Raum voller Teilnehmer, die zeitgleich in der Web-UI suchen
+#    (Uebung 4). Fester, grosszuegiger Wert statt sich auf den CPU-Default zu verlassen -
+#    verifiziert am 02.09.2026: 25 gleichzeitige Suchen via REST-API, 25/25 erfolgreich,
+#    keine "maximum concurrent searches"-Abweisung (alter CPU-Default waere 14 gewesen).
+mkdir -p /opt/splunk/etc/system/local
+cat > /opt/splunk/etc/system/local/limits.conf <<'LIMITS'
+[search]
+base_max_searches = 30
+max_searches_per_cpu = 4
+LIMITS
 
 # ── Lizenz akzeptieren, starten, Boot-Start aktivieren ────────────────────────
 # --run-as-root noetig: Splunk >=10 verweigert sonst den Start als root (kein

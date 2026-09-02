@@ -2,3 +2,4 @@
 *.tfstate*
 .env
 hec-token-values.yml
+tfplan
