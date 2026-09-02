@@ -61,7 +61,7 @@
      * [Fluentd/Kibana/Elasticsearch - Walkthrough](microk8s/fluent-kibana-elastic-mit-microk8s.md)
 
   1. Alternative: Splunk-Integration
-     * [Architektur & Konzept: Splunk extern vs. im Cluster](kubernetes-splunk/UEBERSICHT.md)
+     * [Theorie: Kubernetes mit Splunk verbinden](kubernetes-splunk/UEBERSICHT.md)
      * [Funktionsuebersicht: Splunk-Menuepunkte und Kubernetes-Relevanz](kubernetes-splunk/menues-und-ihre-funktion.md)
      * [Log-Forwarder an externen Splunk-Server anbinden](kubernetes-splunk/uebungen/03-forwarder-an-externe-splunk.md)
      * [Abstuerzenden Pod ueber Splunk debuggen (CrashLoopBackOff)](kubernetes-splunk/uebungen/04-log-suche-crashloop-debugging.md)
