@@ -1,4 +1,4 @@
-# Theorie: Splunk mit Kubernetes verbinden
+# Theorie: Kubernetes mit Splunk verbinden
 
 ## Was ist Splunk
 
