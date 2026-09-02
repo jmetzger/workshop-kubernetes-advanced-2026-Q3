@@ -96,11 +96,6 @@ gibt der Trainer bekannt (Details zur VM: [Uebung 2, Schritt 5](02-externe-splun
 Suche in Splunk Web - bei mehreren angebundenen Clustern - (Suche > Neue Suche):
 
 ```
-index=main k8s.container.name="payment-service"
-```
-
-
-```
 # <tlnX> durch Deine Teilnehmer-Nr ersetzen, z.B. tln1
 # index=main k8s.container.name="payment-service" k8s.cluster.name="tln1"
 index=main k8s.container.name="payment-service" k8s.cluster.name="<dein-username>"
