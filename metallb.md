@@ -2,8 +2,8 @@
 
 ## General 
 
-  * Supports bgp and arp 
-  * Divided into controller, speaker 
+  * Supports bgp and arp (l2 mode) - this exercise uses l2/arp
+  * Divided into controller (ipam), speaker (advertises the ip)
 
 ## Installation Ways  
 
@@ -13,17 +13,11 @@
 ## Step 1: install metallb
 
 ```
-# Just to show some basics 
-# Page from metallb says that digitalocean is not really supported well 
-# So we will not install the speaker .
+# We use L2 mode (arp), not bgp
+# The speaker is required in both modes - it is the component that
+# actually announces the IP on the network (controller only does IPAM)
 
 helm repo add metallb https://metallb.github.io/metallb 
-```
-
-```
-# Eventually disabling speaker 
-# vi values.yml 
-
 ```
 
 ```
@@ -31,7 +25,14 @@ helm repo add metallb https://metallb.github.io/metallb
 helm upgrade --install metallb metallb/metallb --namespace=metallb-system --create-namespace --version 0.15.2 --reset-values
 ```
 
-## Step 2: addresspool und Propagation-type (config) 
+## Step 2: addresspool
+
+```
+# find your node public ips first - "kubectl get nodes -o wide" does NOT
+# show them (no cloud-controller-manager here), EXTERNAL-IP stays <none>.
+# they are listed in ~/cluster-zugang.txt on client-bka.
+cat ~/cluster-zugang.txt
+```
 
 ```
 cd
@@ -50,7 +51,11 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  # we will use our external ip here 
+  # important: on DigitalOcean L2 mode only works with ips the nodes
+  # already have (their own public ip) - the leader speaker answers
+  # arp for its own node, so no conflict.
+  # a free-floating/virtual ip not assigned to any node does NOT work,
+  # DO's network fabric drops arp for ips it does not know about.
   - 134.209.231.154-134.209.231.154
   # both notations are possible 
   - 157.230.113.124/32
@@ -59,6 +64,8 @@ spec:
 ```
 kubectl apply -f .
 ```
+
+## Step 3: L2Advertisement
 
 ```
 nano 02-advertisement.yml
@@ -76,7 +83,7 @@ metadata:
 kubectl apply -f .
 ```
 
-## Schritt 4: Test do i get an external ip 
+## Step 4: Test do i get an external ip 
 
 ```
 nano 03-deploy.yml
@@ -142,6 +149,6 @@ curl http://<ip aus get svc>
 kubectl delete -f 03-deploy.yml 04-service.yml 
 ```
 
-## Schritt 5: Referenz:
+## Step 5: Referenz:
 
   * https://metallb.io/installation/#installation-with-helm
