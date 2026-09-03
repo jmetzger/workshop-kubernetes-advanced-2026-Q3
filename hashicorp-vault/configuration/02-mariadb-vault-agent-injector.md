@@ -28,8 +28,15 @@ lokale Datei, ohne dass ein Kubernetes Secret jemals existiert.
 ## Voraussetzungen
 
 - Eigenes kubeadm-Cluster, Helm v3
-- Dein `kubernetes-<tln>`-Auth-Mount in Vault existiert bereits (siehe
-  vorherige Uebung, Voraussetzungen)
+- Dein `kubernetes-<tln>`-Auth-Mount in Vault existiert bereits, inkl. der
+  Rolle `mariadb` (gebunden an ServiceAccount `mariadb-sa`/Namespace
+  `default`, Policy `mariadb-read`) - der Trainer hat das fuer dich
+  eingerichtet, siehe "Hintergrund: Was der Trainer fuer dich schon
+  eingerichtet hat" in der VSO-Uebung (`01-mariadb-vault-secrets-operator.md`)
+  fuer die Details. Diese Uebung nutzt exakt denselben Mount und dieselbe
+  Rolle wie die VSO-Uebung - der Unterschied liegt nur darin, WIE der Pod
+  sich damit einloggt (siehe Vergleichstabelle oben), nicht in der
+  Auth-Konfiguration selbst.
 - ServiceAccount `mariadb-sa` im Namespace `default` existiert (aus der
   VSO-Uebung, sonst siehe Schritt 3 unten)
 
