@@ -23,7 +23,39 @@ darauf zu, ohne selbst etwas von Vault zu wissen.
 - Dein Cluster muss `vault-bka.do.t3isp.de` per HTTPS erreichen koennen
 - Der Trainer hat fuer dein `<tln>` bereits einen Kubernetes-Auth-Mount in
   Vault eingerichtet (Rolle `mariadb`, gebunden an ServiceAccount
-  `mariadb-sa` im Namespace `default`)
+  `mariadb-sa` im Namespace `default`) - siehe Hintergrund unten
+
+### Hintergrund: Was der Trainer fuer dich schon eingerichtet hat
+
+Vault muss deinem Cluster vertrauen koennen, bevor irgendein Pod sich dort
+einloggen darf. Das ist zweistufig aufgebaut - beide Stufen hat der Trainer
+per Skript (`training-vault-server`) bereits fuer dich erledigt, du musst
+sie nicht selbst anlegen, solltest aber verstehen, was da steht:
+
+1. **In deinem Cluster:** Ein ServiceAccount `vault-auth` mit einem
+   `ClusterRoleBinding` auf `system:auth-delegator`. Vault validiert jeden
+   eingehenden Login-Versuch ueber die Kubernetes-TokenReview-API - dafuer
+   braucht Vault selbst einen Token mit genau dieser Berechtigung. Dieser
+   ServiceAccount ist NICHT der, mit dem sich MariaDB spaeter einloggt
+   (das macht `mariadb-sa`, siehe Schritt 4) - er ist reine
+   Vault-Infrastruktur, einmalig pro Cluster.
+2. **Auf dem Vault-Server:** Ein eigener Kubernetes-Auth-Mount
+   `kubernetes-<dein-tln>` (jeder Teilnehmer bekommt einen eigenen, weil ein
+   Mount fest an EINEN API-Server + dessen CA-Zertifikat + den
+   Reviewer-Token aus Schritt 1 gebunden ist - ein gemeinsamer Mount fuer
+   alle Cluster ist technisch nicht moeglich). Darin ist eine Rolle
+   `mariadb` konfiguriert, die zwei Bedingungen prueft: Der einloggende Pod
+   muss den ServiceAccount `mariadb-sa` im Namespace `default` benutzen -
+   und wenn das stimmt, bekommt er ein Vault-Token mit der Policy
+   `mariadb-read` (liest ausschliesslich `secret/data/mariadb`, sonst
+   nichts).
+
+Kurz: Schritt 1 sagt Vault "ich kann Tokens aus diesem Cluster pruefen",
+Schritt 2 sagt Vault "und genau dieser ServiceAccount-Name in diesem
+Cluster darf dann das MariaDB-Secret lesen". Deine Aufgabe in dieser
+Uebung ist nur noch, den passenden ServiceAccount (`mariadb-sa`) anzulegen
+und die K8s-seitigen Ressourcen (VaultConnection/VaultAuth/
+VaultStaticSecret) zu erstellen, die diesen Mount tatsaechlich benutzen.
 
 Deinen Teilnehmernamen als Variable setzen - wird in allen folgenden
 Schritten verwendet:
