@@ -58,9 +58,8 @@
      * [Prometheus/Grafana-Stack installieren mit helm](prometheus-grafana/prometheus-grafana/install-with-helm-letsencrypt-basic-auth.md)
      * [Uebung: nginx mit ServiceMonitor und Exporter (Sidecar)](monitoring/praxis/03-nginx-servicemonitor.md)
 
-  1. Logging-Stack: Fluentd -> Elasticsearch
-     * [Fluentd - Grundlagen](kubernetes-monitoring/fluentd.md)
-     * [Fluentd/Kibana/Elasticsearch - Walkthrough](microk8s/fluent-kibana-elastic-mit-microk8s.md)
+  1. Logging-Stack: EFK (Elasticsearch/Fluentd/Kibana)
+     * [EFK-Stack: Aufbau, Fluentd vs. Fluent Bit, DaemonSet vs. Sidecar](kubernetes-monitoring/fluentd.md)
 
   1. Alternative: Splunk-Integration
      * [Theorie: Kubernetes mit Splunk verbinden](kubernetes-splunk/UEBERSICHT.md)
