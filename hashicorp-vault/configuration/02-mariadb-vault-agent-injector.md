@@ -42,10 +42,6 @@ lokale Datei, ohne dass ein Kubernetes Secret jemals existiert.
 - ServiceAccount `mariadb-sa` im Namespace `default` existiert (aus der
   VSO-Uebung, sonst siehe Schritt 3 unten)
 
-```
-export TLN=tln1   # Anpassen auf deinen Teilnehmernamen!
-```
-
 ---
 
 ## Schritt 1: Arbeitsverzeichnisse anlegen
