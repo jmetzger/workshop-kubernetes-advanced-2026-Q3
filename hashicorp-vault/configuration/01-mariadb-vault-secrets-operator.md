@@ -59,13 +59,6 @@ Uebung ist nur noch, den passenden ServiceAccount (`mariadb-sa`) anzulegen
 und die K8s-seitigen Ressourcen (VaultConnection/VaultAuth/
 VaultStaticSecret) zu erstellen, die diesen Mount tatsaechlich benutzen.
 
-Deinen Teilnehmernamen als Variable setzen - wird in allen folgenden
-Schritten verwendet:
-
-```
-export TLN=tln1   # Anpassen auf deinen Teilnehmernamen!
-```
-
 ---
 
 ## Schritt 1: Vorschau - was steht ueberhaupt in Vault?
