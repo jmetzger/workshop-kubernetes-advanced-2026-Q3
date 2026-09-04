@@ -215,7 +215,8 @@ Erwartete Ausgabe:
 Login-Test:
 
 ```
-kubectl exec -n default mariadb-agent-0 -c mariadb -- bash -c 'mariadb -uroot -p"***REMOVED***" -e "SELECT 2 AS agent_login_test;"'
+source /etc/training-vault.env
+kubectl exec -n default mariadb-agent-0 -c mariadb -- mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SELECT 2 AS agent_login_test;"
 ```
 
 Erwartete Ausgabe:
