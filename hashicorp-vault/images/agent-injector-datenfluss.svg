@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 840" font-family="Arial, Helvetica, sans-serif">
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8250df"/>
+    </marker>
+  </defs>
+
+  <!-- Hintergrund -->
+  <rect x="1" y="1" width="898" height="838" rx="14" fill="#ffffff" stroke="#d0d7de"/>
+
+  <!-- Titel -->
+  <text x="450" y="42" text-anchor="middle" font-size="21" font-weight="bold" fill="#24292f">Ueberblick: Vault Agent Injector</text>
+  <text x="450" y="66" text-anchor="middle" font-size="13" fill="#57606a">Kein Kubernetes Secret - das Passwort landet als Datei direkt im Pod</text>
+
+  <!-- Vault-Server -->
+  <rect x="160" y="90" width="280" height="130" rx="10" fill="#fff8c5" stroke="#9a6700" stroke-width="2"/>
+  <text x="300" y="118" text-anchor="middle" font-size="16" font-weight="bold" fill="#24292f">Vault-Server (gemeinsam)</text>
+  <text x="300" y="138" text-anchor="middle" font-size="12" fill="#57606a">vault-bka.do.t3isp.de</text>
+  <rect x="185" y="152" width="230" height="50" rx="6" fill="#ffffff" stroke="#9a6700"/>
+  <text x="300" y="173" text-anchor="middle" font-size="13" font-weight="bold" fill="#24292f">secret/mariadb</text>
+  <text x="300" y="192" text-anchor="middle" font-size="12" fill="#57606a">username + password</text>
+
+  <!-- Pfeil 2: Login (hoch) -->
+  <line x1="250" y1="328" x2="250" y2="226" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="235" y="258" text-anchor="end" font-size="12" font-weight="bold" fill="#24292f">2) Login: Kubernetes-Auth</text>
+  <text x="235" y="276" text-anchor="end" font-size="11.5" fill="#57606a">Mount kubernetes-&lt;tln&gt;, Rolle mariadb</text>
+
+  <!-- Pfeil 3: Secret lesen (runter) -->
+  <line x1="350" y1="226" x2="350" y2="328" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="365" y="258" font-size="12" font-weight="bold" fill="#24292f">3) liest secret/mariadb</text>
+  <text x="365" y="276" font-size="11.5" fill="#57606a">durch den vault-agent-init</text>
+
+  <!-- Cluster -->
+  <rect x="60" y="280" width="780" height="500" rx="12" fill="#f6f8fa" stroke="#57606a" stroke-width="2"/>
+  <text x="680" y="310" text-anchor="middle" font-size="15" font-weight="bold" fill="#24292f">Dein Kubernetes-Cluster</text>
+
+  <!-- Pod -->
+  <rect x="110" y="330" width="360" height="380" rx="10" fill="#ddf4ff" stroke="#0969da" stroke-width="2"/>
+  <text x="290" y="358" text-anchor="middle" font-size="15" font-weight="bold" fill="#0a3069">MariaDB-Pod (StatefulSet)</text>
+  <text x="290" y="376" text-anchor="middle" font-size="11.5" fill="#57606a">ServiceAccount mariadb-sa</text>
+
+  <!-- Init-Container -->
+  <rect x="140" y="392" width="300" height="54" rx="6" fill="#ffffff" stroke="#0969da"/>
+  <text x="290" y="414" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#24292f">vault-agent-init (Init-Container)</text>
+  <text x="290" y="432" text-anchor="middle" font-size="11" fill="#57606a">loggt sich ein, rendert das Secret, beendet sich</text>
+
+  <!-- Pfeil 4: rendert Datei -->
+  <line x1="290" y1="450" x2="290" y2="486" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="302" y="472" font-size="11.5" font-weight="bold" fill="#24292f">4) rendert Datei</text>
+
+  <!-- Datei im emptyDir -->
+  <rect x="140" y="490" width="300" height="58" rx="6" fill="#fff8c5" stroke="#9a6700"/>
+  <text x="290" y="512" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#24292f">/vault/secrets/mariadb-root-password</text>
+  <text x="290" y="530" text-anchor="middle" font-size="11" fill="#57606a">Datei im emptyDir-Volume (nur im Pod)</text>
+
+  <!-- Sidecar haelt aktuell (dashed hoch) -->
+  <line x1="205" y1="576" x2="205" y2="552" stroke="#57606a" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <!-- Pfeil 5: mariadb liest (runter) -->
+  <line x1="375" y1="552" x2="375" y2="576" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Sidecar-Container -->
+  <rect x="130" y="580" width="150" height="60" rx="6" fill="#ffffff" stroke="#0969da"/>
+  <text x="205" y="604" text-anchor="middle" font-size="12" font-weight="bold" fill="#24292f">vault-agent</text>
+  <text x="205" y="622" text-anchor="middle" font-size="11" fill="#57606a">(Sidecar)</text>
+  <text x="205" y="662" text-anchor="middle" font-size="10.5" fill="#57606a">haelt die Datei aktuell</text>
+  <text x="205" y="677" text-anchor="middle" font-size="10.5" fill="#57606a">(Renewal, Re-Rendern)</text>
+
+  <!-- MariaDB-Container -->
+  <rect x="300" y="580" width="150" height="60" rx="6" fill="#dafbe1" stroke="#1a7f37"/>
+  <text x="375" y="604" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f5323">mariadb</text>
+  <text x="375" y="622" text-anchor="middle" font-size="11" fill="#57606a">(App-Container)</text>
+  <text x="375" y="662" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#24292f">5) liest die Datei per</text>
+  <text x="375" y="677" text-anchor="middle" font-size="10.5" fill="#57606a">MARIADB_ROOT_PASSWORD_FILE</text>
+
+  <!-- Injector-Webhook -->
+  <rect x="600" y="330" width="230" height="90" rx="10" fill="#fbefff" stroke="#8250df" stroke-width="2"/>
+  <text x="715" y="360" text-anchor="middle" font-size="14" font-weight="bold" fill="#3e1f79">Vault Agent Injector</text>
+  <text x="715" y="380" text-anchor="middle" font-size="11.5" fill="#57606a">Admission-Webhook</text>
+  <text x="715" y="398" text-anchor="middle" font-size="11" fill="#57606a">Namespace: vault-injector</text>
+
+  <!-- Pfeil 1: mutiert den Pod -->
+  <line x1="596" y1="375" x2="474" y2="375" stroke="#8250df" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-purple)"/>
+  <text x="535" y="360" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#8250df">1) mutiert den Pod</text>
+  <text x="535" y="394" text-anchor="middle" font-size="10.5" fill="#8250df">Init + Sidecar rein</text>
+
+  <!-- Annotations-Panel -->
+  <rect x="560" y="470" width="290" height="240" rx="10" fill="#fbefff" stroke="#8250df" stroke-dasharray="6 4"/>
+  <text x="705" y="495" text-anchor="middle" font-size="13" font-weight="bold" fill="#3e1f79">Deine Pod-Annotations</text>
+
+  <rect x="580" y="510" width="250" height="48" rx="6" fill="#ffffff" stroke="#8250df"/>
+  <text x="705" y="530" text-anchor="middle" font-size="12" font-weight="bold" fill="#24292f">agent-inject: "true"</text>
+  <text x="705" y="548" text-anchor="middle" font-size="11" fill="#57606a">Injection einschalten</text>
+
+  <rect x="580" y="566" width="250" height="48" rx="6" fill="#ffffff" stroke="#8250df"/>
+  <text x="705" y="586" text-anchor="middle" font-size="12" font-weight="bold" fill="#24292f">role: "mariadb"</text>
+  <text x="705" y="604" text-anchor="middle" font-size="11" fill="#57606a">Vault-Rolle fuer den Login</text>
+
+  <rect x="580" y="622" width="250" height="64" rx="6" fill="#ffffff" stroke="#8250df"/>
+  <text x="705" y="642" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#24292f">agent-inject-secret + -template</text>
+  <text x="705" y="658" text-anchor="middle" font-size="11" fill="#57606a">Pfad secret/mariadb, Template:</text>
+  <text x="705" y="674" text-anchor="middle" font-size="11" fill="#57606a">nur das Passwort als Datei</text>
+
+  <!-- Pfeil Annotations -> Webhook -->
+  <line x1="705" y1="466" x2="705" y2="426" stroke="#8250df" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-purple)"/>
+  <text x="715" y="450" font-size="10.5" fill="#8250df">steuern die Injection</text>
+
+  <!-- Fussnote -->
+  <text x="450" y="815" text-anchor="middle" font-size="12" font-style="italic" fill="#57606a">Es entsteht KEIN Kubernetes Secret - das Passwort existiert nur als Datei im Pod.</text>
+</svg>
