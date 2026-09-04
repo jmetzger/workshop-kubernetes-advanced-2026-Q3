@@ -353,13 +353,86 @@ Secret ankommt.
 > werden nur EINMAL beim Container-Start aufgeloest. Dazu kommt: Das
 > tatsaechliche Root-Passwort liegt in den Systemtabellen der Datenbank;
 > eine Rotation in Vault aendert dort nichts. Nach 60 Sekunden aktuell
-> ist also nur das Secret-Objekt. Wer die Rotation bis in die App bringen
-> will, braucht z.B. `spec.rolloutRestartTargets` im VaultStaticSecret
-> (VSO restartet dann das StatefulSet bei jeder Secret-Aenderung) - und
-> fuer die Datenbank selbst eine Rotation auf DB-Seite (Stichwort:
-> dynamische Secrets mit der Vault Database-Engine, nicht Teil dieser
-> Uebung). In dieser Uebung wuerde ein Pod-Neustart zufaellig genuegen,
-> weil die Datenbank ohne Persistenz dabei neu initialisiert wird.
+> ist also nur das Secret-Objekt. Was man dagegen tun kann, zeigt der
+> Bonus-Schritt direkt hier drunter.
+
+---
+
+## Schritt 10 (Bonus): Rotation automatisch bis in den Pod
+
+VSO hat fuer den fehlenden Neustart ein Bordmittel eingebaut (das
+uebernimmt hier die Aufgabe, fuer die man sonst Tools wie Stakater
+Reloader installiert): `rolloutRestartTargets`. Damit sagst du dem
+Operator: "Immer wenn du dieses Secret neu schreibst, starte auch das
+StatefulSet neu durch."
+
+Ergaenze in `03-vault-static-secret.yml` unter `spec:` drei Zeilen:
+
+```
+# vi 03-vault-static-secret.yml
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: mariadb-secret
+spec:
+  vaultAuthRef: vault-auth
+  mount: secret
+  type: kv-v2
+  path: mariadb
+  refreshAfter: 60s
+  destination:
+    name: mariadb-vault-secret
+    create: true
+  rolloutRestartTargets:
+    - kind: StatefulSet
+      name: mariadb-vso
+```
+
+```
+kubectl apply -f 03-vault-static-secret.yml -n default
+```
+
+Die Kette laeuft ab jetzt automatisch durch:
+
+1. Passwort in Vault aendern (macht der Trainer zentral - das Secret ist
+   fuer alle Teilnehmer dasselbe, und eure Policy `mariadb-read` darf nur
+   lesen)
+2. VSO schreibt das Kubernetes Secret neu (spaetestens nach 60s)
+3. VSO macht einen Rolling Restart des StatefulSets - erkennbar an der
+   Annotation `vso.secrets.hashicorp.com/restartedAt` und einem frischen
+   Pod
+4. Der neue Pod liest die Umgebungsvariable frisch und kennt das neue
+   Passwort
+
+Beobachten, waehrend der Trainer rotiert:
+
+```
+kubectl get pods -n default -w
+```
+
+Erwartete Ausgabe (nach ca. einer Minute):
+
+```
+mariadb-vso-0   1/1     Running       0          25m
+mariadb-vso-0   1/1     Terminating   0          26m
+mariadb-vso-0   0/1     Pending       0          0s
+mariadb-vso-0   1/1     Running       0          31s
+```
+
+> **Wichtig: Das loest das eigentliche Problem noch NICHT.** Der
+> automatische Neustart tauscht nur das Passwort aus, das die App
+> uebergeben bekommt. Das Passwort, das die Datenbank tatsaechlich
+> akzeptiert, liegt in ihren Systemtabellen - und dort aendert ein
+> Pod-Neustart gar nichts. Dass der Test in dieser Uebung trotzdem
+> funktioniert, ist ein Sonderfall: Ohne Persistenz startet die MariaDB
+> beim Pod-Neustart leer und initialisiert sich mit dem neuen Passwort
+> einfach neu. Eine echte Datenbank mit persistenten Daten wuerde nach
+> dem Restart weiter das ALTE Passwort verlangen, waehrend App und
+> Secret schon das neue kennen - Login kaputt. Echte Rotation heisst:
+> Datenbank und Vault im Gleichschritt aendern. Genau dafuer gibt es die
+> Vault **Database Secrets Engine** (static roles bzw. dynamische
+> Secrets), die per `ALTER USER` direkt in der Datenbank rotiert - das
+> sprengt diese Uebung, ist aber das Stichwort fuer die Praxis.
 
 ---
 
