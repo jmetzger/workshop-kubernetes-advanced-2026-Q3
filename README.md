@@ -65,6 +65,7 @@
      * [Funktionsuebersicht: Splunk-Menuepunkte und Kubernetes-Relevanz](kubernetes-splunk/menues-und-ihre-funktion.md)
      * [Log-Forwarder an externen Splunk-Server anbinden](kubernetes-splunk/uebungen/03-forwarder-an-externe-splunk.md)
      * [Abstuerzenden Pod ueber Splunk debuggen (CrashLoopBackOff)](kubernetes-splunk/uebungen/04-log-suche-crashloop-debugging.md)
+     * [CrashLoopBackOff-Alert einrichten (optional)](kubernetes-splunk/uebungen/05-alert-crashloop-backoff.md)
      * [Optional: Splunk im Cluster betreiben (Splunk Operator)](kubernetes-splunk/uebungen/10-optional-splunk-operator-installieren.md)
 
   1. Troubleshooting

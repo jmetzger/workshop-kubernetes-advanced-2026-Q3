@@ -35,4 +35,4 @@ kubectl delete -f https://github.com/splunk/splunk-operator/releases/download/3.
 ```
 
 Der Abbau des geteilten DOKS-Clusters/Bastion selbst steht in
-[Uebung 5, Schritt 3](05-aufraeumen.md).
+[Uebung 6, Schritt 3](06-aufraeumen.md).

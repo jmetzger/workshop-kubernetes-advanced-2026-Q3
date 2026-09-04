@@ -1,9 +1,11 @@
-# Uebung 5: Aufraeumen
+# Uebung 6: Aufraeumen
 
-## Schritt 1: Forwarder und Demo-Namespace entfernen
+## Schritt 1: Forwarder entfernen
+
+Der `crashloop-demo`-Namespace wurde bereits am Ende von Uebung 5 entfernt. Jetzt noch
+den Log-Forwarder selbst:
 
 ```
-kubectl delete namespace crashloop-demo
 helm uninstall splunk-log-forwarder -n splunk-forwarder
 kubectl delete namespace splunk-forwarder
 ```

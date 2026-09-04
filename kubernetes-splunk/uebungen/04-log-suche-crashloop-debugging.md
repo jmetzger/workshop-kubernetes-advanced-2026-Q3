@@ -2,6 +2,8 @@
 
 ## Hintergrund
 
+![Vom Absturz zur Ursache: Debugging ueber die zentrale Splunk-Suche](screenshots/07-crashloop-debugging-flow.svg)
+
 Wenn ein Pod wiederholt abstuerzt und neu gestartet wird (`CrashLoopBackOff`), sind seine
 Logs mit reinem `kubectl` schwer nachzuvollziehen: `kubectl logs` zeigt nur den aktuellen und
 den letzten Container-Versuch, alle aelteren Restarts sind verloren. Mit dem zentralen
@@ -123,8 +125,13 @@ vorhanden, weil sie zentral in Splunk liegen statt nur auf dem Node):
 index=main payment
 ```
 
-(auch hier bei mehreren gleichzeitigen Clustern mit `k8s.cluster.name="<dein-username>"`
-eingrenzen, siehe oben)
+**Laeuft die Uebung mit mehreren Clustern gleichzeitig gegen dieselbe externe Splunk-Instanz**
+(siehe Hinweis in Schritt 3): auch hier auf die eigenen Daten eingrenzen, `<dein-username>`
+wieder durch den eigenen Bastion-Usernamen ersetzen:
+
+```
+index=main payment k8s.cluster.name="<dein-username>"
+```
 
 ![Container-Log-Zeilen mit der Fehlerursache](screenshots/03-container-logs-search.jpg)
 
@@ -146,17 +153,8 @@ mehr laufen, da die Daten schon auf der externen VM liegen.
 Splunk-Suche kurzzeitig fehlen, wenn der Log-Forwarder die neue Log-Datei noch nicht entdeckt
 hat (Poll-Intervall). Bei Bedarf 1-2 Neustarts abwarten und die Suche wiederholen.
 
-## Schritt 5: Alert bauen (optional)
+Der `crashloop-demo`-Namespace bleibt fuer die naechste Uebung noch bestehen - der
+weiter abstuerzende `payment-service` liefert dort die Daten fuer den Alert.
 
-Aus der Event-Suche aus Schritt 3 liesse sich ein Alert bauen, der bei mehr als 3 BackOff-
-Events pro Pod in 10 Minuten eine Benachrichtigung ausloest - in Splunk Web ueber
-"Speichern als > Benachrichtigung" direkt aus dem Suchergebnis heraus.
-
-## Aufraeumen des Demo-Namespace
-
-```
-kubectl delete namespace crashloop-demo
-```
-
-Fuer den vollstaendigen Abbau der Uebung (Forwarder, externe VM, Cluster) siehe
-[Uebung 5: Aufraeumen](05-aufraeumen.md).
+Weiter mit [Uebung 5: CrashLoopBackOff-Alert einrichten](05-alert-crashloop-backoff.md),
+um Splunk bei zu vielen Neustarts automatisch Bescheid geben zu lassen.

@@ -26,7 +26,7 @@ Verifiziert an der laufenden externen Instanz aus [UEBERSICHT.md](UEBERSICHT.md)
 | Analytics Workspace | Klick-basierte Alternative zu SPL (Pivot-Nachfolger) fuer Nutzer ohne SPL-Kenntnisse | Nein - Trainingsziel ist SPL selbst zu ueben, nicht der Klick-Weg drumherum |
 | Datasets | Verwaltung von Data Models/Table Datasets als wiederverwendbare Datenbasis fuer Pivot | Nein - Aufbauthema, ueberschneidet sich mit Analytics Workspace, nicht im Scope |
 | Reports | Gespeicherte Suchen mit Zeitplan, Ergebnis-Export | Nein direkt - waere ein sinnvoller naechster Schritt nach Uebung 4, aber kein eigener Uebungsinhalt |
-| Alerts | Bedingte Benachrichtigung aus einer Suche heraus (E-Mail, Webhook, Skript) | Ja - explizit in [Uebung 4, Schritt 5](uebungen/04-log-suche-crashloop-debugging.md) als optionaler Schritt angelegt (BackOff-Alert) |
+| Alerts | Bedingte Benachrichtigung aus einer Suche heraus (E-Mail, Webhook, Skript) | Ja - eigene, optionale [Uebung 5](uebungen/05-alert-crashloop-backoff.md) (BackOff-Alert) |
 | Dashboards | Visualisierungen/Panels aus gespeicherten Suchen | Optional - "Visualize your data" wird auf der Startseite beworben, ist aber keine eigene Uebung; waere naheliegende Erweiterung fuer ein Kubernetes-Log-Dashboard |
 | Modules | SPL2-Suchmodule (mehrere Suchen kombinieren, neueres API-Konzept) | Nein - SPL2 ist ein Splunk-internes Nachfolgekonzept zu SPL, kein Kubernetes-Bezug |
 
@@ -69,7 +69,7 @@ die BackOff-Suche aus Uebung 4 dauerhaft zu speichern.
 ![Alerts](screenshots-menue/05-alerts.jpg)
 Liste aller konfigurierten Alerts (Bedingung -> Aktion). Sinnvoll fuer die
 Kubernetes-Anbindung: ja - hier taucht der optionale BackOff-Alert aus
-[Uebung 4, Schritt 5](uebungen/04-log-suche-crashloop-debugging.md) auf, falls angelegt.
+[Uebung 5](uebungen/05-alert-crashloop-backoff.md) auf, falls angelegt.
 
 **Dashboards**
 ![Dashboards](screenshots-menue/06-dashboards.jpg)
@@ -90,14 +90,15 @@ dafuer noetige Zusatzkomponente.
 | Menuepunkt | Was er tut | Fuer K8s-Training gebraucht? |
 |---|---|---|
 | Jobs | Laufende/abgeschlossene Suchjobs verwalten (abbrechen, Ergebnisse nachladen) | Nein direkt - nuetzlich falls eine Suche in Uebung 4 haengt, aber kein eigener Uebungsinhalt |
-| Triggered Alerts | Historie ausgeloester Alerts | Nein direkt - haengt am optionalen Alert aus Uebung 4, Schritt 5 |
+| Triggered Alerts | Historie ausgeloester Alerts | Nein direkt - haengt am optionalen Alert aus Uebung 5 |
 
 ## Fazit
 
 Fuer dieses Training zaehlen im Kern nur wenige Menuepunkte wirklich: **Search** und
 **Alerts** aus der Search & Reporting App - das deckt den Weg "Log/Event trifft in Splunk
-ein -> wird per SPL gefunden -> loest optional einen Alert aus" ab, der
-[Uebung 4](uebungen/04-log-suche-crashloop-debugging.md) traegt. Analytics Workspace,
+ein -> wird per SPL gefunden -> loest optional einen Alert aus" ab, den
+[Uebung 4](uebungen/04-log-suche-crashloop-debugging.md) und
+[Uebung 5](uebungen/05-alert-crashloop-backoff.md) tragen. Analytics Workspace,
 Datasets, Reports und Modules sind Aufbau- bzw. Alternativkonzepte ohne eigenen
 Uebungsschritt, Dashboards eine naheliegende, aber optionale Erweiterung. Das
 Settings-Menue (Administration der Splunk-Instanz selbst: Server, Lizenz, Indizes,
