@@ -30,7 +30,9 @@ Was die einzelnen Teile der Suche tun:
 | `k8s.cluster.name="<dein-username>"` | nur der eigene Cluster |
 | `k8s.event.count>2` | der eigentliche Schwellwert - Kubernetes' eigener Wiederholungszaehler |
 
-Oben rechts den Zeitraum auf **Letzte 5 Minuten** stellen. Ausfuehren - solltet ihr noch
+Oben rechts den Zeitraum auf **Letzte 15 Minuten** stellen (`Letzte 5 Minuten` gibt es im
+Zeitraum-Dropdown nicht als Preset - nur unter "Echtzeit", das hier nicht gewollt ist).
+Ausfuehren - solltet ihr noch
 im Anschluss an Uebung 4 sein, liefert die Suche sofort mindestens ein Ergebnis (der
 Demo-Container crasht dort bereits laenger als eine Minute).
 
@@ -49,7 +51,7 @@ Nach dem Ausfuehren oben rechts ueber der Ergebnisliste auf **Speichern als** kl
 - Zeitplan-Dropdown (Standard "Jede Woche ausfuehren") auf **Nach Cron-Zeitplan
   ausfuehren** umstellen - die Presets bieten nur Stunde/Tag/Woche/Monat, fuer den
   gewuenschten 5-Minuten-Takt braucht es einen eigenen Cron-Ausdruck
-- **Zeitspanne**: `Letzte 5 Minuten` (aus Schritt 1 uebernommen)
+- **Zeitspanne**: `Letzte 15 Minuten` (aus Schritt 1 uebernommen)
 - **Cron-Ausdruck**: `*/5 * * * *` (alle 5 Minuten pruefen)
 - **Trigger-Bedingungen** > "Benachrichtigung ausloesen, wenn": Standardwert
   `Anzahl der Ergebnisse` **groesser ist als** `0` **unveraendert lassen** - die
