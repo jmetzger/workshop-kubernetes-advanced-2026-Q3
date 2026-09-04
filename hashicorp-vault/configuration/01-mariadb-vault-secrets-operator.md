@@ -8,6 +8,8 @@ loggt sich bei Vault ein, liest das Secret periodisch neu und legt es als
 `Secret`-Ressource ab - Anwendungen greifen ganz normal per `secretKeyRef`
 darauf zu, ohne selbst etwas von Vault zu wissen.
 
+![VSO Datenfluss](../images/vso-datenfluss.svg)
+
 > **Setup:** Alle Teilnehmer nutzen den **gleichen Vault-Server**
 > (`https://vault-bka.do.t3isp.de`), aber jeder arbeitet mit seinem
 > **eigenen Kubernetes-Cluster**. Das MariaDB-Credential
