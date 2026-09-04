@@ -141,7 +141,7 @@ curl http://<ip aus get svc>
 ```
 
 ```
-kubectl delete -f 03-deploy.yml 04-service.yml 
+kubectl delete -f 03-deploy.yml -f 04-service.yml 
 ```
 
 ## Step 5: Referenz:
