@@ -1,3 +1,4 @@
 .env
 .env.enc
 .env.sources
+.claude/settings.local.json
