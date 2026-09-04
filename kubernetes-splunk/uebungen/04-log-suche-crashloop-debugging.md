@@ -122,14 +122,6 @@ Breitere Suche (auch aeltere, laengst rotierte Container-Log-Dateien sind hier n
 vorhanden, weil sie zentral in Splunk liegen statt nur auf dem Node):
 
 ```
-index=main payment
-```
-
-**Laeuft die Uebung mit mehreren Clustern gleichzeitig gegen dieselbe externe Splunk-Instanz**
-(siehe Hinweis in Schritt 3): auch hier auf die eigenen Daten eingrenzen, `<dein-username>`
-wieder durch den eigenen Bastion-Usernamen ersetzen:
-
-```
 index=main payment k8s.cluster.name="<dein-username>"
 ```
 
