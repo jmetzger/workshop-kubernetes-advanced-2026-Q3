@@ -23,7 +23,6 @@ Tag 2: Observability, Service Mesh & GitOps) - alle Uebungen sind dort verlinkt.
 |-------------|--------|
 | kubernetes-networks/, kubectl/, kubectl-examples/, kubernetes-networkpolicy/, calico/, debug/, service/, metallb.md, kubernetes/ (Basis) | training-kubernetes-networking |
 | kubernetes/rbac/, kubernetes/rbac-create-user-kubernetes-1-25.md, security/ | training-kubernetes-security |
-| openbao/ | training-openbao-kubernetes |
 | prometheus/, prometheus-grafana/, monitoring/, kubernetes-autoscaling/, kubernetes-monitoring/, microk8s/ | training-kubernetes-monitoring |
 | istio/ (inkl. istio/argocd/) | training-istio-kubernetes |
 | tipps-tricks/, kubernetes/autoscaling.md | training-kubernetes-advanced |
@@ -43,8 +42,10 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
   einem kompletten Bootstrap-bis-Uninstall-Durchlauf end-to-end nachgetestet
   (optional, nicht blockierend - der Finalizer-Mechanismus dahinter ist
   verstanden).
-- Vault/OpenBao: Operator-Variante (VSO) ist als Uebung da; eine explizite
-  Sidecar/Agent-Injection-Uebung fehlt noch (wuerde Neubau + Cluster-Test brauchen).
+- OpenBao-Kapitel am 04.09.2026 komplett entfernt (`openbao/`) - Secrets
+  Management laeuft jetzt ausschliesslich ueber das HashiCorp-Vault-Kapitel
+  (`security/hashicorp-vault/`, `hashicorp-vault/`) mit VSO- und
+  Agent-Injector-Uebung gegen den zentralen Vault-Trainingsserver.
 - README-Punkt "Abschluss" hat bewusst keine Links (freier Teil).
 - NFS-basierte StorageClass fuer die kubeadm-Trainingscluster (in-Cluster
   NFS-Server vs. zentraler Droplet pro Training) noch nicht entschieden.
