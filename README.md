@@ -39,8 +39,8 @@
      * [Praktische Uebung RBAC (ab Kubernetes 1.25)](kubernetes/rbac-create-user-kubernetes-1-25.md)
 
   1. Secrets Management mit HashiCorp Vault
-     * [HashiCorp Vault als Password-Safe (Overview)](security/hashicorp-vault/overview.md)
      * [Vault-Architektur einfach erklaert](hashicorp-vault/architektur-einfach-erklaert.md)
+     * [HashiCorp Vault als Password-Safe (Overview)](security/hashicorp-vault/overview.md)
      * [Uebung: MariaDB-Deployment mit HashiCorp Vault ueber den Vault Secrets Operator (VSO)](hashicorp-vault/configuration/01-mariadb-vault-secrets-operator.md)
      * [Uebung: MariaDB-Deployment mit dem Vault Agent Injector](hashicorp-vault/configuration/02-mariadb-vault-agent-injector.md)
 
