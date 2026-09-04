@@ -51,13 +51,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  # important: on DigitalOcean L2 mode only works with ips the nodes
-  # already have (their own public ip) - the leader speaker answers
-  # arp for its own node, so no conflict.
-  # a free-floating/virtual ip not assigned to any node does NOT work,
-  # DO's network fabric drops arp for ips it does not know about.
-  - 134.209.231.154-134.209.231.154
-  # both notations are possible 
+  # hier die ip-adressen Deiner 3 worker nodes eintragen
   - 157.230.113.124/32
 ```
 
