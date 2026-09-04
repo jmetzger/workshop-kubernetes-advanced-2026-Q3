@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 420" font-family="Helvetica, Arial, sans-serif" role="img" aria-label="Diagramm: payment-service ist im CrashLoopBackOff, kubectl logs zeigt nur den letzten Neustart. Schritt 3 durchsucht Splunk nach dem kube:events-Sourcetype und findet das Back-off-Event (WAS ist passiert). Schritt 4 durchsucht Splunk nach dem kube:container-Sourcetype und findet die eigentliche Fehlerursache in den Container-Logs (WARUM).">
+  <defs>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#dc2626"/>
+    </marker>
+    <marker id="arrow-indigo" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#4f46e5"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#16a34a"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="980" height="420" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="490" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Vom Absturz zur Ursache: Debugging ueber die zentrale Splunk-Suche</text>
+
+  <!-- Box 1: CrashLoopBackOff / kubectl logs limit -->
+  <rect x="30" y="90" width="190" height="140" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="125" y="115" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">payment-service</text>
+  <text x="125" y="133" text-anchor="middle" font-size="11" font-weight="700" fill="#991b1b">CrashLoopBackOff</text>
+  <text x="125" y="158" text-anchor="middle" font-size="10.5" fill="#7f1d1d">kubectl logs zeigt nur</text>
+  <text x="125" y="174" text-anchor="middle" font-size="10.5" fill="#7f1d1d">den aktuellen + letzten</text>
+  <text x="125" y="190" text-anchor="middle" font-size="10.5" fill="#7f1d1d">Container-Versuch</text>
+  <text x="125" y="212" text-anchor="middle" font-size="10.5" font-weight="700" fill="#dc2626">aeltere Restarts weg</text>
+
+  <!-- Box 2: Splunk search 1 - events -->
+  <rect x="248" y="90" width="228" height="140" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="362" y="110" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">Schritt 3: Splunk-Suche</text>
+  <text x="362" y="125" text-anchor="middle" font-size="9.5" fill="#3730a3">index=main</text>
+  <text x="362" y="138" text-anchor="middle" font-size="9.5" fill="#3730a3">k8s.container.name=</text>
+  <text x="362" y="151" text-anchor="middle" font-size="9.5" fill="#3730a3">"payment-service"</text>
+  <text x="362" y="164" text-anchor="middle" font-size="9.5" fill="#3730a3">k8s.cluster.name=</text>
+  <text x="362" y="177" text-anchor="middle" font-size="9.5" fill="#3730a3">"&lt;dein-username&gt;"</text>
+  <text x="362" y="198" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">kube:events:</text>
+  <text x="362" y="213" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">"Back-off restarting..."</text>
+
+  <!-- Box 3: Splunk search 2 - container logs -->
+  <rect x="506" y="90" width="228" height="140" rx="8" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5"/>
+  <text x="620" y="110" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">Schritt 4: Splunk-Suche</text>
+  <text x="620" y="125" text-anchor="middle" font-size="9.5" fill="#3730a3">index=main payment</text>
+  <text x="620" y="138" text-anchor="middle" font-size="9.5" fill="#3730a3">k8s.cluster.name=</text>
+  <text x="620" y="151" text-anchor="middle" font-size="9.5" fill="#3730a3">"&lt;dein-username&gt;"</text>
+  <text x="620" y="164" text-anchor="middle" font-size="9.5" fill="#3730a3">Sourcetype</text>
+  <text x="620" y="177" text-anchor="middle" font-size="9.5" fill="#3730a3">kube:container:payment-service</text>
+  <text x="620" y="198" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">echte stdout-Zeilen,</text>
+  <text x="620" y="213" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">auch aeltere Restarts</text>
+
+  <!-- Box 4: root cause -->
+  <rect x="764" y="90" width="186" height="140" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="857" y="112" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">Fehlerursache</text>
+  <text x="857" y="134" text-anchor="middle" font-size="10" fill="#14532d">ERROR Verbindung zu</text>
+  <text x="857" y="148" text-anchor="middle" font-size="10" fill="#14532d">db-payments.internal</text>
+  <text x="857" y="162" text-anchor="middle" font-size="10" fill="#14532d">:5432 fehlgeschlagen:</text>
+  <text x="857" y="176" text-anchor="middle" font-size="10" fill="#14532d">Connection refused</text>
+  <text x="857" y="200" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16a34a">Ursache klar, ganz</text>
+  <text x="857" y="215" text-anchor="middle" font-size="10.5" font-weight="700" fill="#16a34a">ohne kubectl logs</text>
+
+  <!-- Arrows -->
+  <line x1="220" y1="160" x2="246" y2="160" stroke="#dc2626" stroke-width="1.8" marker-end="url(#arrow-red)"/>
+  <text x="233" y="145" text-anchor="middle" font-size="9" fill="#991b1b">WAS?</text>
+
+  <line x1="476" y1="160" x2="504" y2="160" stroke="#4f46e5" stroke-width="1.8" marker-end="url(#arrow-indigo)"/>
+  <text x="490" y="145" text-anchor="middle" font-size="9" fill="#3730a3">WARUM?</text>
+
+  <line x1="734" y1="160" x2="762" y2="160" stroke="#16a34a" stroke-width="1.8" marker-end="url(#arrow-green)"/>
+
+  <!-- Legend / takeaway -->
+  <rect x="30" y="255" width="920" height="140" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2"/>
+  <text x="50" y="280" font-size="11.5" fill="#334155">Kubernetes-Events (Sourcetype kube:events) zeigen DASS ein Container abstuerzt und neu startet -</text>
+  <text x="50" y="298" font-size="11.5" fill="#334155">Container-Logs (Sourcetype kube:container:*) zeigen WARUM. Beide Quellen kommen ueber denselben</text>
+  <text x="50" y="316" font-size="11.5" fill="#334155">Log-Forwarder aus Uebung 3 und bleiben in Splunk durchsuchbar - auch nach dem naechsten Neustart</text>
+  <text x="50" y="334" font-size="11.5" fill="#334155">oder wenn der Cluster selbst laengst nicht mehr laeuft. Bei mehreren Clustern gegen dieselbe externe</text>
+  <text x="50" y="352" font-size="11.5" fill="#334155">Splunk-Instanz beide Suchen mit k8s.cluster.name="&lt;dein-username&gt;" auf die eigenen Daten eingrenzen.</text>
+  <text x="50" y="378" font-size="11.5" font-weight="700" fill="#166534">Sammelbecken-Prinzip: die Daten ueberleben den Cluster.</text>
+</svg>

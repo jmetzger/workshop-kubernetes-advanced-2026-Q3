@@ -45,7 +45,8 @@ Schritt-für-Schritt-Übungen zur externen Variante:
 1. (Optional) [Externe Splunk-VM per Terraform aufsetzen](uebungen/02-externe-splunk-vm.md)
 2. [Log-Forwarder an die externe Splunk-VM anbinden](uebungen/03-forwarder-an-externe-splunk.md)
 3. [Log-Suche und CrashLoopBackOff-Debugging](uebungen/04-log-suche-crashloop-debugging.md)
-4. [Aufräumen](uebungen/05-aufraeumen.md)
+4. [CrashLoopBackOff-Alert einrichten (optional)](uebungen/05-alert-crashloop-backoff.md)
+5. [Aufräumen](uebungen/06-aufraeumen.md)
 
 Welche Splunk-Menuepunkte davon in der Uebung tatsaechlich vorkommen (und welche bewusst
 aussen vor bleiben, weil sie den Betrieb von Splunk selbst statt die Kubernetes-Anbindung

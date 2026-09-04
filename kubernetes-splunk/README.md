@@ -26,7 +26,7 @@ erreichbar (Nginx-Reverse-Proxy mit Let's-Encrypt-Zertifikat), kein SSH-Tunnel n
 - DOKS-Control-Plane ist kostenlos, es fallen nur Kosten für die Worker-Nodes, den
   Bastion-Server und die externe Splunk-VM an (siehe `digitalocean/` und
   `terraform-external-splunk/`).
-- Nichts vergessen aufzuräumen: [uebungen/05-aufraeumen.md](uebungen/05-aufraeumen.md).
+- Nichts vergessen aufzuräumen: [uebungen/06-aufraeumen.md](uebungen/06-aufraeumen.md).
 
 ## Infrastruktur aufbauen
 
@@ -52,8 +52,9 @@ Details: `digitalocean/`.
      * [Log-Forwarder an die externe Splunk-VM anbinden](uebungen/03-forwarder-an-externe-splunk.md)
   3. Log-Suche & Troubleshooting
      * [Abstürzenden Pod über Splunk debuggen (CrashLoopBackOff)](uebungen/04-log-suche-crashloop-debugging.md)
+     * [CrashLoopBackOff-Alert einrichten (optional)](uebungen/05-alert-crashloop-backoff.md)
   4. Aufräumen
-     * [Aufräumen](uebungen/05-aufraeumen.md)
+     * [Aufräumen](uebungen/06-aufraeumen.md)
 
 **Optionaler Anhang — Splunk im Cluster betreiben**
 
