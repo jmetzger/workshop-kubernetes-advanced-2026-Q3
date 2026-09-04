@@ -44,6 +44,8 @@
      * [Server-Installation: Standalone hinter nginx Reverse Proxy](openbao/installation/standalone.md)
      * [User/Gruppe fuer Passwort-Authentifizierung aufsetzen](openbao/configuration/01-setup-userpass-for-user-with-group.md)
      * [Uebung Operator-Variante: MariaDB-Deployment mit Vault Secrets Operator (VSO)](openbao/configuration/02-kubernetes-to-openbao-eso-secrets.md)
+     * [Uebung: MariaDB-Deployment mit echtem HashiCorp Vault ueber den Vault Secrets Operator (VSO)](hashicorp-vault/configuration/01-mariadb-vault-secrets-operator.md)
+     * [Uebung: MariaDB-Deployment mit dem Vault Agent Injector](hashicorp-vault/configuration/02-mariadb-vault-agent-injector.md)
 
   1. Workload-Skalierung
      * [Autoscaling Pods/Deployments - Grundlagen](kubernetes/autoscaling.md)
