@@ -202,8 +202,31 @@ kubectl apply -f 01-vault-connection.yml -n default
 
 ## Schritt 6: VaultAuth erstellen
 
-Die VaultAuth verweist auf deinen persoenlichen Kubernetes-Auth-Mount
-(`kubernetes-<dein-tln>`) und die dort hinterlegte Rolle `mariadb`.
+Die VaultAuth sagt dem Operator, WIE er sich bei Vault einloggen soll.
+Dafuer lohnt es sich, die beiden Felder `mount` und `role` einmal sauber
+auseinanderzuhalten:
+
+- **`mount` - der Kubernetes-Auth-Mount:** Ein Auth-Mount ist eine
+  Login-Tuer in Vault. Hinter einem Kubernetes-Auth-Mount sind die Daten
+  EINES Clusters hinterlegt (API-Server-Adresse, CA-Zertifikat,
+  Reviewer-Token) - damit kann Vault ServiceAccount-Tokens aus genau
+  diesem Cluster ueber die TokenReview-API pruefen. Weil ein Mount immer
+  nur auf EINEN API-Server zeigen kann und jeder Teilnehmer ein eigenes
+  Cluster hat, gibt es pro Teilnehmer einen eigenen Mount
+  (`kubernetes-tln1`, `kubernetes-tln2`, ...). "Dein" Mount ist er also
+  nur, weil er DEIN Cluster identifiziert - nicht dich als Person.
+- **`role` - die Rolle im Mount:** Innerhalb eines Mounts legen Rollen
+  fest, WER aus dem Cluster sich einloggen darf und WAS er danach darf.
+  Die Rolle `mariadb` bindet den ServiceAccount `mariadb-sa` (Namespace
+  `default`) an die Policy `mariadb-read`. Sie heisst in jedem
+  Teilnehmer-Mount gleich und ist ueberall identisch konfiguriert -
+  technisch ist es aber jeweils eine eigene Rolle im jeweiligen Mount.
+
+Beim Login schickt der Operator das ServiceAccount-Token von `mariadb-sa`
+an deinen Mount und nennt dabei die Rolle `mariadb`. Vault prueft das
+Token gegen dein Cluster, vergleicht ServiceAccount-Name und Namespace
+mit der Rolle - und gibt bei Erfolg ein Vault-Token mit der Policy
+`mariadb-read` zurueck.
 
 ```
 nano 02-vault-auth.yml
