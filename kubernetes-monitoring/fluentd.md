@@ -24,24 +24,7 @@ der Log-Collector als DaemonSet oder als Sidecar?
 
 ## Aufbau: Wie fliesst ein Log durch den Cluster?
 
-```
-+--------------------------- Node ---------------------------+
-| Pod: App-Container --> stdout/stderr                        |
-|                             |                               |
-|                             v                               |
-| Container-Runtime (containerd) schreibt nach                |
-|   /var/log/pods/... (Symlinks: /var/log/containers/*.log)   |
-|                             |                               |
-|                             v                               |
-| Log-Collector (DaemonSet-Pod) liest die Log-Dateien (tail), |
-| ergaenzt Kubernetes-Metadaten (Namespace, Pod, Labels)      |
-+-------------------------|-----------------------------------+
-                          v
-              Elasticsearch (Indizes, Retention)
-                          |
-                          v
-              Kibana (Suche, Dashboards)
-```
+![Log-Flow im EFK-Stack](images/efk-log-flow.svg)
 
 Die wichtigsten Punkte daran:
 
@@ -58,10 +41,12 @@ Die wichtigsten Punkte daran:
 
 ## Ist Fluentd noch zeitgemaess?
 
-Kurze Antwort: **Als Node-Collector fuer einen Neuaufbau meist nicht mehr
-erste Wahl - der Nachfolger im eigenen Haus heisst Fluent Bit.**
+Kurze Antwort: **Deprecated ist Fluentd nicht - aber als Node-Collector
+fuer einen Neuaufbau meist nicht mehr erste Wahl. Der Nachfolger im
+eigenen Haus heisst Fluent Bit.**
 
-  * **Fluentd** (seit 2011, Ruby + C, CNCF graduated) funktioniert und hat
+  * **Fluentd** (seit 2011, Ruby + C, CNCF graduated) wird aktiv gepflegt
+    (fluent-package v6 LTS mit Support bis mindestens Ende 2027) und hat
     ein riesiges Plugin-Oekosystem (1000+). Aber: relativ schwergewichtig
     (typisch einige hundert MB RAM pro Instanz) - als DaemonSet auf jedem
     Node zahlt man das mal Anzahl Nodes.
@@ -73,6 +58,10 @@ erste Wahl - der Nachfolger im eigenen Haus heisst Fluent Bit.**
     Collector auf jedem Node, optional ein zentrales Fluentd als
     **Aggregator** (Routing, aufwendige Filter, viele Ziele) - dort spielt
     das Plugin-Oekosystem seine Staerke aus, ohne jeden Node zu belasten.
+    Fluent Bit kann inzwischen auch selbst als Aggregator dienen - die
+    zweistufige Architektur ist optional, nicht Pflicht.
+  * Bestehende Fluentd-Setups laufen zu lassen ist voellig legitim -
+    es gibt keinen Migrationszwang.
 
 Alternativen ausserhalb der Fluent-Familie:
 
@@ -82,6 +71,19 @@ Alternativen ausserhalb der Fluent-Familie:
 | Vector | Moderner Collector in Rust (Datadog), sehr performant, eigene Transformationssprache |
 | Filebeat / Elastic Agent | Die Elastic-eigene Variante, eng mit dem Elastic-Stack verzahnt (dann "ELK" statt "EFK") |
 | Promtail / Grafana Alloy | Collector fuer Grafana Loki - anderes Backend-Konzept (Label-Index statt Volltext), guenstiger im Betrieb als Elasticsearch |
+
+Mit den "drei Signalen" der Observability sind gemeint:
+
+  1. **Logs** - Textereignisse mit Zeitstempel ("was ist passiert?") -
+     darum geht es in diesem Kapitel.
+  2. **Metriken** - numerische Zeitreihen ("wie viel / wie schnell?"),
+     z.B. CPU, RAM, Requests/s - siehe Prometheus/Grafana-Kapitel.
+  3. **Traces** - der Weg eines einzelnen Requests durch mehrere Services
+     ("wo haengt's?"), jeder Service steuert einen Span bei.
+
+Klassisch braucht man dafuer drei verschiedene Agenten auf dem Node
+(z.B. Fluent Bit + Node Exporter + Tracing-Agent) - der OpenTelemetry
+Collector kann alle drei Signale mit einem einzigen Agenten einsammeln.
 
 ## DaemonSet oder Sidecar?
 
@@ -140,8 +142,11 @@ eigenes Handling brauchen.
 
   * Aufbau: App -> stdout -> Node-Dateisystem -> Collector (DaemonSet) ->
     Elasticsearch -> Kibana.
-  * Fluentd ist nicht tot, aber als Node-Collector von Fluent Bit abgeloest;
-    fuer Neuaufbauten auch OpenTelemetry Collector oder Vector pruefen.
+  * Merksatz: "EFK" heisst heute praktisch **Elasticsearch + Fluent Bit +
+    Kibana** - Fluentd lebt weiter als optionaler Aggregator und in
+    Bestandsumgebungen.
+  * Fuer Neuaufbauten auch OpenTelemetry Collector (ein Agent fuer Logs,
+    Metriken und Traces) oder Vector pruefen.
   * DaemonSet ist der Normalfall, Sidecar das Werkzeug fuer Ausnahmen -
     und man sollte begruenden koennen, warum man es einsetzt.
 
