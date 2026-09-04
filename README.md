@@ -24,8 +24,9 @@
   1. Network Policies
      * [Einfache Uebung NetworkPolicy (Standard)](kubernetes-networkpolicy/00-simple-exercises-group.md)
      * [Beispiel mit ipBlock](kubernetes-networkpolicy/01-example-from-ipblock.md)
-     * [Erweiterte Policies mit Calico - Uebung](kubernetes-networkpolicy/calico/01-exercise-calico.md)
-     * [Calico - Services schuetzen](kubernetes-networkpolicy/calico/02-example-protecting-services.md)
+     * [Warum Calico-Policies statt Standard-NetworkPolicy?](kubernetes-networkpolicy/calico/00-warum-calico-policies.md)
+     * [Calico-Policies - Grundlagen (Ordering, Implicit Deny, API-Version)](kubernetes-networkpolicy/calico/01-overview.md)
+     * [Erweiterte Policies mit Calico - Uebung](kubernetes-networkpolicy/calico/02-exercise-calico.md)
 
   1. RBAC & Identity
      * [Least Privileges mit RBAC](kubernetes/rbac/00-rbac-and-least-privileges.md)
@@ -54,9 +55,8 @@
      * [Prometheus/Grafana-Stack installieren mit helm](prometheus-grafana/prometheus-grafana/install-with-helm-letsencrypt-basic-auth.md)
      * [Uebung: nginx mit ServiceMonitor und Exporter (Sidecar)](monitoring/praxis/03-nginx-servicemonitor.md)
 
-  1. Logging-Stack: Fluentd -> Elasticsearch
-     * [Fluentd - Grundlagen](kubernetes-monitoring/fluentd.md)
-     * [Fluentd/Kibana/Elasticsearch - Walkthrough](microk8s/fluent-kibana-elastic-mit-microk8s.md)
+  1. Logging-Stack: EFK (Elasticsearch/Fluentd/Kibana)
+     * [EFK-Stack: Aufbau, Fluentd vs. Fluent Bit, DaemonSet vs. Sidecar](kubernetes-monitoring/fluentd.md)
 
   1. Alternative: Splunk-Integration
      * [Theorie: Kubernetes mit Splunk verbinden](kubernetes-splunk/UEBERSICHT.md)
