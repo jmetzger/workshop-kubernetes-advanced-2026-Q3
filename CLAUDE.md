@@ -24,7 +24,7 @@ Tag 2: Observability, Service Mesh & GitOps) - alle Uebungen sind dort verlinkt.
 | kubernetes-networks/, kubectl/, kubectl-examples/, kubernetes-networkpolicy/, calico/, debug/, service/, metallb.md, kubernetes/ (Basis) | training-kubernetes-networking |
 | kubernetes/rbac/, kubernetes/rbac-create-user-kubernetes-1-25.md, security/ | training-kubernetes-security |
 | openbao/ | training-openbao-kubernetes |
-| prometheus/, prometheus-grafana/, monitoring/, kubernetes-autoscaling/, kubernetes-monitoring/, microk8s/ | training-kubernetes-monitoring |
+| prometheus/, prometheus-grafana/, monitoring/, kubernetes-autoscaling/, kubernetes-monitoring/ | training-kubernetes-monitoring |
 | istio/ (inkl. istio/argocd/) | training-istio-kubernetes |
 | tipps-tricks/, kubernetes/autoscaling.md | training-kubernetes-advanced |
 | kubernetes-splunk/ | workshop-kubernetes-advanced-2026-modul1 (anderes Training, nur Splunk-Teil uebernommen) |
