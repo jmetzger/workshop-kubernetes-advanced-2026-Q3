@@ -132,6 +132,7 @@ spec:
 kubectl apply -f .
 kubectl get pods
 kubectl get svc
+kubectl describe svc svc-nginx
 ```
 
 ```
