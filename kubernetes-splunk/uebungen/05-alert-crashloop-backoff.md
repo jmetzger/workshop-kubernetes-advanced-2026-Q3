@@ -4,35 +4,6 @@
 
 ![Vom BackOff-Zaehler zur Benachrichtigung: wie der Alert entsteht](screenshots/09-alert-flow-ueberblick.svg)
 
-Bisher habt ihr die BackOff-Events und die Fehlerursache selbst gesucht (Uebung 4). In der
-Praxis will niemand rund um die Uhr Suchen von Hand wiederholen - Splunk soll von sich aus
-Bescheid geben, wenn ein Pod ernsthaft Probleme hat.
-
-Kubernetes zaehlt jeden BackOff selbst mit: `kubectl describe pod` zeigt bei einem
-haengenden Container z.B. `Back-off restarting failed container ... (x1123 over 45m)`.
-Genau dieser Zaehler kommt auch bei uns an - als Feld `k8s.event.count` auf jedem
-`kube:events`-Event mit `k8s.event.reason=BackOff`. Ein einzelner oder ein paar wenige
-BackOffs sind normal (kurzer Netzwerk-Hickser, Pod-Neustart beim Deployment) - **viele**
-wiederholte BackOffs deuten dagegen auf ein andauerndes, echtes Problem hin. Darauf baut
-dieser Alert auf: er ueberwacht `k8s.event.count`, nicht die Anzahl der Log-Zeilen in
-einem Zeitfenster (das waere z.B. bei einem einzigen sehr langlebigen BackOff-Event, das
-Splunk nur einmal empfaengt, unzuverlaessig).
-
-**Schwellwert:** In der Uebung nutzen wir `k8s.event.count > 2`, damit der Alert
-innerhalb von unter einer Minute ausloest (der Demo-Container crasht sehr schnell). Fuer
-echten Produktionsbetrieb waere ein deutlich hoeherer Wert sinnvoller, z.B. `> 20` - sonst
-alarmiert der Alert schon bei ganz normalen, kurzen Startproblemen.
-
-**Sprache der Splunk-Web-UI:** Sie verhandelt sich ueber den `Accept-Language`-Header
-des Browsers - bei deutsch eingestelltem Browser (der Regelfall auf dem Bastion-Client)
-erscheint sie auf Deutsch, so auch hier beschrieben. Alle folgenden Schritte, Label und
-Screenshots wurden live gegen die Trainings-VM (Splunk Enterprise 10.4.2) verifiziert.
-
-**Wichtig:** Diese Splunk-Instanz laeuft auf einer Trial-Lizenz. Splunk zeigt beim
-Speichern eines geplanten Alerts die Warnung *"This scheduled search will not run
-after the Splunk Enterprise Trial License expires."* - fuer die Dauer des Trainings
-unproblematisch, aber kein Alert, der laenger als die Trial-Laufzeit ueberleben soll.
-
 ## Schritt 1: Die Suche fuer den Alert bauen
 
 Ausgangspunkt ist eine eigene, praezise Suche - nicht die aus Uebung 4, denn dort ging es
@@ -109,7 +80,10 @@ CrashLoopBackOff ist `Hoch` angemessen.
 
 ## Schritt 5: Speichern und Ergebnis pruefen
 
-**Speichern** klicken (die Trial-Lizenz-Warnung von oben ignorieren).
+**Speichern** klicken. Splunk zeigt dabei die Warnung *"This scheduled search will not
+run after the Splunk Enterprise Trial License expires."* - diese Splunk-Instanz laeuft
+auf einer Trial-Lizenz, fuer die Dauer des Trainings ist das unproblematisch, die
+Warnung also ignorieren.
 
 Ergebnis pruefen: links in der Navigation von Search & Reporting auf
 **Benachrichtigungen** - der neue Alert erscheint dort mit Status `Aktiviert` und dem

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 420" font-family="Helvetica, Arial, sans-serif" role="img" aria-label="Diagramm: kubelet zaehlt jeden BackOff selbst (k8s.event.count). Die Splunk-Suche prueft k8s.event.count>2. Beim Speichern als geplante Benachrichtigung (Cron alle 5 Minuten, Trigger Anzahl Ergebnisse>0, Einschraenkung 30 Minuten) wertet Splunk das regelmaessig aus. Ergebnis: eine ausgeloeste Benachrichtigung, sichtbar nur innerhalb von Splunk, kein E-Mail-Versand.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 260" font-family="Helvetica, Arial, sans-serif" role="img" aria-label="Diagramm: kubelet zaehlt jeden BackOff selbst (k8s.event.count). Die Splunk-Suche prueft k8s.event.count>2. Beim Speichern als geplante Benachrichtigung (Cron alle 5 Minuten, Trigger Anzahl Ergebnisse>0, Einschraenkung 30 Minuten) wertet Splunk das regelmaessig aus. Ergebnis: eine ausgeloeste Benachrichtigung, sichtbar nur innerhalb von Splunk, kein E-Mail-Versand.">
   <defs>
     <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#dc2626"/>
@@ -11,7 +11,7 @@
     </marker>
   </defs>
 
-  <rect x="0" y="0" width="980" height="420" fill="#ffffff"/>
+  <rect x="0" y="0" width="980" height="260" fill="#ffffff"/>
 
   <!-- Title -->
   <text x="490" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Vom BackOff-Zaehler zur Benachrichtigung: wie der Alert entsteht</text>
@@ -65,14 +65,4 @@
 
   <line x1="714" y1="160" x2="742" y2="160" stroke="#d97706" stroke-width="1.8" marker-end="url(#arrow-amber)"/>
   <text x="728" y="145" text-anchor="middle" font-size="9" fill="#92400e">feuert</text>
-
-  <!-- Legend / takeaway -->
-  <rect x="30" y="255" width="920" height="140" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2"/>
-  <text x="50" y="280" font-size="11.5" fill="#334155">Kubernetes zaehlt jeden Neustart selbst - Splunk beobachtet nur diesen Zaehler, es wird nicht gezaehlt,</text>
-  <text x="50" y="298" font-size="11.5" fill="#334155">wie viele Log-Zeilen in einem Zeitfenster ankommen (unzuverlaessig bei einem einzigen langlebigen Event).</text>
-  <text x="50" y="316" font-size="11.5" fill="#334155">Schwellwert &gt;2 ist bewusst niedrig fuer eine schnelle Demo - fuer echten Produktionsbetrieb waere ein</text>
-  <text x="50" y="334" font-size="11.5" fill="#334155">deutlich hoeherer Wert (z.B. &gt;20) sinnvoller, sonst alarmiert der Alert schon bei normalen Startproblemen.</text>
-  <text x="50" y="352" font-size="11.5" fill="#334155">Die Einschraenkung (30 Min) verhindert erneutes Feuern, solange derselbe Pod weiter crasht; E-Mail-Versand</text>
-  <text x="50" y="370" font-size="11.5" fill="#334155">ist auf der Trainings-VM nicht konfiguriert - die Benachrichtigung bleibt innerhalb von Splunk sichtbar.</text>
-  <text x="50" y="392" font-size="11.5" font-weight="700" fill="#166534">Kubernetes zaehlt, Splunk wertet regelmaessig aus, das Ergebnis bleibt in Splunk sichtbar.</text>
 </svg>
