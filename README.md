@@ -8,6 +8,10 @@
      * [kubectl Verbindung mit namespace einrichten](kubectl/kubectl-einrichten.md)
      * [Das Tool kubectl - Spickzettel](/kubectl/spickzettel.md)
 
+  1. MetalLB als Load-Balancer (Bare-Metal)
+     * [Kubernetes Load Balancer - metallb](metallb.md)
+     * [Feste IP beziehen](/service/feste-ip-beziehen.md)
+
   1. Kubernetes-Networking-Grundlagen
      * [Networking Internal Overview](/kubernetes-networks/networking-internal-overview.md)
      * [Cluster-CIDR, POD-CIDR und Service-CIDR](kubernetes-networks/kubernetes-cidrs.md)
@@ -16,10 +20,6 @@
      * [Ueberblick CNI-Provider](kubernetes-networks/overview.md)
      * [CNI-Provider calico einrichten](kubernetes-networks/calico/installation/install-cni.md)
      * [Weg vom Pod zum Host -> veth / calicoctl get wep](kubernetes-networks/calico/find-corresponding-interfaces.md)
-
-  1. MetalLB als Load-Balancer (Bare-Metal)
-     * [Kubernetes Load Balancer - metallb](metallb.md)
-     * [Feste IP beziehen](/service/feste-ip-beziehen.md)
 
   1. Network Policies
      * [Einfache Uebung NetworkPolicy (Standard)](kubernetes-networkpolicy/00-simple-exercises-group.md)
