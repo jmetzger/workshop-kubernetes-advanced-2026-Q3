@@ -4,13 +4,16 @@
 
 Der Vault Agent Injector arbeitet grundlegend anders als der Vault Secrets
 Operator aus der letzten Uebung: Er erzeugt **kein** Kubernetes Secret.
-Stattdessen mutiert ein Admission-Webhook jeden Pod mit der passenden
-Annotation und haengt ihm einen `vault-agent`-Init-Container plus
-`vault-agent`-Sidecar an. Der Init-Container loggt sich bei Vault ein,
-rendert das Secret als Datei in ein `emptyDir`-Volume (`/vault/secrets/...`)
-und beendet sich - der Sidecar haelt das Secret danach aktuell (Renewal,
-periodisches Re-Rendern). Die Anwendung selbst liest ganz normal eine
-lokale Datei, ohne dass ein Kubernetes Secret jemals existiert.
+Stattdessen laeuft es so ab:
+
+1. Ein Admission-Webhook mutiert jeden Pod mit der passenden Annotation:
+   Er haengt ihm einen `vault-agent`-Init-Container und einen
+   `vault-agent`-Sidecar an.
+2. Der Init-Container loggt sich bei Vault ein, rendert das Secret als
+   Datei in ein `emptyDir`-Volume (`/vault/secrets/...`) und beendet sich.
+3. Der Sidecar haelt das Secret aktuell (Renewal, periodisches Re-Rendern).
+4. Die Anwendung liest ganz normal eine lokale Datei - ein Kubernetes
+   Secret existiert zu keinem Zeitpunkt.
 
 ![Agent Injector Datenfluss](../images/agent-injector-datenfluss.svg)
 
