@@ -345,8 +345,21 @@ login_test
 
 Das Passwort kam nicht aus einem `kubectl apply`-Manifest, sondern wurde
 vom Operator live aus Vault gezogen - `refreshAfter: 60s` sorgt dafuer,
-dass eine Aenderung in Vault spaetestens nach 60 Sekunden im Cluster
-ankommt (ohne Pod-Neustart, solange nur der Secret-Inhalt gelesen wird).
+dass eine Aenderung in Vault spaetestens nach 60 Sekunden im Kubernetes
+Secret ankommt.
+
+> **Aber: MariaDB merkt von so einer Rotation nichts.** Der Chart reicht
+> das Passwort als Umgebungsvariable in den Container - und Env-Vars
+> werden nur EINMAL beim Container-Start aufgeloest. Dazu kommt: Das
+> tatsaechliche Root-Passwort liegt in den Systemtabellen der Datenbank;
+> eine Rotation in Vault aendert dort nichts. Nach 60 Sekunden aktuell
+> ist also nur das Secret-Objekt. Wer die Rotation bis in die App bringen
+> will, braucht z.B. `spec.rolloutRestartTargets` im VaultStaticSecret
+> (VSO restartet dann das StatefulSet bei jeder Secret-Aenderung) - und
+> fuer die Datenbank selbst eine Rotation auf DB-Seite (Stichwort:
+> dynamische Secrets mit der Vault Database-Engine, nicht Teil dieser
+> Uebung). In dieser Uebung wuerde ein Pod-Neustart zufaellig genuegen,
+> weil die Datenbank ohne Persistenz dabei neu initialisiert wird.
 
 ---
 
