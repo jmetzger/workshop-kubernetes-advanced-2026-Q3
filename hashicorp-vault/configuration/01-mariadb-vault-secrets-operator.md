@@ -73,9 +73,14 @@ export TLN=tln1   # Anpassen auf deinen Teilnehmernamen!
 Bevor wir irgendetwas automatisieren, schauen wir uns das Secret einmal
 direkt per CLI an - auf `client-bka` ist `vault` bereits installiert.
 
+Die Demo-Passwoerter des Trainings liegen auf `client-bka` zentral in
+`/etc/training-vault.env` - einmal sourcen, dann stehen sie als Variablen
+bereit und muessen nirgends im Klartext getippt werden:
+
 ```
+source /etc/training-vault.env
 export VAULT_ADDR=https://vault-bka.do.t3isp.de
-vault login -method=userpass username=training password="Vault-Training-2026!"
+vault login -method=userpass username=training password="$VAULT_TRAINING_PASSWORD"
 ```
 
 Erwartete Ausgabe (Auszug):
@@ -98,7 +103,7 @@ Erwartete Ausgabe (Auszug):
 ====== Data ======
 Key         Value
 ---         -----
-password    MariaDB-Training-2026!
+password    <das-mariadb-demo-passwort>
 username    root
 ```
 
@@ -333,7 +338,8 @@ kubectl -n default rollout status statefulset/mariadb-vso
 ## Schritt 9: Verifikation - Login-Test
 
 ```
-kubectl exec -n default mariadb-vso-0 -- bash -c 'mariadb -uroot -p"MariaDB-Training-2026!" -e "SELECT 1 AS login_test;"'
+source /etc/training-vault.env
+kubectl exec -n default mariadb-vso-0 -- mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SELECT 1 AS login_test;"
 ```
 
 Erwartete Ausgabe:
@@ -348,13 +354,9 @@ vom Operator live aus Vault gezogen - `refreshAfter: 60s` sorgt dafuer,
 dass eine Aenderung in Vault spaetestens nach 60 Sekunden im Kubernetes
 Secret ankommt.
 
-> **Aber: MariaDB merkt von so einer Rotation nichts.** Der Chart reicht
-> das Passwort als Umgebungsvariable in den Container - und Env-Vars
-> werden nur EINMAL beim Container-Start aufgeloest. Dazu kommt: Das
-> tatsaechliche Root-Passwort liegt in den Systemtabellen der Datenbank;
-> eine Rotation in Vault aendert dort nichts. Nach 60 Sekunden aktuell
-> ist also nur das Secret-Objekt. Was man dagegen tun kann, zeigt der
-> Bonus-Schritt direkt hier drunter.
+> **Aber: MariaDB merkt davon nichts.** Der Container liest das Passwort
+> nur einmal beim Start als Umgebungsvariable - eine Rotation erreicht
+> die App erst mit einem Neustart (siehe Bonus in Schritt 10).
 
 ---
 
@@ -404,6 +406,13 @@ Die Kette laeuft ab jetzt automatisch durch:
 4. Der neue Pod liest die Umgebungsvariable frisch und kennt das neue
    Passwort
 
+> **Trainer-Hinweis - so wird zentral rotiert:** Auf dem Vault-Server mit
+> Admin-Token anmelden und
+> `vault kv put secret/mariadb username=root password='<neuer-wert>'`
+> ausfuehren - bei allen Teilnehmern folgen Secret-Update und
+> Auto-Restart. Danach auf demselben Weg den Demo-Wert aus
+> `/etc/training-vault.env` wiederherstellen.
+
 Beobachten, waehrend der Trainer rotiert:
 
 ```
@@ -419,20 +428,11 @@ mariadb-vso-0   0/1     Pending       0          0s
 mariadb-vso-0   1/1     Running       0          31s
 ```
 
-> **Wichtig: Das loest das eigentliche Problem noch NICHT.** Der
-> automatische Neustart tauscht nur das Passwort aus, das die App
-> uebergeben bekommt. Das Passwort, das die Datenbank tatsaechlich
-> akzeptiert, liegt in ihren Systemtabellen - und dort aendert ein
-> Pod-Neustart gar nichts. Dass der Test in dieser Uebung trotzdem
-> funktioniert, ist ein Sonderfall: Ohne Persistenz startet die MariaDB
-> beim Pod-Neustart leer und initialisiert sich mit dem neuen Passwort
-> einfach neu. Eine echte Datenbank mit persistenten Daten wuerde nach
-> dem Restart weiter das ALTE Passwort verlangen, waehrend App und
-> Secret schon das neue kennen - Login kaputt. Echte Rotation heisst:
-> Datenbank und Vault im Gleichschritt aendern. Genau dafuer gibt es die
-> Vault **Database Secrets Engine** (static roles bzw. dynamische
-> Secrets), die per `ALTER USER` direkt in der Datenbank rotiert - das
-> sprengt diese Uebung, ist aber das Stichwort fuer die Praxis.
+> **Wichtig: Das loest das eigentliche Problem noch nicht.** Der Neustart
+> bringt das neue Passwort nur bis zur App - in den Systemtabellen der
+> Datenbank rotiert dabei nichts (hier klappt es nur, weil die DB ohne
+> Persistenz leer neu startet). Echte Rotation - Datenbank und Vault im
+> Gleichschritt - macht die Vault **Database Secrets Engine**.
 
 ---
 
