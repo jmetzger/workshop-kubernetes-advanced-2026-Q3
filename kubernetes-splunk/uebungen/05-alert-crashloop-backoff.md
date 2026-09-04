@@ -2,6 +2,8 @@
 
 ## Hintergrund
 
+![Vom BackOff-Zaehler zur Benachrichtigung: wie der Alert entsteht](screenshots/09-alert-flow-ueberblick.svg)
+
 Bisher habt ihr die BackOff-Events und die Fehlerursache selbst gesucht (Uebung 4). In der
 Praxis will niemand rund um die Uhr Suchen von Hand wiederholen - Splunk soll von sich aus
 Bescheid geben, wenn ein Pod ernsthaft Probleme hat.
