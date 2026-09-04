@@ -12,6 +12,8 @@ und beendet sich - der Sidecar haelt das Secret danach aktuell (Renewal,
 periodisches Re-Rendern). Die Anwendung selbst liest ganz normal eine
 lokale Datei, ohne dass ein Kubernetes Secret jemals existiert.
 
+![Agent Injector Datenfluss](../images/agent-injector-datenfluss.svg)
+
 | Aspekt | VSO (letzte Uebung) | Agent Injector (diese Uebung) |
 |---|---|---|
 | Kubernetes Secret? | Ja (`mariadb-vault-secret`) | **Nein** - nie |
