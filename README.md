@@ -37,14 +37,10 @@
      * [Praktische Uebung: User mit Zertifikat anlegen (kubeconfig)](kubernetes/rbac/create-kubeconfig-with-cert.md)
      * [Praktische Uebung RBAC (ab Kubernetes 1.25)](kubernetes/rbac-create-user-kubernetes-1-25.md)
 
-  1. Secrets Management mit HashiCorp Vault / OpenBao
+  1. Secrets Management mit HashiCorp Vault
      * [HashiCorp Vault als Password-Safe (Overview)](security/hashicorp-vault/overview.md)
-     * [Architektur-Ueberblick OpenBao](openbao/overview.md)
-     * [Was sind Secret-Engines?](openbao/secret-engines.md)
-     * [Server-Installation: Standalone hinter nginx Reverse Proxy](openbao/installation/standalone.md)
-     * [User/Gruppe fuer Passwort-Authentifizierung aufsetzen](openbao/configuration/01-setup-userpass-for-user-with-group.md)
-     * [Uebung Operator-Variante: MariaDB-Deployment mit Vault Secrets Operator (VSO)](openbao/configuration/02-kubernetes-to-openbao-eso-secrets.md)
-     * [Uebung: MariaDB-Deployment mit echtem HashiCorp Vault ueber den Vault Secrets Operator (VSO)](hashicorp-vault/configuration/01-mariadb-vault-secrets-operator.md)
+     * [Vault-Architektur einfach erklaert](hashicorp-vault/architektur-einfach-erklaert.md)
+     * [Uebung: MariaDB-Deployment mit HashiCorp Vault ueber den Vault Secrets Operator (VSO)](hashicorp-vault/configuration/01-mariadb-vault-secrets-operator.md)
      * [Uebung: MariaDB-Deployment mit dem Vault Agent Injector](hashicorp-vault/configuration/02-mariadb-vault-agent-injector.md)
 
   1. Workload-Skalierung
