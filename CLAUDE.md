@@ -47,6 +47,8 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
   (`security/hashicorp-vault/`, `hashicorp-vault/`) mit VSO- und
   Agent-Injector-Uebung gegen den zentralen Vault-Trainingsserver.
 - README-Punkt "Abschluss" hat bewusst keine Links (freier Teil).
+- PDF-Workflow-Lauf steht aus: README.pdf/_README.md enthalten noch
+  OpenBao-Inhalte (aber keine Passwoerter).
 - NFS-basierte StorageClass fuer die kubeadm-Trainingscluster (in-Cluster
   NFS-Server vs. zentraler Droplet pro Training) noch nicht entschieden.
   Aktuelle Uebungen (z.B. gitops/flux/05-oci-helm-chart.md) umgehen das
@@ -80,6 +82,33 @@ Trainings-Passwort) zentral im privaten Auth-Repo und per `.env.sources`-Mapping
 eingebunden (siehe security-Skill). `.env`/`.env.enc` stehen in `.gitignore`,
 falls doch mal kurzzeitig eine Klartext-`.env` hier landet (z.B. zum
 Token-Uebergeben) - danach wieder loeschen, niemals committen.
+
+### Vault-Demo-Passwoerter (Uebungskapitel hashicorp-vault/)
+
+Die Demo-Werte der Vault-Uebungen (userpass-User `training`,
+`secret/mariadb`) stehen bewusst NICHT in den Anleitungen - die Uebungen
+sourcen `/etc/training-vault.env` auf dem Bastion-Client. Die Datei wird
+per Cloud-Init aus dem privaten Skills-Repo provisioniert
+(`training-client-doks-cluster/templates/k8s-client.sh`, Phase 10.6).
+
+Historie: Die Werte standen frueher im Klartext in diesem (public) Repo;
+am 04.09.2026 wurden sie per `git filter-repo` aus der History entfernt
+und anschliessend rotiert - erst die Rotation macht so einen Scrub
+wirksam (alte Werte bleiben ueber verwaiste PR-Commits/Clones abrufbar).
+
+Bei kuenftiger Rotation gibt es 4 Sync-Stellen: Vault userpass,
+Vault-KV `secret/mariadb`, `/etc/training-vault.env` auf dem laufenden
+Bastion, Cloud-Init-Template im Skills-Repo. Learnings:
+
+- userpass-Passwort ueber den dedizierten Endpoint
+  `auth/userpass/users/<user>/password` rotieren - ein Voll-Write auf
+  `auth/userpass/users/<user>` setzt sonst die Policies des Users zurueck.
+- Der Vault Secrets Operator zieht die Aenderung an `secret/mariadb`
+  binnen `refreshAfter` (60s) und restartet MariaDB automatisch via
+  `rolloutRestartTargets` (Annotation
+  `vso.secrets.hashicorp.com/restartedAt` am Pod-Template) - der
+  Login-Test aus der Uebung laeuft danach ohne manuelles Zutun.
+  Ein Rotations-Durchstich ist damit in <2 min end-to-end testbar.
 
 ## Konventionen (Kurzfassung Skill workshop-training)
 
