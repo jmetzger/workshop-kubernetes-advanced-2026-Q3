@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 780" font-family="Arial, Helvetica, sans-serif">
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#57606a"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8250df"/>
+    </marker>
+  </defs>
+
+  <!-- Hintergrund -->
+  <rect x="1" y="1" width="898" height="778" rx="14" fill="#ffffff" stroke="#d0d7de"/>
+
+  <!-- Titel -->
+  <text x="450" y="42" text-anchor="middle" font-size="21" font-weight="bold" fill="#24292f">Ueberblick: Vault Secrets Operator (VSO)</text>
+  <text x="450" y="66" text-anchor="middle" font-size="13" fill="#57606a">Vom zentralen Vault-Server bis zum MariaDB-Pod - in vier Schritten</text>
+
+  <!-- Vault-Server -->
+  <rect x="160" y="90" width="280" height="130" rx="10" fill="#fff8c5" stroke="#9a6700" stroke-width="2"/>
+  <text x="300" y="118" text-anchor="middle" font-size="16" font-weight="bold" fill="#24292f">Vault-Server (gemeinsam)</text>
+  <text x="300" y="138" text-anchor="middle" font-size="12" fill="#57606a">vault-bka.do.t3isp.de</text>
+  <rect x="185" y="152" width="230" height="50" rx="6" fill="#ffffff" stroke="#9a6700"/>
+  <text x="300" y="173" text-anchor="middle" font-size="13" font-weight="bold" fill="#24292f">secret/mariadb</text>
+  <text x="300" y="192" text-anchor="middle" font-size="12" fill="#57606a">username + password</text>
+
+  <!-- Pfeil 1: Login (hoch) -->
+  <line x1="250" y1="318" x2="250" y2="226" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="235" y="258" text-anchor="end" font-size="12" font-weight="bold" fill="#24292f">1) Login: Kubernetes-Auth</text>
+  <text x="235" y="276" text-anchor="end" font-size="11.5" fill="#57606a">Mount kubernetes-&lt;tln&gt;, Rolle mariadb</text>
+
+  <!-- Pfeil 2: Secret lesen (runter) -->
+  <line x1="350" y1="226" x2="350" y2="318" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="365" y="258" font-size="12" font-weight="bold" fill="#24292f">2) VSO liest secret/mariadb</text>
+  <text x="365" y="276" font-size="11.5" fill="#57606a">alle 60s (refreshAfter)</text>
+
+  <!-- Cluster -->
+  <rect x="60" y="280" width="780" height="470" rx="12" fill="#f6f8fa" stroke="#57606a" stroke-width="2"/>
+  <text x="680" y="310" text-anchor="middle" font-size="15" font-weight="bold" fill="#24292f">Dein Kubernetes-Cluster</text>
+
+  <!-- VSO-Controller -->
+  <rect x="160" y="320" width="280" height="90" rx="10" fill="#ddf4ff" stroke="#0969da" stroke-width="2"/>
+  <text x="300" y="355" text-anchor="middle" font-size="15" font-weight="bold" fill="#0a3069">VSO-Controller</text>
+  <text x="300" y="378" text-anchor="middle" font-size="11.5" fill="#57606a">Namespace: vault-secrets-operator</text>
+
+  <!-- CR-Panel -->
+  <rect x="520" y="330" width="290" height="280" rx="10" fill="#fbefff" stroke="#8250df" stroke-dasharray="6 4"/>
+  <text x="665" y="355" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#3e1f79">Deine Manifeste (Custom Resources)</text>
+
+  <rect x="540" y="368" width="250" height="56" rx="6" fill="#ffffff" stroke="#8250df"/>
+  <text x="665" y="390" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#24292f">VaultConnection</text>
+  <text x="665" y="408" text-anchor="middle" font-size="11.5" fill="#57606a">Adresse des Vault-Servers</text>
+
+  <rect x="540" y="436" width="250" height="72" rx="6" fill="#ffffff" stroke="#8250df"/>
+  <text x="665" y="458" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#24292f">VaultAuth</text>
+  <text x="665" y="476" text-anchor="middle" font-size="11" fill="#57606a">Mount kubernetes-&lt;tln&gt;, Rolle mariadb</text>
+  <text x="665" y="492" text-anchor="middle" font-size="11" fill="#57606a">ServiceAccount mariadb-sa</text>
+
+  <rect x="540" y="520" width="250" height="72" rx="6" fill="#ffffff" stroke="#8250df"/>
+  <text x="665" y="542" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#24292f">VaultStaticSecret</text>
+  <text x="665" y="560" text-anchor="middle" font-size="11" fill="#57606a">liest secret/mariadb, Ziel-Secret</text>
+  <text x="665" y="576" text-anchor="middle" font-size="11" fill="#57606a">mariadb-vault-secret, alle 60s</text>
+
+  <!-- Pfeil CR-Panel -> Controller -->
+  <line x1="516" y1="375" x2="446" y2="375" stroke="#8250df" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-purple)"/>
+  <text x="481" y="395" text-anchor="middle" font-size="10.5" fill="#8250df">konfiguriert</text>
+
+  <!-- Pfeil 3: Secret schreiben -->
+  <line x1="300" y1="414" x2="300" y2="470" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="315" y="447" font-size="11.5" font-weight="bold" fill="#24292f">3) schreibt/aktualisiert Secret</text>
+
+  <!-- Kubernetes Secret -->
+  <rect x="160" y="474" width="280" height="76" rx="10" fill="#dafbe1" stroke="#1a7f37" stroke-width="2"/>
+  <text x="300" y="503" text-anchor="middle" font-size="15" font-weight="bold" fill="#0f5323">Kubernetes Secret</text>
+  <text x="300" y="525" text-anchor="middle" font-size="11.5" fill="#57606a">mariadb-vault-secret (username, password)</text>
+
+  <!-- Pfeil 4: Pod konsumiert -->
+  <line x1="300" y1="554" x2="300" y2="610" stroke="#57606a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="315" y="587" font-size="11.5" font-weight="bold" fill="#24292f">4) Root-Passwort (existingSecret)</text>
+
+  <!-- MariaDB-Pod -->
+  <rect x="160" y="614" width="280" height="80" rx="10" fill="#ffffff" stroke="#57606a" stroke-width="2"/>
+  <text x="300" y="644" text-anchor="middle" font-size="15" font-weight="bold" fill="#24292f">MariaDB-Pod</text>
+  <text x="300" y="666" text-anchor="middle" font-size="11.5" fill="#57606a">Helm-Chart cloudpirates/mariadb</text>
+
+  <!-- Fussnote -->
+  <text x="450" y="770" text-anchor="middle" font-size="12" font-style="italic" fill="#57606a">Die App weiss nichts von Vault - sie liest ein ganz normales Kubernetes Secret.</text>
+</svg>
