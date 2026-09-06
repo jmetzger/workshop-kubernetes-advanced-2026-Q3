@@ -26,7 +26,7 @@ kubectl -n kube-system get pods
     fuer die apply-Annotation
 
 ```
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.31.2/manifests/tigera-operator.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.32.2/manifests/tigera-operator.yaml
 ```
 
 ```
@@ -41,7 +41,7 @@ kubectl -n tigera-operator get pods
     kubeadm-Setup (`--pod-network-cidr=192.168.0.0/16`)
 
 ```
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.31.2/manifests/custom-resources.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.32.2/manifests/custom-resources.yaml
 ```
 
 ## Schritt 4: Zuschauen, wie das Cluster "heile" wird
