@@ -18,6 +18,46 @@ This code defines a simple index.php page that performs some CPU intensive compu
 ?>
 ```
 
+## Schritt 1: Metrics-Server installieren (Voraussetzung)
+
+  * Der HorizontalPodAutoscaler braucht die Metrics API (metrics-server), um die CPU-Auslastung der Pods auszulesen.
+  * Auf unseren kubeadm-Trainingsclustern ist der metrics-server NICHT vorinstalliert.
+  * Ohne ihn zeigt `kubectl get hpa` beim TARGET dauerhaft `<unknown>` und es wird nie skaliert.
+
+```
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+helm repo update
+```
+
+```
+cd
+mkdir -p helm-charts/metrics-server
+cd helm-charts/metrics-server
+nano values.yml
+```
+
+```
+# Die kubelets im Trainingscluster nutzen selbst-signierte Zertifikate,
+# daher braucht der metrics-server dieses Flag
+args:
+  - --kubelet-insecure-tls
+```
+
+```
+helm -n kube-system upgrade --install metrics-server metrics-server/metrics-server --version 3.13.0 -f values.yml
+```
+
+```
+# Pruefen - dauert ca. 1 Minute, bis der Pod Ready ist
+kubectl -n kube-system get pods | grep metrics-server
+```
+
+```
+# Sobald er Ready ist, liefert die Metrics API Daten:
+kubectl top nodes
+kubectl top pods -A
+```
+
 ## Walkthrough 
 
 ```
@@ -70,7 +110,8 @@ kubectl apply -f 01-php-apache-deploy.yml
 
 ```
 # autoscaler erstellen
-kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+# (--cpu-percent=50 ist deprecated, aktuelle Syntax:)
+kubectl autoscale deployment php-apache --cpu=50% --min=1 --max=10
 kubectl get hpa 
 kubectl get hpa -o yaml 
 

@@ -86,7 +86,7 @@ kind: Pod
 metadata:
   name: nginx-pausetest
   labels:
-    webserver: nginx:1.21
+    webserver: nginx
 spec:
   containers:
   - name: web

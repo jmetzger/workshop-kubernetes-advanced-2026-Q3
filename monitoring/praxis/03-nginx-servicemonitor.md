@@ -2,7 +2,7 @@
 
 ## Voraussetzung:
 
-  * kube-prometheus-stack muss installiert sein -> [Kube-Prometheus-Stack installieren](prometheus-grafana/prometheus-grafana/install-with-helm-letsencrypt-basic-auth.md)
+  * kube-prometheus-stack muss installiert sein -> [Kube-Prometheus-Stack installieren](../../prometheus-grafana/prometheus-grafana/install-with-helm-traefik-letsencrypt-basic-auth.md)
 
 
 ## 🔧 Vorbereitung: Verzeichnisstruktur anlegen

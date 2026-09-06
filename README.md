@@ -8,6 +8,9 @@
      * [kubectl Verbindung mit namespace einrichten](kubectl/kubectl-einrichten.md)
      * [Das Tool kubectl - Spickzettel](/kubectl/spickzettel.md)
 
+  1. Cluster startklar machen: CNI installieren
+     * [Uebung: CNI-Provider Calico installieren](kubernetes-networks/calico/installation/install-cni.md)
+
   1. MetalLB als Load-Balancer (Bare-Metal)
      * [Kubernetes Load Balancer - metallb](metallb.md)
      * [Feste IP beziehen](/service/feste-ip-beziehen.md)
@@ -18,12 +21,10 @@
      * [Wann wird die PodIP vergeben?](kubectl/run-with-example.md)
      * [CNI - Wie funktioniert das unter der Haube](/kubernetes/internals/cni.md)
      * [Ueberblick CNI-Provider](kubernetes-networks/overview.md)
-     * [CNI-Provider calico einrichten](kubernetes-networks/calico/installation/install-cni.md)
      * [Weg vom Pod zum Host -> veth / calicoctl get wep](kubernetes-networks/calico/find-corresponding-interfaces.md)
 
   1. Network Policies
      * [Einfache Uebung NetworkPolicy (Standard)](kubernetes-networkpolicy/00-simple-exercises-group.md)
-     * [Beispiel mit ipBlock](kubernetes-networkpolicy/01-example-from-ipblock.md)
      * [Warum Calico-Policies statt Standard-NetworkPolicy?](kubernetes-networkpolicy/calico/00-warum-calico-policies.md)
      * [Calico-Policies - Grundlagen (Ordering, Implicit Deny, API-Version)](kubernetes-networkpolicy/calico/01-overview.md)
      * [Erweiterte Policies mit Calico - Uebung](kubernetes-networkpolicy/calico/02-exercise-calico.md)
@@ -52,7 +53,7 @@
 
   1. Monitoring mit Prometheus
      * [Prometheus Monitoring Server (Overview)](prometheus/overview.md)
-     * [Prometheus/Grafana-Stack installieren mit helm](prometheus-grafana/prometheus-grafana/install-with-helm-letsencrypt-basic-auth.md)
+     * [Prometheus/Grafana-Stack installieren mit helm (Traefik + Letsencrypt)](prometheus-grafana/prometheus-grafana/install-with-helm-traefik-letsencrypt-basic-auth.md)
      * [Uebung: nginx mit ServiceMonitor und Exporter (Sidecar)](monitoring/praxis/03-nginx-servicemonitor.md)
 
   1. Logging-Stack: EFK (Elasticsearch/Fluentd/Kibana)

@@ -59,8 +59,8 @@ kubectl get node k8s-nue-jo-ff1p1 -o=jsonpath='{.metadata.labels}'
 
 ```
 # Start einen pod // BESSER: direkt manifest verwenden
-# kubectl run podname image=imagename 
-kubectl run nginx image=nginx 
+# kubectl run podname --image=imagename 
+kubectl run nginx --image=nginx 
 
 # Pods anzeigen 
 kubectl get pods 
