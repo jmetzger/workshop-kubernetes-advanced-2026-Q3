@@ -12,10 +12,49 @@ Tag 2: Observability, Service Mesh & GitOps) - alle Uebungen sind dort verlinkt.
 
 ## Trainingsumgebung
 
-- Jeder Teilnehmer hat in diesem Modul ein EIGENES Cluster.
+- Jeder Teilnehmer hat in diesem Modul ein EIGENES kubeadm-Cluster auf
+  DigitalOcean (1 CP + 3 Worker, Skill `training-kubeadm-cluster`, IaC-Repo
+  training-do-opentofu-ansible-kubeadm, Branch feature/multi-cluster-ansible).
+- **Cluster werden OHNE CNI provisioniert** (`INSTALL_CNI=false` beim
+  create-clusters.sh): Nodes sind absichtlich NotReady, die Teilnehmer
+  installieren Calico selbst in der ersten Uebung (Lerneffekt). Provisionieren
+  also IMMER mit `INSTALL_CNI=false`.
+- Kein Cloud-LoadBalancer, keine garantierte StorageClass. LoadBalancer-Services
+  brauchen MetalLB (eigene Uebung Tag 1; Pool = die oeffentlichen Node-IPs).
 - Namespaces in Uebungen daher fest (ohne `<dein-name>`-Suffix) moeglich;
   Uebungen aus geteilten Quell-Repos nutzen teils `<prefix>-<dein-name>` - beides ok.
-- Zugang per Putty/SSH oder Chrome (Guacamole) auf Bastion-Client.
+- Zugang per Putty/SSH oder Chrome (Guacamole) auf Bastion-Client
+  (`client-bka.do.t3isp.de`, bleibt bei Cluster-Abbau stehen).
+
+## Stand 06.09.2026 - Uebungs-Review & Umbauten (getestet auf tln1/tln2)
+
+Kompletter statischer Review aller ungetesteten Uebungen (Befundliste liegt
+untracked in `REVIEW-BEFUNDE-2026-09-06.md`, nicht committen). Umgesetzt und auf
+echten kubeadm-Clustern getestet:
+
+- **CNI-Uebung** (`kubernetes-networks/calico/installation/install-cni.md`):
+  neu als echtes Hands-on (TN installieren Calico v3.32.2 selbst), in der Agenda
+  VOR MetalLB (ohne CNI startet kein MetalLB-Pod). Pod-CIDR 192.168.0.0/16.
+- **HPA-Uebung** (`kubernetes-autoscaling/hpa.md`): installiert jetzt den
+  metrics-server (auf kubeadm nicht vorhanden), `--kubelet-insecure-tls`;
+  `kubectl autoscale --cpu=50%` (nicht mehr --cpu-percent).
+- **Prometheus-Stack**: neue Uebung
+  `prometheus-grafana/prometheus-grafana/install-with-helm-traefik-letsencrypt-basic-auth.md`
+  mit Traefik + Letsencrypt (http01 funktioniert ueber MetalLB, da Pool =
+  oeffentliche Node-IPs) + basic-auth via Traefik-Middleware. Ersetzt die alte
+  nginx-Variante (bleibt unverlinkt liegen). StorageClass optional (nur wenn da).
+- **Wildcard-DNS**: `scripts/create-wildcard-dns.sh` - TN legt
+  `*.<tln>.do.t3isp.de` selbst an (Name automatisch = Login-User; nur IP
+  uebergeben). Token aus `/etc/training-dns.env` (Key `DO_DNS_TOKEN`, scoped
+  domain-only). Wird per Cloud-Init auf den Bastion getemplatet (Skill
+  training-client-doks-cluster, Template Phase 10.7 + create-client.sh, Wert
+  aus `$DO_DNS_TOKEN`). Der scoped Token liegt im Auth-Repo als
+  `DO_DNS_TOKEN_T3COMPANY_TRAINING` (99-auth/digitalocean/.env.enc).
+- **ipBlock-Uebung entfernt** (SNAT/NodePort nicht durchfuehrbar), spickzettel
+  `kubectl run --image=` gefixt, Label `nginx:1.21`->`nginx`.
+- Noch OFFEN (aus dem Review): `service/feste-ip-beziehen.md` (Datei-Kollision
+  mit metallb.md, spec.loadBalancerIP deprecated) und Istio-Install
+  (`downloadIstio` ungepinnt vs. fester 1.28-Pfad). Details in der Befund-Datei.
 
 ## Woher die Inhalte kommen (Stand 31.08.2026)
 
