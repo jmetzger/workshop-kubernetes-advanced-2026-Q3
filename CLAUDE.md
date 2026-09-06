@@ -56,6 +56,29 @@ echten kubeadm-Clustern getestet:
   mit metallb.md, spec.loadBalancerIP deprecated) und Istio-Install
   (`downloadIstio` ungepinnt vs. fester 1.28-Pfad). Details in der Befund-Datei.
 
+## Stand 06.09.2026 - DOKS-Cluster fuer Basics-Modul + Bastion-Zustand
+
+Das Basics-Modul (Schwester-Repo) startet Mo 08.09.2026, 13:00. Dafuer am
+06.09. mittags angelegt (Skill training-client-doks-cluster):
+
+- **DOKS-Cluster `bka-training`** laeuft: fra1, 3x s-4vcpu-8gb, v1.35.7-do.3,
+  kein HA-Control-Plane (~5 USD/Tag, kostet ab sofort!). Abbau nach dem
+  Training: `destroy-doks-cluster.sh bka` - der Bastion bleibt dabei stehen.
+- **Kubeconfig** auf dem Bastion unter `/tmp/config` (chmod 644, fuer alle
+  tln lesbar). Smoke-Test als tln2 gruen (3 Nodes Ready), danach tln2s
+  `~/.kube` wieder geloescht - Teilnehmer starten sauber.
+- **tln1s kubeadm-Config gesichert** (der Advanced-Testcluster tln1 laeuft
+  weiter, aktive Config unangetastet, Context `kubeadm-bka`):
+  `~tln1/.kube/config.kubeadm-backup-20260906` und
+  `/root/backup-kube/tln1-config-kubeadm-20260906` (uebersteht auch ein
+  `rm -rf ~/.kube` durch den Teilnehmer).
+- `doctl` ist lokal NICHT dauerhaft authentifiziert - DO_TOKEN kommt per
+  sops-Decrypt aus `99-auth/digitalocean/.env.enc`
+  (Key `DO_TOKEN_T3COMPANY_TRAINING`); der inject_env-Hook greift nur im
+  Session-CWD, daher Wrapper-Script mit `set -a; source; set +a` noetig.
+- Der Bastion akzeptiert `~/.ssh/id_ed25519_nopass` (aeltere Notiz
+  "Key wird abgelehnt" ist seit der Neuprovisionierung ueberholt).
+
 ## Woher die Inhalte kommen (Stand 31.08.2026)
 
 | Verzeichnis | Quelle |
