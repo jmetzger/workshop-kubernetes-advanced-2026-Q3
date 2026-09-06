@@ -75,8 +75,9 @@ kubectl -n traefik get svc traefik
 curl -sO https://raw.githubusercontent.com/jmetzger/workshop-kubernetes-advanced-2026-Q3/main/scripts/create-wildcard-dns.sh
 chmod +x create-wildcard-dns.sh
 
+# Name wird automatisch aus deinem Login-User gesetzt (z.B. tln1)
 # <traefik-ip> = EXTERNAL-IP aus Schritt 2
-./create-wildcard-dns.sh <du> <traefik-ip>
+./create-wildcard-dns.sh <traefik-ip>
 ```
 
 ```

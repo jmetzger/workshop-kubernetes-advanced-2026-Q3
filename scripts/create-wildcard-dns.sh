@@ -3,15 +3,26 @@
 # IP (DigitalOcean-DNS) - oder aktualisiert ihn, falls er schon existiert.
 # Wird in der Traefik/Letsencrypt-Uebung verwendet.
 #
-# Usage:    create-wildcard-dns.sh <dein-name> <ip>
-# Beispiel: create-wildcard-dns.sh tln5 165.22.73.43
+# Usage:    create-wildcard-dns.sh <ip>              (Name = aktueller Login-User)
+#           create-wildcard-dns.sh <dein-name> <ip>  (Name explizit angeben)
+# Beispiel: create-wildcard-dns.sh 165.22.73.43      (als tln5 -> *.tln5...)
+#           create-wildcard-dns.sh tln5 165.22.73.43
 #
 # Token kommt aus /etc/training-dns.env (DO_DNS_TOKEN=..., stellt der
 # Trainer bereit) oder aus einer bereits gesetzten Umgebungsvariable.
 set -euo pipefail
 
-NAME="${1:?Usage: create-wildcard-dns.sh <dein-name> <ip>}"
-IP="${2:?Usage: create-wildcard-dns.sh <dein-name> <ip>}"
+# Name ist optional: ohne Angabe der eingeloggte User (z.B. tln1)
+if [ $# -eq 1 ]; then
+  NAME="$(id -un)"
+  IP="$1"
+elif [ $# -eq 2 ]; then
+  NAME="$1"
+  IP="$2"
+else
+  echo "Usage: create-wildcard-dns.sh [<dein-name>] <ip>" >&2
+  exit 1
+fi
 DOMAIN="do.t3isp.de"
 API="https://api.digitalocean.com/v2/domains/$DOMAIN/records"
 
