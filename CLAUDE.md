@@ -58,7 +58,7 @@ echten kubeadm-Clustern getestet:
 
 ## Stand 06.09.2026 - DOKS-Cluster fuer Basics-Modul + Bastion-Zustand
 
-Das Basics-Modul (Schwester-Repo) startet Mo 08.09.2026, 13:00. Dafuer am
+Das Basics-Modul (Schwester-Repo) startet Mo 07.09.2026, 13:00. Dafuer am
 06.09. mittags angelegt (Skill training-client-doks-cluster):
 
 - **DOKS-Cluster `bka-training`** laeuft: fra1, 3x s-4vcpu-8gb, v1.35.7-do.3,
