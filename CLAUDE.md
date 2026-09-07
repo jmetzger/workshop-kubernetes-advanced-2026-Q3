@@ -111,10 +111,15 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
 - README-Punkt "Abschluss" hat bewusst keine Links (freier Teil).
 - PDF-Workflow-Lauf steht aus: README.pdf/_README.md enthalten noch
   OpenBao-Inhalte (aber keine Passwoerter).
-- NFS-basierte StorageClass fuer die kubeadm-Trainingscluster (in-Cluster
-  NFS-Server vs. zentraler Droplet pro Training) noch nicht entschieden.
-  Aktuelle Uebungen (z.B. gitops/flux/05-oci-helm-chart.md) umgehen das
-  bewusst mit `persistence.enabled: false`.
+- NFS-Storage: am 07.09.2026 entschieden - EIN zentraler NFS-Droplet pro
+  Training (Skill training-kubeadm-cluster, `create-nfs-server.sh` /
+  `destroy-nfs-server.sh`). `nfs-bka` laeuft (privat 10.135.0.5, kostet
+  Geld; wird von destroy-clusters.sh NICHT mit abgebaut). Die zugehoerige
+  Uebung (`kubernetes-csi/nfs-exercise.md`) gehoert zum BASICS-Modul
+  (Schwester-Repo, dort in der Agenda; auf DOKS + kubeadm getestet) -
+  in DIESEM Modul bewusst keine Storage-Uebung, Uebungen mit PVC-Bedarf
+  bleiben bei `persistence.enabled: false` (z.B. gitops/flux/05,
+  Vault-MariaDB).
 
 ## GitOps-Kapitel (Tag 2) - FluxCD
 
