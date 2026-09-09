@@ -21,8 +21,9 @@ helm repo add metallb https://metallb.github.io/metallb
 ```
 
 ```
-# reset-values, always reset values on upgrade 
-helm upgrade --install metallb metallb/metallb --namespace=metallb-system --create-namespace --version 0.15.2 --reset-values
+# reset-values, always reset values on upgrade
+# Attention: 0.16.1 is buggy, operator fires a lot of api-calls to the kube-api-server -> do not use before fix 
+helm upgrade --install metallb metallb/metallb --namespace=metallb-system --create-namespace --version 0.15.3 --reset-values
 ```
 
 ## Step 2: addresspool
