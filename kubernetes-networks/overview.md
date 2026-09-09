@@ -110,7 +110,7 @@ Typha maintains a single datastore connection on behalf of all of its clients li
 ### calicoctl
 
   * Wird heute selten gebraucht, da das meiste heute mit kubectl über den Calico API Server realisiert werden kann
-  * Früher haben die neuesten NetworkPolicies/v3 nur über calioctl funktioniert 
+  * Früher haben die neuesten NetworkPolicies/v3 nur über calicoctl funktioniert 
 
 ### Generell 
 
