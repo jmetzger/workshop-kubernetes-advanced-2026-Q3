@@ -12,7 +12,7 @@
   * Calico 
   * Cilium
   * Antrea (vmware)
-  * Weave Net 
+
   
 ## Flannel
 
