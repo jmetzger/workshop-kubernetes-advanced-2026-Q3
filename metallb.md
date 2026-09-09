@@ -117,8 +117,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-nginx
-  labels:
-    svc: nginx
 spec:
   type: LoadBalancer
   ports:
