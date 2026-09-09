@@ -128,10 +128,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-nginx2
+  annotations:
+    # spec.loadBalancerIP is deprecated since 1.24 - use a provider-specific
+    # annotation instead, e.g. metallb.io/loadBalancerIPs for MetalLB
+    metallb.io/loadBalancerIPs: 10.34.12.34
 spec:
   type: LoadBalancer
-  # this line to get a specific ip if supported
-  loadBalancerIP: 10.34.12.34
   ports:
   - port: 80
     protocol: TCP
