@@ -5,11 +5,6 @@
   * Common Network Interface
   * Feste Definition, wie Pod  mit Netzwerk-Bibliotheken kommunizieren
 
-## Docker - Container oder andere 
-
-  * Pod (Pause Container) wird hochgefahren -> über CNI -> zieht Netzwerk - IP  hoch. 
-  * Pod (Pause Container) witd runtergahren -> uber CNI -> Netzwerk - IP wird released 
-
 ## Welche gibt es ? 
 
   * Flannel
