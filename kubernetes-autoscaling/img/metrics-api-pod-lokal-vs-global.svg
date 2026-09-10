@@ -1,0 +1,70 @@
+<svg viewBox="0 0 920 340" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="920" height="340" fill="#ffffff"/>
+  <text x="20" y="28" font-size="16" font-weight="bold" fill="#111827">metrics-api fragt immer nur EINEN Pod - wann ist das ein Problem?</text>
+
+  <!-- Left: pod-local -->
+  <text x="20" y="58" font-size="13" font-weight="bold" fill="#991b1b">Beispiel PHP-FPM-Worker (Pod-lokaler Zustand)</text>
+
+  <rect x="20" y="75" width="180" height="70" rx="6" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="110" y="98" font-size="12" text-anchor="middle" fill="#1e293b">Pod 1</text>
+  <text x="110" y="116" font-size="12" text-anchor="middle" fill="#991b1b" font-weight="bold">active_processes = 3</text>
+  <text x="110" y="132" font-size="10" text-anchor="middle" fill="#64748b">(eigener Prozessspeicher)</text>
+
+  <rect x="220" y="75" width="180" height="70" rx="6" fill="#fef2f2" stroke="#b91c1c"/>
+  <text x="310" y="98" font-size="12" text-anchor="middle" fill="#1e293b">Pod 2</text>
+  <text x="310" y="116" font-size="12" text-anchor="middle" fill="#991b1b" font-weight="bold">active_processes = 0</text>
+  <text x="310" y="132" font-size="10" text-anchor="middle" fill="#64748b">(eigener Prozessspeicher)</text>
+
+  <rect x="120" y="190" width="180" height="45" rx="6" fill="#dcfce7" stroke="#15803d"/>
+  <text x="210" y="217" font-size="12" text-anchor="middle" fill="#1e293b">KEDA (metrics-api)</text>
+
+  <path d="M170,190 Q140,165 110,145" stroke="#475569" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#arrow2)"/>
+  <path d="M250,190 Q280,165 310,145" stroke="#475569" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#arrow2)"/>
+  <text x="210" y="170" font-size="10" text-anchor="middle" fill="#64748b">Service waehlt zufaellig</text>
+
+  <rect x="60" y="250" width="300" height="60" rx="6" fill="#fffbeb" stroke="#d97706"/>
+  <text x="80" y="270" font-size="11" fill="#92400e">Ergebnis haengt davon ab, WELCHEN Pod der</text>
+  <text x="80" y="285" font-size="11" fill="#92400e">Service gerade trifft - 3 oder 0, nie der echte</text>
+  <text x="80" y="300" font-size="11" fill="#92400e">Fleet-Durchschnitt. Deshalb bei PHP-FPM eher</text>
+  <text x="80" y="313" font-size="11" fill="#92400e" font-style="italic">(Prometheus-Scaler statt metrics-api nutzen)</text>
+
+  <!-- divider -->
+  <line x1="460" y1="40" x2="460" y2="320" stroke="#e5e7eb" stroke-width="1"/>
+
+  <!-- Right: global -->
+  <text x="500" y="58" font-size="13" font-weight="bold" fill="#166534">Beispiel Nextcloud serverinfo (geteilter Zustand)</text>
+
+  <rect x="500" y="75" width="170" height="70" rx="6" fill="#ecfdf5" stroke="#15803d"/>
+  <text x="585" y="98" font-size="12" text-anchor="middle" fill="#1e293b">Pod 1</text>
+  <text x="585" y="116" font-size="10" text-anchor="middle" fill="#64748b">liest activeUsers</text>
+  <text x="585" y="130" font-size="10" text-anchor="middle" fill="#64748b">aus der DB</text>
+
+  <rect x="690" y="75" width="170" height="70" rx="6" fill="#ecfdf5" stroke="#15803d"/>
+  <text x="775" y="98" font-size="12" text-anchor="middle" fill="#1e293b">Pod 2</text>
+  <text x="775" y="116" font-size="10" text-anchor="middle" fill="#64748b">liest activeUsers</text>
+  <text x="775" y="130" font-size="10" text-anchor="middle" fill="#64748b">aus der DB</text>
+
+  <ellipse cx="680" cy="175" rx="70" ry="18" fill="#e0f2fe" stroke="#0369a1"/>
+  <path d="M610,175 v0" stroke="#0369a1"/>
+  <text x="680" y="180" font-size="11" text-anchor="middle" fill="#0c4a6e" font-weight="bold">DB: activeUsers = 7</text>
+
+  <path d="M585,145 V160 Q585,175 615,175" stroke="#475569" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+  <path d="M775,145 V160 Q775,175 745,175" stroke="#475569" stroke-width="1.5" fill="none" marker-end="url(#arrow2)"/>
+
+  <rect x="600" y="235" width="160" height="45" rx="6" fill="#dcfce7" stroke="#15803d"/>
+  <text x="680" y="262" font-size="12" text-anchor="middle" fill="#1e293b">KEDA (metrics-api)</text>
+
+  <path d="M650,235 Q610,205 590,145" stroke="#475569" stroke-width="1.5" fill="none" stroke-dasharray="4 3" marker-end="url(#arrow2)"/>
+  <text x="600" y="200" font-size="10" fill="#64748b">egal wer antwortet -</text>
+  <text x="600" y="213" font-size="10" fill="#64748b">immer 7</text>
+
+  <rect x="500" y="285" width="360" height="45" rx="6" fill="#fffbeb" stroke="#d97706"/>
+  <text x="520" y="305" font-size="11" fill="#92400e">Wert kommt aus der gemeinsamen DB, nicht aus</text>
+  <text x="520" y="320" font-size="11" fill="#92400e">Pod-Speicher - jeder Pod liefert dieselbe, korrekte Zahl.</text>
+</svg>
