@@ -60,18 +60,24 @@ kubectl -n keda get pods
 # 3 Pods sollten Running sein (operator, operator-metrics-apiserver, admission-webhooks)
 ```
 
-## Skizze: Nextcloud deployen
+## Skizze: warum es hier ueberhaupt eine externe DB braucht
 
-  * Fuer die Konzept-Skizze reicht die einfache `apache`-Variante des offiziellen
-    Nextcloud-Images (ein Container, kein separates nginx/php-fpm-Gespann wie im PHP-FPM-
-    Beispiel der prometheus-Scaler-Uebung - `serverinfo` braucht das nicht).
-  * `SQLITE_DATABASE` + die `NEXTCLOUD_ADMIN_*`-Env-Vars lassen das Image beim ersten
-    Start automatisch installieren (offizielles Verhalten des Images, kein manueller
-    `occ`-Schritt noetig).
-  * **Vereinfachung fuer die Skizze:** SQLite + `emptyDir` reicht fuer eine Instanz. Fuer
-    echten Multi-Replica-Betrieb braucht Nextcloud eine externe DB (MySQL/PostgreSQL) und
-    einen RWX-Shared-Storage (NFS/S3) fuer `/var/www/html/data` - das ist hier bewusst
-    ausgeklammert, der Fokus liegt auf der Skalierungs-Metrik.
+  * Diagramm 2 oben behauptet "beide Pods lesen `activeUsers` aus derselben DB". Das
+    stimmt nur, wenn die DB wirklich **extern und geteilt** ist. Mit `SQLITE_DATABASE`
+    (SQLite-Datei) + `emptyDir` haette JEDER Pod seine EIGENE, unabhaengige Datenbank in
+    seiner eigenen `emptyDir` - bei 2 Replicas zwei komplett getrennte, leere
+    Nextcloud-Installationen statt einer geteilten. Deshalb kommt hier eine echte,
+    externe MariaDB dazu.
+  * **Bewusst ausgeklammert bleibt trotzdem:** `/var/www/html` (Code + `config.php` +
+    `data/`-Verzeichnis) liegt weiterhin in einer Pod-lokalen `emptyDir`. Fuer echten
+    Multi-Replica-Betrieb braucht es zusaetzlich einen RWX-Shared-Storage (NFS/S3) dafuer
+    - und man laesst NICHT jeden Pod unabhaengig per Auto-Install-Env-Vars installieren
+    (das wuerde beim zweiten Pod gegen die bereits von Pod 1 befuellte DB fehlschlagen),
+    sondern installiert einmal und haengt weitere Pods an dieselbe, fertige Installation.
+    Das ist ein groesseres Thema (Nextcloud-HA-Setup) und hier bewusst nicht geloest - der
+    Fokus dieser Skizze bleibt auf dem `metrics-api`-Scaler.
+
+## Skizze: MariaDB als externe, geteilte DB
 
 ```
 # vi 01-namespace.yaml
@@ -82,7 +88,83 @@ metadata:
 ```
 
 ```
-# vi 02-nextcloud-deployment.yaml
+# vi 02-mariadb-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mariadb-nextcloud
+  namespace: nextcloud-demo
+type: Opaque
+stringData:
+  MARIADB_ROOT_PASSWORD: "<starkes-root-Passwort>"
+  MARIADB_DATABASE: nextcloud
+  MARIADB_USER: nextcloud
+  MARIADB_PASSWORD: "<starkes-DB-Passwort>"
+```
+
+```
+# vi 03-mariadb-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb
+  namespace: nextcloud-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:11
+        envFrom:
+        - secretRef:
+            name: mariadb-nextcloud
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: data
+        emptyDir: {}
+        # Achtung: emptyDir, weil unsere Trainingscluster aktuell keine
+        # StorageClass haben (siehe Prometheus-Uebung) - Daten sind weg,
+        # wenn der Pod neu startet. Fuer die Skizze ok, fuer echten Betrieb PVC!
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: nextcloud-demo
+spec:
+  selector:
+    app: mariadb
+  ports:
+  - port: 3306
+    targetPort: 3306
+```
+
+```
+kubectl apply -f 01-namespace.yaml
+kubectl apply -f 02-mariadb-secret.yaml
+kubectl apply -f 03-mariadb-deployment.yaml
+```
+
+## Skizze: Nextcloud deployen
+
+  * Fuer die Konzept-Skizze reicht die einfache `apache`-Variante des offiziellen
+    Nextcloud-Images (ein Container, kein separates nginx/php-fpm-Gespann wie im PHP-FPM-
+    Beispiel der prometheus-Scaler-Uebung - `serverinfo` braucht das nicht).
+  * Die `NEXTCLOUD_ADMIN_*`- und `MYSQL_*`-Env-Vars lassen das Image beim ersten Start
+    automatisch installieren und dabei gleich gegen die MariaDB von oben verbinden
+    (offizielles Verhalten des Images, kein manueller `occ`-Schritt noetig).
+
+```
+# vi 04-nextcloud-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -104,8 +186,17 @@ spec:
         ports:
         - containerPort: 80
         env:
-        - name: SQLITE_DATABASE
+        - name: MYSQL_HOST
+          value: mariadb
+        - name: MYSQL_DATABASE
           value: nextcloud
+        - name: MYSQL_USER
+          value: nextcloud
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb-nextcloud
+              key: MARIADB_PASSWORD
         - name: NEXTCLOUD_ADMIN_USER
           value: admin
         - name: NEXTCLOUD_ADMIN_PASSWORD
@@ -136,9 +227,8 @@ spec:
 ```
 
 ```
-kubectl apply -f 01-namespace.yaml
 kubectl -n nextcloud-demo create secret generic nextcloud-admin --from-literal=password='<starkes-Passwort>'
-kubectl apply -f 02-nextcloud-deployment.yaml
+kubectl apply -f 04-nextcloud-deployment.yaml
 ```
 
 ## Skizze: serverinfo-App aktivieren + testen
@@ -232,6 +322,13 @@ spec:
       name: nextcloud-serverinfo-auth
     metadata:
       # targetValue statt threshold (anderer Feldname als beim prometheus-Scaler!)
+      # Rechenregel (wie bei KEDAs Queue-Lag-Scalern):
+      #   gewuenschte Replicas = ceil(aktuelle Replicas * Metrikwert / targetValue)
+      # targetValue=5 heisst: "ein Replica soll ~5 aktive User bedienen koennen".
+      # Bei 1 Replica und activeUsers=12 -> ceil(1*12/5) = 3 Replicas.
+      # Eine grobe Heuristik - activeUsers ist eigentlich keine Pro-Pod-Groesse
+      # (jeder Pod kann potenziell alle User bedienen), aber fuer einen rohen
+      # Einzelwert ohne PromQL kennt KEDA kein anderes Muster.
       targetValue: "5"
       url: "http://nextcloud.nextcloud-demo/ocs/v2.php/apps/serverinfo/api/v1/info?format=json"
       # GJSON-Pfad zum Wert - keine Leerzeichen im Feldnamen, kein Escaping noetig
