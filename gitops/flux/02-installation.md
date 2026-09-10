@@ -56,7 +56,7 @@ flux version --client
 Auf gitlab.com unter `https://gitlab.com/-/user_settings/personal_access_tokens`
 (als `training.tn<deine-nr>` eingeloggt):
 
-- Scope: `api`
+- Scope: `api` (**legacy - token**)
 - Name z.B. `flux-sync`
 
 Token kopieren und als Umgebungsvariable setzen:
