@@ -8,9 +8,10 @@
 
 ## Hintergrund
 
-  * Die [vorherige Uebung](hpa-keda-custom-metric.md) nutzt KEDAs `prometheus`-Scaler:
-    Prometheus sammelt die Metrik von allen Pods ein, PromQL (`avg(...)`) aggregiert
-    darueber - KEDA fragt am Ende Prometheus, nicht die App.
+  * Die [Uebung mit dem prometheus-Scaler](hpa-keda-custom-metric.md) (Tag 2, nach der
+    Prometheus-Installation) nutzt KEDAs `prometheus`-Scaler: Prometheus sammelt die
+    Metrik von allen Pods ein, PromQL (`avg(...)`) aggregiert darueber - KEDA fragt am
+    Ende Prometheus, nicht die App.
   * KEDAs **`metrics-api`-Scaler** geht einen anderen Weg: er ruft eine HTTP/JSON-URL
     **direkt** auf und liest per JSONPath (`valueLocation`) EINEN einzelnen Wert heraus.
     Kein Prometheus, kein Exporter, kein ServiceMonitor noetig - aber auch kein PromQL,
@@ -44,14 +45,26 @@
 
 ## Voraussetzung
 
-  * KEDA installiert (siehe [vorherige Uebung, Schritt 1](hpa-keda-custom-metric.md#schritt-1-keda-installieren))
-  * Kein Prometheus-Stack noetig fuer diesen Weg
+  * KEDA installiert - kein Prometheus-Stack noetig fuer diesen Weg (im Unterschied zur
+    [Uebung mit dem prometheus-Scaler](hpa-keda-custom-metric.md), die erst nach der
+    Prometheus-Installation an Tag 2 drankommt)
+
+```
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+helm upgrade --install keda kedacore/keda --namespace keda --create-namespace
+```
+
+```
+kubectl -n keda get pods
+# 3 Pods sollten Running sein (operator, operator-metrics-apiserver, admission-webhooks)
+```
 
 ## Skizze: Nextcloud deployen
 
   * Fuer die Konzept-Skizze reicht die einfache `apache`-Variante des offiziellen
-    Nextcloud-Images (ein Container, kein separates nginx/php-fpm-Gespann wie in der
-    vorherigen Uebung - `serverinfo` braucht das nicht).
+    Nextcloud-Images (ein Container, kein separates nginx/php-fpm-Gespann wie im PHP-FPM-
+    Beispiel der prometheus-Scaler-Uebung - `serverinfo` braucht das nicht).
   * `SQLITE_DATABASE` + die `NEXTCLOUD_ADMIN_*`-Env-Vars lassen das Image beim ersten
     Start automatisch installieren (offizielles Verhalten des Images, kein manueller
     `occ`-Schritt noetig).

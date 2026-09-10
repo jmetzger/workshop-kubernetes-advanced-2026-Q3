@@ -49,6 +49,7 @@
   1. Workload-Skalierung
      * [Autoscaling Pods/Deployments - Grundlagen](kubernetes/autoscaling.md)
      * [Uebung: Horizontal Pod Autoscaler (HPA)](kubernetes-autoscaling/hpa.md)
+     * [Optional/Konzept (ungetestet): HPA ueber KEDAs metrics-api-Scaler (Nextcloud serverinfo)](kubernetes-autoscaling/hpa-keda-metrics-api-nextcloud.md)
 
 ### Tag 2 - Observability, Service Mesh & GitOps
 
@@ -57,7 +58,6 @@
      * [Prometheus/Grafana-Stack installieren mit helm (Traefik + Letsencrypt)](prometheus-grafana/prometheus-grafana/install-with-helm-traefik-letsencrypt-basic-auth.md)
      * [Uebung: nginx mit ServiceMonitor und Exporter (Sidecar)](monitoring/praxis/03-nginx-servicemonitor.md)
      * [Uebung: HPA mit eigener Metrik statt CPU (KEDA + Prometheus)](kubernetes-autoscaling/hpa-keda-custom-metric.md)
-     * [Optional/Konzept (ungetestet): HPA ueber KEDAs metrics-api-Scaler (Nextcloud serverinfo)](kubernetes-autoscaling/hpa-keda-metrics-api-nextcloud.md)
 
   1. Logging-Stack: EFK (Elasticsearch/Fluentd/Kibana)
      * [EFK-Stack: Aufbau, Fluentd vs. Fluent Bit, DaemonSet vs. Sidecar](kubernetes-monitoring/fluentd.md)
