@@ -248,6 +248,12 @@ spec:
 kubectl apply -f 04-servicemonitor.yaml
 ```
 
+  * **Warum das hier noetig ist:** KEDA fragt im naechsten Schritt NICHT unsere App direkt,
+    sondern schickt seine PromQL-Query an den Prometheus-Server. Damit dort ueberhaupt
+    etwas steht, muss Prometheus unsere Metrik vorher eingesammelt haben - genau das
+    erledigt dieser ServiceMonitor (er sagt Prometheus: "scrape den Exporter alle 15s").
+    Ohne ihn liefe KEDAs Query ins Leere.
+
 ```
 # Ist der Target in Prometheus gruen? (Browser)
 https://prometheus.<du>.do.t3isp.de/targets
@@ -277,6 +283,12 @@ spec:
   triggers:
   - type: prometheus
     metadata:
+      # serverAddress zeigt auf Prometheus, NICHT auf unsere App/den Exporter!
+      # KEDA fragt hier den Prometheus-Server per PromQL ab (die Daten dafuer
+      # hat der ServiceMonitor aus Schritt 7 vorher dort hineingescraped).
+      # Der grosse Vorteil: avg(...) aggregiert automatisch ueber ALLE Pods -
+      # ein einzelner Pod koennte seine eigene Auslastung kennen, aber nicht,
+      # wie ausgelastet das gesamte Deployment gerade ist.
       serverAddress: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
       query: avg(phpfpm_active_processes{namespace="php-fpm-demo"}) / avg(phpfpm_total_processes{namespace="php-fpm-demo"}) * 100
       threshold: "70"
