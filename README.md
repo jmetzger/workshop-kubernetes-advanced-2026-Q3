@@ -38,6 +38,7 @@
      * [ServiceAccounts: Automount - ja oder nein?](security/serviceaccount/do-not-mount-if-not-needed.md)
      * [Praktische Uebung: User mit Zertifikat anlegen (kubeconfig)](kubernetes/rbac/create-kubeconfig-with-cert.md)
      * [Praktische Uebung RBAC (ab Kubernetes 1.25)](kubernetes/rbac-create-user-kubernetes-1-25.md)
+     * [Praktische Uebung: RBAC-Hygiene - Label-Konvention pruefen und Nutzung im Audit-Log nachweisen](kubernetes/rbac/03-label-convention-review.md)
 
   1. Secrets Management mit HashiCorp Vault
      * [Vault-Architektur einfach erklaert](hashicorp-vault/architektur-einfach-erklaert.md)
