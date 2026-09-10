@@ -50,8 +50,6 @@
      * [Autoscaling Pods/Deployments - Grundlagen](kubernetes/autoscaling.md)
      * [Uebung: Horizontal Pod Autoscaler (HPA)](kubernetes-autoscaling/hpa.md)
      * [Uebung: HPA mit eigener Metrik (KEDA + eigener Prometheus)](kubernetes-autoscaling/hpa-keda-custom-metric.md)
-     * [Optional/Konzept (ungetestet): HPA ueber KEDAs metrics-api-Scaler (Nextcloud serverinfo)](kubernetes-autoscaling/hpa-keda-metrics-api-nextcloud.md)
-     * [Optional/Konzept (ungetestet): HPA ueber einen selbst gebauten External-Metrics-Server (Nextcloud, ohne Prometheus/KEDA)](kubernetes-autoscaling/hpa-custom-external-metrics-server.md)
 
 ### Tag 2 - Observability, Service Mesh & GitOps
 
@@ -107,3 +105,8 @@
   1. Abschluss
      * Best Practices & Hands-on Labs
      * Fehler vermeiden, Debugging meistern
+
+## Backlog 
+
+  1. Autoscaling für fpm-php (Gedankenexperimente, nicht sinnvol)
+     
