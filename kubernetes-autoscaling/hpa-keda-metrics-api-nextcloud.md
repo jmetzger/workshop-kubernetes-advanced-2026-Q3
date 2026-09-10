@@ -8,10 +8,9 @@
 
 ## Hintergrund
 
-  * Die [Uebung mit dem prometheus-Scaler](hpa-keda-custom-metric.md) (Tag 2, nach der
-    Prometheus-Installation) nutzt KEDAs `prometheus`-Scaler: Prometheus sammelt die
-    Metrik von allen Pods ein, PromQL (`avg(...)`) aggregiert darueber - KEDA fragt am
-    Ende Prometheus, nicht die App.
+  * Die [Uebung mit dem prometheus-Scaler](hpa-keda-custom-metric.md) nutzt KEDAs
+    `prometheus`-Scaler: Prometheus sammelt die Metrik von allen Pods ein, PromQL
+    (`avg(...)`) aggregiert darueber - KEDA fragt am Ende Prometheus, nicht die App.
   * KEDAs **`metrics-api`-Scaler** geht einen anderen Weg: er ruft eine HTTP/JSON-URL
     **direkt** auf und liest per JSONPath (`valueLocation`) EINEN einzelnen Wert heraus.
     Kein Prometheus, kein Exporter, kein ServiceMonitor noetig - aber auch kein PromQL,
@@ -46,8 +45,8 @@
 ## Voraussetzung
 
   * KEDA installiert - kein Prometheus-Stack noetig fuer diesen Weg (im Unterschied zur
-    [Uebung mit dem prometheus-Scaler](hpa-keda-custom-metric.md), die erst nach der
-    Prometheus-Installation an Tag 2 drankommt)
+    [Uebung mit dem prometheus-Scaler](hpa-keda-custom-metric.md), die zusaetzlich einen
+    eigenen, schlanken Prometheus mitbringt)
 
 ```
 helm repo add kedacore https://kedacore.github.io/charts

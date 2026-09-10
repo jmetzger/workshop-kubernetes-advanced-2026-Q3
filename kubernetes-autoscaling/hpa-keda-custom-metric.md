@@ -18,9 +18,11 @@
 
 ## Voraussetzung
 
-  * kube-prometheus-stack muss installiert sein -> [Kube-Prometheus-Stack installieren](../../prometheus-grafana/prometheus-grafana/install-with-helm-traefik-letsencrypt-basic-auth.md)
-  * Empfohlen: vorher die [Uebung: Nginx mit ServiceMonitor](../monitoring/praxis/03-nginx-servicemonitor.md)
-    gemacht haben - wir nutzen hier dieselben ServiceMonitor-Grundlagen
+  * Keine - diese Uebung bringt ihren eigenen, schlanken Prometheus mit (Schritt 2, im
+    Namespace `scaling-monitoring`) und braucht NICHT den vollen kube-prometheus-stack aus
+    "Monitoring mit Prometheus" (Tag 2, Namespace `monitoring`, mit
+    Grafana/Traefik-Ingress/Letsencrypt/basic-auth). Deshalb passt sie hier unter
+    Workload-Skalierung, direkt nach der normalen HPA-Uebung.
 
 ## Schritt 1: KEDA installieren
 
@@ -35,7 +37,30 @@ kubectl -n keda get pods
 # 3 Pods sollten Running sein (operator, operator-metrics-apiserver, admission-webhooks)
 ```
 
-## Schritt 2: Vorbereitung
+## Schritt 2: Eigenen, schlanken Prometheus installieren
+
+  * Nur fuer diese Uebung gedacht - ohne Grafana, ohne Ingress/TLS/basic-auth (das kommt
+    erst mit dem vollen Setup auf Tag 2). Reicht, damit KEDA intern PromQL-Queries
+    stellen kann.
+  * Bewusst ein **eigener Namespace `scaling-monitoring`**, getrennt vom Namespace
+    `monitoring`, den Tag 2 fuer den vollen Stack (Grafana, Ingress, ...) nutzt - keine
+    Vermischung der beiden Installationen.
+
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace scaling-monitoring --create-namespace --version 72.3.0 \
+  --set grafana.enabled=false \
+  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+```
+
+```
+kubectl -n scaling-monitoring get pods
+# Warten, bis u.a. prometheus-prometheus-kube-prometheus-prometheus-0 Running/Ready ist
+```
+
+## Schritt 3: Vorbereitung
 
 ```
 cd
@@ -45,7 +70,7 @@ mkdir php-fpm-hpa
 cd php-fpm-hpa
 ```
 
-## Schritt 3: Namespace
+## Schritt 4: Namespace
 
 ```
 # vi 01-namespace.yaml
@@ -59,7 +84,7 @@ metadata:
 kubectl apply -f 01-namespace.yaml
 ```
 
-## Schritt 4: Die App - ConfigMap mit PHP-Skript, FPM-Pool und nginx-Config
+## Schritt 5: Die App - ConfigMap mit PHP-Skript, FPM-Pool und nginx-Config
 
   * `sleep(5)` simuliert eine "teure" Anfrage (z.B. langsamer DB-Call), die einen
     PHP-FPM-Worker fuer 5 Sekunden blockiert
@@ -117,11 +142,11 @@ kubectl apply -f 02-app-configmap.yaml
     beschaeftigt sind, muss sich auch die Status-Abfrage selbst in dieselbe Warteschlange
     einreihen - sie teilt sich den Pool mit dem Workload. Bei extremer Ueberlast (z.B. 10+
     parallele Anfragen gegen nur 3 Worker) kann das dazu fuehren, dass Prometheus den
-    Scrape-Timeout reisst und die Metrik zeitweise fehlt. Deshalb erzeugen wir in Schritt 8
+    Scrape-Timeout reisst und die Metrik zeitweise fehlt. Deshalb erzeugen wir in Schritt 10
     bewusst nur moderate Ueberlast (8 parallele Requests gegen 3 Worker) - genug zum
     Skalieren, aber die Status-Abfrage kommt trotzdem noch durch.
 
-## Schritt 5: Deployment (3 Container: php-fpm, nginx, Exporter) + Service
+## Schritt 6: Deployment (3 Container: php-fpm, nginx, Exporter) + Service
 
   * `nginx` reicht `.php`-Requests per FastCGI an `php-fpm` weiter (Port 9000, localhost)
   * `exporter` (`hipages/php-fpm_exporter`) fragt die FPM-Statusseite ab und wandelt sie
@@ -206,7 +231,7 @@ kubectl apply -f 03-deployment.yaml
 kubectl -n php-fpm-demo rollout status deployment/php-fpm-app
 ```
 
-## Schritt 6: Exporter-Metriken pruefen
+## Schritt 7: Exporter-Metriken pruefen
 
 ```
 kubectl -n php-fpm-demo run test-metrics --image=busybox:1.36 --restart=Never --rm -i --command -- wget -qO- http://php-fpm-app.php-fpm-demo:9253/metrics
@@ -219,7 +244,7 @@ phpfpm_idle_processes{pool="www",...} 3
 phpfpm_total_processes{pool="www",...} 3
 ```
 
-## Schritt 7: ServiceMonitor
+## Schritt 8: ServiceMonitor
 
 ```
 # vi 04-servicemonitor.yaml
@@ -255,12 +280,18 @@ kubectl apply -f 04-servicemonitor.yaml
     Ohne ihn liefe KEDAs Query ins Leere.
 
 ```
-# Ist der Target in Prometheus gruen? (Browser)
-https://prometheus.<du>.do.t3isp.de/targets
+# Ist der Target in Prometheus gruen? Kein Ingress fuer diesen schlanken
+# Stack (siehe Schritt 2) - deshalb per Port-Forward pruefen:
+kubectl -n scaling-monitoring port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090
+```
+
+```
+# In einem zweiten Terminal (oder Browser):
+http://localhost:9090/targets
 # suchen nach: php-fpm-demo/php-fpm-app/0
 ```
 
-## Schritt 8: ScaledObject (KEDA) - die eigentliche Skalierungslogik
+## Schritt 9: ScaledObject (KEDA) - die eigentliche Skalierungslogik
 
   * Statt `%CPU` nehmen wir hier `avg(active) / avg(total) * 100` - die Worker-Auslastung
     in Prozent, ueber alle Pods gemittelt. Genau dasselbe Muster wie bei der CPU-HPA-Uebung
@@ -285,11 +316,11 @@ spec:
     metadata:
       # serverAddress zeigt auf Prometheus, NICHT auf unsere App/den Exporter!
       # KEDA fragt hier den Prometheus-Server per PromQL ab (die Daten dafuer
-      # hat der ServiceMonitor aus Schritt 7 vorher dort hineingescraped).
+      # hat der ServiceMonitor aus Schritt 8 vorher dort hineingescraped).
       # Der grosse Vorteil: avg(...) aggregiert automatisch ueber ALLE Pods -
       # ein einzelner Pod koennte seine eigene Auslastung kennen, aber nicht,
       # wie ausgelastet das gesamte Deployment gerade ist.
-      serverAddress: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+      serverAddress: http://prometheus-kube-prometheus-prometheus.scaling-monitoring.svc.cluster.local:9090
       query: avg(phpfpm_active_processes{namespace="php-fpm-demo"}) / avg(phpfpm_total_processes{namespace="php-fpm-demo"}) * 100
       threshold: "70"
 ```
@@ -307,11 +338,11 @@ kubectl -n php-fpm-demo get hpa
 # keda-hpa-php-fpm-app   Deployment/php-fpm-app   0/70 (avg)   1         5         1          15s
 ```
 
-## Schritt 9: Last erzeugen und Skalierung beobachten
+## Schritt 10: Last erzeugen und Skalierung beobachten
 
   * 8 parallele Dauerschleifen gegen einen Pool mit nur 3 Workern - reicht zum
     Ueberschreiten der 70%-Schwelle, ohne die Status-Abfrage zu blockieren (siehe Hinweis
-    oben bei Schritt 4)
+    oben bei Schritt 5)
 
 ```
 # vi 06-load-generator.yaml
@@ -356,7 +387,7 @@ kubectl -n php-fpm-demo get deployment php-fpm-app
 # READY sollte jetzt 2/2 zeigen (oder mehr, je nach Last)
 ```
 
-## Schritt 10: Last stoppen und Scale-down beobachten
+## Schritt 11: Last stoppen und Scale-down beobachten
 
 ```
 kubectl -n php-fpm-demo delete pod load-generator
@@ -372,6 +403,7 @@ kubectl -n php-fpm-demo get hpa keda-hpa-php-fpm-app --watch
 
 ```
 kubectl delete ns php-fpm-demo
+kubectl delete ns scaling-monitoring
 helm -n keda uninstall keda
 kubectl delete ns keda
 ```
