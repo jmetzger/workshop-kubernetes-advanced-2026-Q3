@@ -131,9 +131,8 @@ spec:
       volumes:
       - name: data
         emptyDir: {}
-        # Achtung: emptyDir, weil unsere Trainingscluster aktuell keine
-        # StorageClass haben (siehe Prometheus-Uebung) - Daten sind weg,
-        # wenn der Pod neu startet. Fuer die Skizze ok, fuer echten Betrieb PVC!
+        # Achtung: emptyDir - Daten sind weg, wenn der Pod neu startet.
+        # Fuer die Skizze ok, fuer echten Betrieb PVC verwenden!
 ---
 apiVersion: v1
 kind: Service
