@@ -29,7 +29,7 @@ Vorteile:
 | Multi-Cluster | Ja, zentrale Instanz kann viele Cluster bedienen | Ja, ueblicherweise 1 Flux pro Cluster |
 | Multi-Tenancy | Projects, RBAC, SSO in der UI | ueber Kubernetes-RBAC und Namespaces |
 | Image-Update-Automation | Separates Projekt (argocd-image-updater) | Eingebaut (Image Automation Controller) |
-| Bootstrapping | Manuell oder argocd-autopilot | flux bootstrap (legt Repo-Struktur an) |
+| Bootstrapping | Manuell oder argocd-autopilot | `flux bootstrap` (imperativer CLI-Befehl, legt Repo-Struktur an) oder Flux Operator + `FluxInstance` (deklarativ, **empfohlen** - siehe [Installation](flux/02-installation.md): haelt sich selbst UND die Flux-Version automatisch aktuell) |
 | Typische Zielgruppe | Teams, die eine UI fuer Devs/Ops wollen | Plattform-Teams, die alles deklarativ/headless wollen |
 
 ## Wann was?

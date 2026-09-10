@@ -93,12 +93,11 @@
   1. GitOps mit Flux
      * [ArgoCD vs. Flux CD im Ueberblick](gitops/argocd-vs-flux.md)
      * [Flux Ueberblick - Controller, CRDs und Ablauf](gitops/flux/01-overview.md)
-     * [Flux Installation und GitOps-Bootstrap mit GitLab](gitops/flux/02-installation.md)
+     * [Flux Installation und GitOps-Sync mit dem Flux Operator](gitops/flux/02-installation.md)
      * [HelmRepository - Helm Chart Repositories verwalten](gitops/flux/03-helmrepository.md)
      * [HelmRelease - Helm Charts deklarativ ausrollen](gitops/flux/04-helmrelease.md)
      * [OCI-Helm-Chart verwenden](gitops/flux/05-oci-helm-chart.md)
      * [Eigenes Helm Chart aus Git-Repository ausrollen](gitops/flux/06-eigenes-helmchart.md)
-     * [Alternative: Flux Operator statt flux bootstrap](gitops/flux/07-flux-operator.md)
 
   1. Abschluss
      * Best Practices & Hands-on Labs

@@ -14,7 +14,7 @@ das mit der CRD `OCIRepository` ab.
 
 ## Voraussetzungen
 
-- Flux gebootstrapped (siehe [02-installation.md](02-installation.md))
+- Flux Operator installiert, Git-Sync eingerichtet (siehe [02-installation.md](02-installation.md))
 
 ## Schritt 1: OCIRepository einrichten
 

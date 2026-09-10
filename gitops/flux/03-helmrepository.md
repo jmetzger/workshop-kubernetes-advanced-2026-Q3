@@ -15,7 +15,7 @@ periodisch den Repository-Index (`index.yaml`).
 
 ## Voraussetzungen
 
-- Flux gebootstrapped (siehe [02-installation.md](02-installation.md))
+- Flux Operator installiert, Git-Sync eingerichtet (siehe [02-installation.md](02-installation.md))
 - Euer Repo `flux-<dein-kuerzel>` lokal geklont
 
 ## Schritt 1: Vorbereitung

@@ -90,7 +90,7 @@ Das Basics-Modul (Schwester-Repo) startet Mo 07.09.2026, 13:00. Dafuer am
 | tipps-tricks/, kubernetes/autoscaling.md | training-kubernetes-advanced |
 | kubernetes-splunk/ | workshop-kubernetes-advanced-2026-modul1 (anderes Training, nur Splunk-Teil uebernommen) |
 | gitops/argocd-vs-flux.md | neu geschrieben (Theorie-Uebersicht) |
-| gitops/flux/ | adaptiert aus jmetzger/workshop-kubernetes-helmholtz -> gitops/flux/, umgebaut auf GitLab-Bootstrap-Flow (kein Helm-Install, kein kubectl apply fuer GitOps-Objekte) und auf dem kubeadm-Testcluster verifiziert |
+| gitops/flux/ | adaptiert aus jmetzger/workshop-kubernetes-helmholtz -> gitops/flux/, urspruenglich auf GitLab-Bootstrap-Flow umgebaut, am 10.09.2026 auf Flux-Operator-Flow (FluxInstance + Git-Sync statt `flux bootstrap`, inkl. Selbst-Update von Flux UND vom Operator) umgestellt - 02-installation.md end-to-end auf Testcluster tln18 verifiziert, 03-06 nur inhaltlich angepasst (siehe Offene Punkte) |
 
 Aenderungen an Uebungen bitte HIER machen, nicht in den Quell-Repos -
 dieses Repo ist die fuer das Training massgebliche Kopie.
@@ -104,6 +104,39 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
   einem kompletten Bootstrap-bis-Uninstall-Durchlauf end-to-end nachgetestet
   (optional, nicht blockierend - der Finalizer-Mechanismus dahinter ist
   verstanden).
+- `gitops/flux/02-installation.md` wurde am 10.09.2026 komplett auf den
+  Flux-Operator-Flow umgebaut (FluxInstance + Git-Sync statt `flux bootstrap`,
+  plus Selbst-Update-HelmRelease fuer den Operator selbst) und Schritt 1-8
+  end-to-end auf einem eigenen Trainer-Testcluster (`tln18` im `bka`-Projekt,
+  siehe unten) durchgespielt - inkl. Beobachtung, dass die Selbst-Update-
+  HelmRelease den per Helm CLI installierten Operator nahtlos uebernimmt
+  (Revision 1 -> 2, gleicher Release-Name). Aufraeumen-Abschnitt NICHT live
+  getestet (Cluster sollte als Trainer-Demo stehen bleiben) - Befehle sind
+  aber wortgleich mit dem schon vorher bewaehrten 07-flux-operator.md-Stand.
+  Die nachfolgenden Uebungen 03-06 wurden NICHT erneut end-to-end
+  durchgespielt (nur die Bootstrap-Referenz durch Git-Sync-Referenz ersetzt) -
+  vor dem Training idealerweise noch einmal 03-06 gegen den neuen Flow
+  gegentesten.
+- Trainer-Testcluster `tln18` (1 CP + 3 Worker, Bastion `client-bka`) wurde
+  am 10.09.2026 zusaetzlich zu den 17 echten Teilnehmer-Clustern angelegt,
+  ausschliesslich fuer den Flux-Operator-Test. Bleibt auf Wunsch stehen
+  (nicht abgebaut) - eigener Bastion-User `tln18`, eigenes Kubeconfig,
+  komplett getrennt von den echten Teilnehmern.
+- Bei der `tln18`-Erstellung kam es zu einem Terraform-`-target`-Fehler
+  (ein zu eng gezieltes `tofu destroy` hat ueber den Abhaengigkeitsgraphen
+  versehentlich die `digitalocean_project_resources`-Bindings (nur
+  DO-Dashboard-Gruppierung, keine Droplets) aller 17 echten Teilnehmer mit
+  entfernt) - wurde noch in derselben Sitzung per `tofu apply` wieder
+  hergestellt und gegen tln1/tln2 verifiziert (kubectl + cluster-zugang.txt
+  korrekt). Keine Droplet ging verloren, aber Lehre fuer die Zukunft:
+  `-target` auf `digitalocean_droplet.worker[...]` NIE ohne vorherigen
+  `tofu plan` verwenden, wenn andere Teilnehmer im selben State aktiv sind.
+- Nebenfund (nicht durch obige Aktion verursacht, schon vorher so): Bei
+  `tln1` existiert eine verwaiste Doppel-Droplet `k8s-tln1-w1` (zwei
+  Droplets gleichen Namens, vermutlich Rest aus den Scale-Tests vor
+  Trainingsbeginn, siehe `create-tln1-scale3.log`) - die im Cluster aktive
+  ist korrekt in `cluster-zugang.txt` hinterlegt, die andere ist reine
+  Kostenleiche. Aufraeumen nur nach Rueckfrage.
 - OpenBao-Kapitel am 04.09.2026 komplett entfernt (`openbao/`) - Secrets
   Management laeuft jetzt ausschliesslich ueber das HashiCorp-Vault-Kapitel
   (`security/hashicorp-vault/`, `hashicorp-vault/`) mit VSO- und
@@ -123,14 +156,23 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
 
 ## GitOps-Kapitel (Tag 2) - FluxCD
 
-Umgebaut und getestet (Stand 31.08.2026): ArgoCD-Hands-on
-(`istio/argocd/was-ist-argocd.md`, `istio/argocd/argocd-istio-bookinfo.md`)
-ist aus der Agenda raus, `gitops/flux/` (6 Uebungen) ist drin. Jeder
-Teilnehmer nutzt seinen eigenen gitlab.com-Account (`training.tn<nr>`,
-vom Trainer vorab angelegt) fuer `flux bootstrap gitlab` - danach laeuft
-alles ueber `git commit`/`push`, kein `kubectl apply` mehr fuer die
-GitOps-Objekte selbst. Getestet auf einem kubeadm-Testcluster
-(Skill `training-kubeadm-cluster`).
+ArgoCD-Hands-on (`istio/argocd/was-ist-argocd.md`,
+`istio/argocd/argocd-istio-bookinfo.md`) ist aus der Agenda raus,
+`gitops/flux/` (6 Uebungen) ist drin. Jeder Teilnehmer nutzt seinen eigenen
+gitlab.com-Account (`training.tn<nr>`, vom Trainer vorab angelegt).
+
+Installation (Stand 10.09.2026) laeuft ueber den **Flux Operator**
+(`02-installation.md`): Operator per Helm installieren, dann `FluxInstance`
+(mit `spec.sync` fuer Git-Sync) + eine `HelmRelease` fuer den Operator
+selbst per `kubectl apply`/Git anlegen - kein `flux bootstrap` mehr. Danach
+laeuft wie zuvor alles ueber `git commit`/`push`, kein `kubectl apply` mehr
+fuer die GitOps-Objekte selbst. Zwei Automatik-Effekte gegenueber dem alten
+Bootstrap-Flow: Flux selbst trackt per `version: "2.x"` automatisch neue
+Releases, und der Operator-Chart selbst wird ab der committeten
+`HelmRelease` per Semver-Range ebenfalls automatisch aktuell gehalten (live
+auf tln18 beobachtet: Helm-Release wurde von Revision 1 auf 2 durchgereicht,
+ohne manuellen `helm upgrade`). Getestet auf dem Trainer-Testcluster tln18
+(Skill `training-kubeadm-cluster`, siehe Offene Punkte).
 
 **Wichtig beim Aufraeumen:** `flux uninstall --namespace=flux-system`
 verwenden, NICHT `kubectl delete namespace flux-system` gefolgt von
@@ -143,7 +185,7 @@ in `Terminating`).
 
 Dieses Repo ist PUBLIC und haelt bewusst KEINE eigenen Secrets (kein
 `.env.enc` hier). Trainingsspezifische Tokens fuer Uebungen mit externen
-Diensten (z.B. `GITLAB_PAT` fuer den FluxCD-Bootstrap) liegen verschluesselt
+Diensten (z.B. `GITLAB_PAT` fuer den FluxCD-Git-Sync) liegen verschluesselt
 im privaten Vorbereitungs-Repo (`.env.enc`); stabile Creds (Cloud-API-Token,
 Trainings-Passwort) zentral im privaten Auth-Repo und per `.env.sources`-Mapping
 eingebunden (siehe security-Skill). `.env`/`.env.enc` stehen in `.gitignore`,
