@@ -98,6 +98,7 @@
      * [HelmRelease - Helm Charts deklarativ ausrollen](gitops/flux/04-helmrelease.md)
      * [OCI-Helm-Chart verwenden](gitops/flux/05-oci-helm-chart.md)
      * [Eigenes Helm Chart aus Git-Repository ausrollen](gitops/flux/06-eigenes-helmchart.md)
+     * [Uebung: Flux-Operator Web-UI mit Ingress und HTTPS absichern](gitops/flux/07-web-ui-ingress.md)
 
   1. Abschluss
      * Best Practices & Hands-on Labs
