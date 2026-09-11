@@ -17,6 +17,14 @@ kubectl run --image=nginx nginx
 kubectl debug -it nginx --image=busybox
 ```
 
+```
+# processe des original containers anzeigen
+# z.B. nginx
+# name des containers rausfinden
+kubectl debug -it nginx --target=nginx --image=busybox
+```
+
+
 
 ## Walkthrough Debug Node 
 
