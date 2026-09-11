@@ -8,24 +8,26 @@
      * [kubectl Verbindung mit namespace einrichten](#kubectl-verbindung-mit-namespace-einrichten)
      * [Das Tool kubectl - Spickzettel](#das-tool-kubectl---spickzettel)
 
+  1. Cluster startklar machen: CNI installieren
+     * [Uebung: CNI-Provider Calico installieren](#uebung-cni-provider-calico-installieren)
+
+  1. MetalLB als Load-Balancer (Bare-Metal)
+     * [Kubernetes Load Balancer - metallb](#kubernetes-load-balancer---metallb)
+     * [Feste IP beziehen](#feste-ip-beziehen)
+
   1. Kubernetes-Networking-Grundlagen
      * [Networking Internal Overview](#networking-internal-overview)
      * [Cluster-CIDR, POD-CIDR und Service-CIDR](#cluster-cidr-pod-cidr-und-service-cidr)
      * [Wann wird die PodIP vergeben?](#wann-wird-die-podip-vergeben)
      * [CNI - Wie funktioniert das unter der Haube](#cni---wie-funktioniert-das-unter-der-haube)
      * [Ueberblick CNI-Provider](#ueberblick-cni-provider)
-     * [CNI-Provider calico einrichten](#cni-provider-calico-einrichten)
      * [Weg vom Pod zum Host -> veth / calicoctl get wep](#weg-vom-pod-zum-host-->-veth--calicoctl-get-wep)
-
-  1. MetalLB als Load-Balancer (Bare-Metal)
-     * [Kubernetes Load Balancer - metallb](#kubernetes-load-balancer---metallb)
-     * [Feste IP beziehen](#feste-ip-beziehen)
 
   1. Network Policies
      * [Einfache Uebung NetworkPolicy (Standard)](#einfache-uebung-networkpolicy-standard)
-     * [Beispiel mit ipBlock](#beispiel-mit-ipblock)
+     * [Warum Calico-Policies statt Standard-NetworkPolicy?](#warum-calico-policies-statt-standard-networkpolicy)
+     * [Calico-Policies - Grundlagen (Ordering, Implicit Deny, API-Version)](#calico-policies---grundlagen-ordering-implicit-deny-api-version)
      * [Erweiterte Policies mit Calico - Uebung](#erweiterte-policies-mit-calico---uebung)
-     * [Calico - Services schuetzen](#calico---services-schuetzen)
 
   1. RBAC & Identity
      * [Least Privileges mit RBAC](#least-privileges-mit-rbac)
@@ -36,35 +38,35 @@
      * [ServiceAccounts: Automount - ja oder nein?](#serviceaccounts-automount---ja-oder-nein)
      * [Praktische Uebung: User mit Zertifikat anlegen (kubeconfig)](#praktische-uebung-user-mit-zertifikat-anlegen-kubeconfig)
      * [Praktische Uebung RBAC (ab Kubernetes 1.25)](#praktische-uebung-rbac-ab-kubernetes-125)
+     * [Praktische Uebung: RBAC-Hygiene - Label-Konvention pruefen und Nutzung im Audit-Log nachweisen](#praktische-uebung-rbac-hygiene---label-konvention-pruefen-und-nutzung-im-audit-log-nachweisen)
 
-  1. Secrets Management mit HashiCorp Vault / OpenBao
+  1. Secrets Management mit HashiCorp Vault
+     * [Vault-Architektur einfach erklaert](#vault-architektur-einfach-erklaert)
      * [HashiCorp Vault als Password-Safe (Overview)](#hashicorp-vault-als-password-safe-overview)
-     * [Architektur-Ueberblick OpenBao](#architektur-ueberblick-openbao)
-     * [Was sind Secret-Engines?](#was-sind-secret-engines)
-     * [Server-Installation: Standalone hinter nginx Reverse Proxy](#server-installation-standalone-hinter-nginx-reverse-proxy)
-     * [User/Gruppe fuer Passwort-Authentifizierung aufsetzen](#usergruppe-fuer-passwort-authentifizierung-aufsetzen)
-     * [Uebung Operator-Variante: MariaDB-Deployment mit Vault Secrets Operator (VSO)](#uebung-operator-variante-mariadb-deployment-mit-vault-secrets-operator-vso)
+     * [Uebung: MariaDB-Deployment mit HashiCorp Vault ueber den Vault Secrets Operator (VSO)](#uebung-mariadb-deployment-mit-hashicorp-vault-ueber-den-vault-secrets-operator-vso)
+     * [Uebung: MariaDB-Deployment mit dem Vault Agent Injector](#uebung-mariadb-deployment-mit-dem-vault-agent-injector)
 
   1. Workload-Skalierung
      * [Autoscaling Pods/Deployments - Grundlagen](#autoscaling-podsdeployments---grundlagen)
      * [Uebung: Horizontal Pod Autoscaler (HPA)](#uebung-horizontal-pod-autoscaler-hpa)
+     * [Uebung: HPA mit eigener Metrik (KEDA + eigener Prometheus)](#uebung-hpa-mit-eigener-metrik-keda-+-eigener-prometheus)
 
 ### Tag 2 - Observability, Service Mesh & GitOps
 
   1. Monitoring mit Prometheus
      * [Prometheus Monitoring Server (Overview)](#prometheus-monitoring-server-overview)
-     * [Prometheus/Grafana-Stack installieren mit helm](#prometheusgrafana-stack-installieren-mit-helm)
+     * [Prometheus/Grafana-Stack installieren mit helm (Traefik + Letsencrypt)](#prometheusgrafana-stack-installieren-mit-helm-traefik-+-letsencrypt)
      * [Uebung: nginx mit ServiceMonitor und Exporter (Sidecar)](#uebung-nginx-mit-servicemonitor-und-exporter-sidecar)
 
-  1. Logging-Stack: Fluentd -> Elasticsearch
-     * [Fluentd - Grundlagen](#fluentd---grundlagen)
-     * [Fluentd/Kibana/Elasticsearch - Walkthrough](#fluentdkibanaelasticsearch---walkthrough)
+  1. Logging-Stack: EFK (Elasticsearch/Fluentd/Kibana)
+     * [EFK-Stack: Aufbau, Fluentd vs. Fluent Bit, DaemonSet vs. Sidecar](#efk-stack-aufbau-fluentd-vs-fluent-bit-daemonset-vs-sidecar)
 
   1. Alternative: Splunk-Integration
-     * [Architektur & Konzept: Splunk extern vs. im Cluster](#architektur--konzept-splunk-extern-vs-im-cluster)
+     * [Theorie: Kubernetes mit Splunk verbinden](#theorie-kubernetes-mit-splunk-verbinden)
      * [Funktionsuebersicht: Splunk-Menuepunkte und Kubernetes-Relevanz](#funktionsuebersicht-splunk-menuepunkte-und-kubernetes-relevanz)
      * [Log-Forwarder an externen Splunk-Server anbinden](#log-forwarder-an-externen-splunk-server-anbinden)
      * [Abstuerzenden Pod ueber Splunk debuggen (CrashLoopBackOff)](#abstuerzenden-pod-ueber-splunk-debuggen-crashloopbackoff)
+     * [CrashLoopBackOff-Alert einrichten (optional)](#crashloopbackoff-alert-einrichten-optional)
      * [Optional: Splunk im Cluster betreiben (Splunk Operator)](#optional-splunk-im-cluster-betreiben-splunk-operator)
 
   1. Troubleshooting
@@ -81,7 +83,7 @@
      * [Istio Proxy-Konzepte (Envoy als Sidecar)](#istio-proxy-konzepte-envoy-als-sidecar)
      * [Vergleich mit Linkerd, Cilium, Consul](#vergleich-mit-linkerd-cilium-consul)
 
-  1. Service Mesh - Praktischer Aufbau im Cluster
+  1. Service Mesh - Praktischer Aufbau im Cluster (Sidecar-Modus)
      * [Istio-Installation mit istioctl (demo-Profil)](#istio-installation-mit-istioctl-demo-profil)
      * [istioctl Cheatsheet zum Debuggen](#istioctl-cheatsheet-zum-debuggen)
      * [Uebung: Sidecar-Injection](#uebung-sidecar-injection)
@@ -90,14 +92,33 @@
      * [Uebung: Traffic-Shifting / Load-Balancing](#uebung-traffic-shifting--load-balancing)
      * [Debugging mit debug/run pod](#debugging-mit-debugrun-pod)
 
-  1. GitOps - kurze Einfuehrung
+  1. Service Mesh - Praktischer Aufbau mit Ambient-Mode (Gateway API statt Sidecar)
+     * [Istio-Installation mit istioctl (Ambient-Profil)](#istio-installation-mit-istioctl-ambient-profil)
+     * [istioctl Cheatsheet zum Debuggen](#istioctl-cheatsheet-zum-debuggen)
+     * [Uebung: Workload ins Ambient-Mesh aufnehmen (statt Sidecar-Injection)](#uebung-workload-ins-ambient-mesh-aufnehmen-statt-sidecar-injection)
+     * [Demo-App bookinfo installieren (Ambient/Waypoint)](#demo-app-bookinfo-installieren-ambientwaypoint)
+     * [Uebung: Header-basiertes Routing (Gateway API HTTPRoute)](#uebung-header-basiertes-routing-gateway-api-httproute)
+     * [Uebung: Traffic-Shifting (Gateway API HTTPRoute)](#uebung-traffic-shifting-gateway-api-httproute)
+     * [Debugging mit debug/run pod (Ambient: ztunnel + Waypoint)](#debugging-mit-debugrun-pod-ambient-ztunnel-+-waypoint)
+
+  1. GitOps mit Flux
      * [ArgoCD vs. Flux CD im Ueberblick](#argocd-vs-flux-cd-im-ueberblick)
-     * [Was ist ArgoCD?](#was-ist-argocd)
-     * [Kleines Hands-on: Deployment mit ArgoCD](#kleines-hands-on-deployment-mit-argocd)
+     * [Flux Ueberblick - Controller, CRDs und Ablauf](#flux-ueberblick---controller-crds-und-ablauf)
+     * [Flux Installation und GitOps-Sync mit dem Flux Operator](#flux-installation-und-gitops-sync-mit-dem-flux-operator)
+     * [HelmRepository - Helm Chart Repositories verwalten](#helmrepository---helm-chart-repositories-verwalten)
+     * [HelmRelease - Helm Charts deklarativ ausrollen](#helmrelease---helm-charts-deklarativ-ausrollen)
+     * [OCI-Helm-Chart verwenden](#oci-helm-chart-verwenden)
+     * [Eigenes Helm Chart aus Git-Repository ausrollen](#eigenes-helm-chart-aus-git-repository-ausrollen)
+     * [Uebung: Flux-Operator Web-UI mit Ingress und HTTPS absichern](#uebung-flux-operator-web-ui-mit-ingress-und-https-absichern)
 
   1. Abschluss
      * Best Practices & Hands-on Labs
      * Fehler vermeiden, Debugging meistern
+
+## Backlog 
+
+  1. Autoscaling für fpm-php (Gedankenexperimente, nicht sinnvol)
+     
 
 <div class="page-break"></div>
 
@@ -192,8 +213,8 @@ kubectl get node k8s-nue-jo-ff1p1 -o=jsonpath='{.metadata.labels}'
 
 ```
 ## Start einen pod // BESSER: direkt manifest verwenden
-## kubectl run podname image=imagename 
-kubectl run nginx image=nginx 
+## kubectl run podname --image=imagename 
+kubectl run nginx --image=nginx 
 
 ## Pods anzeigen 
 kubectl get pods 
@@ -255,6 +276,285 @@ kubectl config set-context --current --namespace <dein-namespace>
 ### Referenz
 
   * https://kubernetes.io/de/docs/reference/kubectl/cheatsheet/
+
+## Cluster startklar machen: CNI installieren
+
+### Uebung: CNI-Provider Calico installieren
+
+
+### Hintergrund
+
+  * Dein Cluster wurde bewusst OHNE CNI-Plugin provisioniert (nur kubeadm init/join)
+  * Ohne CNI: Nodes bleiben `NotReady`, CoreDNS bleibt `Pending` - es koennen
+    keine normalen Pods starten
+  * Genau das schauen wir uns erst an, dann beheben wir es
+
+### Schritt 1: Ausgangslage ansehen (kaputt by design)
+
+```
+kubectl get nodes
+## STATUS: NotReady - warum?
+
+kubectl describe node <dein-cp-node> | grep -A 3 "Ready "
+## message: Network plugin returns error: cni plugin not initialized
+
+kubectl -n kube-system get pods
+## coredns: Pending (kein CNI -> kein Pod-Netz -> nicht schedulebar)
+```
+
+### Schritt 2: Tigera-Operator installieren
+
+  * Wichtig: `kubectl create` (nicht `apply`) - die Manifeste sind zu gross
+    fuer die apply-Annotation
+
+```
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.32.2/manifests/tigera-operator.yaml
+```
+
+```
+## Operator laeuft?
+kubectl -n tigera-operator get pods
+```
+
+### Schritt 3: Calico-Konfiguration (Custom Resources) anlegen
+
+  * Die `Installation`-Resource sagt dem Operator, wie er Calico ausrollen soll
+  * Das Default-Pod-Netz darin (192.168.0.0/16) passt zu unserem
+    kubeadm-Setup (`--pod-network-cidr=192.168.0.0/16`)
+
+```
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.32.2/manifests/custom-resources.yaml
+```
+
+### Schritt 4: Zuschauen, wie das Cluster "heile" wird
+
+```
+## 1-3 Minuten, bis alles laeuft
+kubectl -n calico-system get pods -w
+## Ctrl+C wenn calico-node auf allen Nodes Running ist
+```
+
+```
+kubectl -n calico-system get pods
+kubectl get nodes
+## STATUS: Ready !
+
+kubectl -n kube-system get pods
+## coredns: Running
+```
+
+### Schritt 5: Funktionstest - jetzt starten auch normale Pods
+
+```
+kubectl run cni-test --image=nginx
+kubectl get pods -o wide
+## Running, mit IP aus 192.168.x.x
+```
+
+### Aufraeumen
+
+  * Calico bleibt natuerlich installiert - nur den Test-Pod entfernen:
+
+```
+kubectl delete pod cni-test
+```
+
+### Reference
+
+  * https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart
+
+## MetalLB als Load-Balancer (Bare-Metal)
+
+### Kubernetes Load Balancer - metallb
+
+
+### General 
+
+  * Supports bgp and arp (l2 mode) - this exercise uses l2/arp
+  * Divided into controller (ipam), speaker (advertises the ip)
+
+### Installation Ways  
+
+  * helm 
+  * manifests 
+
+### Step 1: install metallb
+
+```
+## We use L2 mode (arp), not bgp
+## The speaker is required in both modes - it is the component that
+## actually announces the IP on the network (controller only does IPAM)
+
+helm repo add metallb https://metallb.github.io/metallb 
+```
+
+```
+## reset-values, always reset values on upgrade
+## Attention: 0.16.1 is buggy, operator fires a lot of api-calls to the kube-api-server -> do not use before fix 
+helm upgrade --install metallb metallb/metallb --namespace=metallb-system --create-namespace --version 0.15.3 --reset-values
+```
+
+### Step 2: addresspool
+
+```
+## find your node public ips first - "kubectl get nodes -o wide" does NOT
+## show them (no cloud-controller-manager here), EXTERNAL-IP stays <none>.
+## they are listed in ~/cluster-zugang.txt on client-bka.
+cat ~/cluster-zugang.txt
+```
+
+```
+cd
+mkdir -p manifests
+cd manifests
+mkdir lb
+cd lb
+nano 01-addresspool.yml 
+```
+
+```
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  # hier die ip-adressen Deiner 3 worker nodes eintragen
+  - 157.230.113.124/32
+```
+
+```
+kubectl apply -f .
+```
+
+### Step 3: L2Advertisement
+
+```
+nano 02-advertisement.yml
+```
+
+```
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: example
+  namespace: metallb-system
+```
+
+```
+kubectl apply -f .
+```
+
+### Step 4: Test do i get an external ip 
+
+```
+nano 03-deploy.yml
+```
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: web-nginx
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        run: web-nginx
+    spec:
+      containers:
+      - name: cont-nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+
+```
+
+
+```
+nano 04-service.yml
+```
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-nginx
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: web-nginx
+```
+
+
+```
+kubectl apply -f .
+kubectl get pods
+kubectl get svc
+kubectl describe svc svc-nginx
+```
+
+```
+## auf dem client 
+curl http://<ip aus get svc>
+```
+
+```
+kubectl delete -f 03-deploy.yml -f 04-service.yml 
+```
+
+### Step 5: Referenz:
+
+  * https://metallb.io/installation/#installation-with-helm
+
+### Feste IP beziehen
+
+
+### Beispiel
+
+```
+cd manifests/lb
+```
+
+```
+## bestehende 04-service.yml aus der metallb-Uebung anpassen (NICHT neu anlegen,
+## sonst kollidiert der Service-Name svc-nginx mit zwei Manifests im selben Ordner)
+nano 04-service.yml
+```
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-nginx
+  labels:
+    svc: nginx
+  annotations:
+    # spec.loadBalancerIP ist deprecated (seit 1.24) - MetalLB nutzt stattdessen
+    # diese Annotation, eure ip aus dem pool nehmen
+    metallb.io/loadBalancerIPs: 167.99.130.85
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: web-nginx
+```
+
+```
+kubectl apply -f 04-service.yml
+## ist es die von oben ?
+kubectl get svc
+```
 
 ## Kubernetes-Networking-Grundlagen
 
@@ -347,7 +647,7 @@ kind: Pod
 metadata:
   name: nginx-pausetest
   labels:
-    webserver: nginx:1.21
+    webserver: nginx
 spec:
   containers:
   - name: web
@@ -499,11 +799,6 @@ static : Allocates static IPv4/IPv6 addresses to containers
   * Common Network Interface
   * Feste Definition, wie Pod  mit Netzwerk-Bibliotheken kommunizieren
 
-### Docker - Container oder andere 
-
-  * Pod (Pause Container) wird hochgefahren -> über CNI -> zieht Netzwerk - IP  hoch. 
-  * Pod (Pause Container) witd runtergahren -> uber CNI -> Netzwerk - IP wird released 
-
 ### Welche gibt es ? 
 
   * Flannel
@@ -511,7 +806,7 @@ static : Allocates static IPv4/IPv6 addresses to containers
   * Calico 
   * Cilium
   * Antrea (vmware)
-  * Weave Net 
+
   
 ### Flannel
 
@@ -609,7 +904,7 @@ Typha maintains a single datastore connection on behalf of all of its clients li
 #### calicoctl
 
   * Wird heute selten gebraucht, da das meiste heute mit kubectl über den Calico API Server realisiert werden kann
-  * Früher haben die neuesten NetworkPolicies/v3 nur über calioctl funktioniert 
+  * Früher haben die neuesten NetworkPolicies/v3 nur über calicoctl funktioniert 
 
 #### Generell 
 
@@ -694,36 +989,6 @@ Typha maintains a single datastore connection on behalf of all of its clients li
   * Sehr grosses Feature-Set 
   * mit das älteste Plugin 
 
-### CNI-Provider calico einrichten
-
-
-### Walkthrough 
-
-```
-## Step 1 - Install the operator
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/tigera-operator.yaml
-## Step 2 - Install the custom resources 
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/custom-resources.yaml
-```
-
-### Testing 
-
-```
-kubectl -n tigera-operator get pods 
-kubectl -n calico-system get pods
-kubectl -n calico-apiserver get pods
-## Sind die nodes schon ready 
-kubectl get nodes
-
-kubectl -n kube-system get pods
-kubectl -n kube-system get pods coredns-7c65d6cfc9-f6f56 -o wide
-kubectl -n kube-system describe pods coredns-7c65d6cfc9-f6f56
-```
-
-### Reference 
-
-  * https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart
-
 ### Weg vom Pod zum Host -> veth / calicoctl get wep
 
 
@@ -796,198 +1061,6 @@ Chain cali-tw-cali42c2aab93f3 (1 references)
 ```
 
 
-
-## MetalLB als Load-Balancer (Bare-Metal)
-
-### Kubernetes Load Balancer - metallb
-
-
-### General 
-
-  * Supports bgp and arp 
-  * Divided into controller, speaker 
-
-### Installation Ways  
-
-  * helm 
-  * manifests 
-
-### Step 1: install metallb
-
-```
-## Just to show some basics 
-## Page from metallb says that digitalocean is not really supported well 
-## So we will not install the speaker .
-
-helm repo add metallb https://metallb.github.io/metallb 
-```
-
-```
-## Eventually disabling speaker 
-## vi values.yml 
-
-```
-
-```
-## reset-values, always reset values on upgrade 
-helm upgrade --install metallb metallb/metallb --namespace=metallb-system --create-namespace --version 0.15.2 --reset-values
-```
-
-### Step 2: addresspool und Propagation-type (config) 
-
-```
-cd
-mkdir -p manifests
-cd manifests
-mkdir lb
-cd lb
-nano 01-addresspool.yml 
-```
-
-```
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
-  name: first-pool
-  namespace: metallb-system
-spec:
-  addresses:
-  # we will use our external ip here 
-  - 134.209.231.154-134.209.231.154
-  # both notations are possible 
-  - 157.230.113.124/32
-```
-
-```
-kubectl apply -f .
-```
-
-```
-nano 02-advertisement.yml
-```
-
-```
-apiVersion: metallb.io/v1beta1
-kind: L2Advertisement
-metadata:
-  name: example
-  namespace: metallb-system
-```
-
-```
-kubectl apply -f .
-```
-
-### Schritt 4: Test do i get an external ip 
-
-```
-nano 03-deploy.yml
-```
-
-```
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: my-nginx
-spec:
-  selector:
-    matchLabels:
-      run: web-nginx
-  replicas: 3
-  template:
-    metadata:
-      labels:
-        run: web-nginx
-    spec:
-      containers:
-      - name: cont-nginx
-        image: nginx
-        ports:
-        - containerPort: 80
-
-```
-
-
-```
-nano 04-service.yml
-```
-
-```
-apiVersion: v1
-kind: Service
-metadata:
-  name: svc-nginx
-  labels:
-    svc: nginx
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    protocol: TCP
-  selector:
-    run: web-nginx
-```
-
-
-```
-kubectl apply -f .
-kubectl get pods
-kubectl get svc
-```
-
-```
-## auf dem client 
-curl http://<ip aus get svc>
-```
-
-```
-kubectl delete -f 03-deploy.yml 04-service.yml 
-```
-
-### Schritt 5: Referenz:
-
-  * https://metallb.io/installation/#installation-with-helm
-
-### Feste IP beziehen
-
-
-### Beispiel 
-
-```
-cd manifests/lb
-```
-
-```
-## bestehende 04-service.yml aus der metallb-Uebung anpassen (NICHT neu anlegen,
-## sonst kollidiert der Service-Name svc-nginx mit zwei Manifests im selben Ordner)
-nano 04-service.yml
-```
-
-```
-apiVersion: v1
-kind: Service
-metadata:
-  name: svc-nginx
-  labels:
-    svc: nginx
-  annotations:
-    ## spec.loadBalancerIP ist deprecated (seit 1.24) - MetalLB nutzt stattdessen
-    ## diese Annotation, eure ip aus dem pool nehmen
-    metallb.io/loadBalancerIPs: 167.99.130.85
-spec:
-  type: LoadBalancer
-  ports:
-  - port: 80
-    protocol: TCP
-  selector:
-    run: web-nginx
-```
-
-```
-kubectl apply -f 04-service.yml
-## ist es die von oben ? 
-kubectl get svc
-```
 
 ## Network Policies
 
@@ -1173,89 +1246,148 @@ kubectl delete ns policy-demo-$KURZ
 
   * https://projectcalico.docs.tigera.io/security/tutorials/kubernetes-policy-basic
 
-### Beispiel mit ipBlock
+### Warum Calico-Policies statt Standard-NetworkPolicy?
 
+
+### Kurzfassung
+
+  * Die Kubernetes-NetworkPolicy ist der kleinste gemeinsame Nenner:
+    portabel ueber alle CNI-Provider (Calico, Cilium, ...), aber bewusst
+    eingeschraenkt.
+  * Die Calico-Policies (`projectcalico.org/v3`) sind ein Superset:
+    alles, was die Standard-Policy kann, plus cluster-weite Policies,
+    Deny-Regeln, Reihenfolge und mehr.
+  * Beide lassen sich mischen - Calico wertet Standard- und
+    Calico-Policies gemeinsam aus.
+
+### Was die Standard-NetworkPolicy kann
+
+  * Namespaced: gilt immer nur in ihrem Namespace
+  * Whitelist-Prinzip: sobald eine Policy auf einen Pod matcht,
+    ist alles andere verboten - es gibt nur "Allow"-Regeln
+  * Selektoren: `podSelector`, `namespaceSelector`, `ipBlock`
+  * Ports/Protokolle: TCP, UDP, SCTP
+  * Wichtig: Kubernetes selbst setzt NICHTS durch - die Umsetzung
+    macht immer der CNI-Provider (bei uns: Calico)
+
+### Grenzen der Standard-NetworkPolicy
+
+  * Kein cluster-weites default-deny mit EINEM Objekt -
+    man braucht eine eigene Policy pro Namespace
+  * Keine expliziten Deny-Regeln (nur implizites Deny durch Whitelisting)
+  * Keine Reihenfolge/Prioritaeten zwischen Policies
+  * Kein Schutz der Nodes selbst (nur Pod-Traffic)
+  * Kein Logging von Policy-Entscheidungen
+  * Nur einfache Label-Gleichheit als Selektor
+
+### Was Calico zusaetzlich bietet
+
+| Feature | Standard NetworkPolicy | Calico |
+|---------|------------------------|--------|
+| Geltungsbereich | nur Namespace | NetworkPolicy (Namespace) + GlobalNetworkPolicy (Cluster) |
+| Aktionen | nur Allow (implizit) | Allow, Deny, Log, Pass |
+| Reihenfolge | keine | `order`-Feld |
+| Selektoren | Label-Gleichheit | Ausdruecke: `has()`, `in`, `!=`, `&&`, `all()` |
+| ServiceAccounts | nein | `serviceAccountSelector` |
+| Nodes/Hosts schuetzen | nein | HostEndpoints, `preDNAT` (z.B. NodePorts) |
+| ICMP-Regeln | nein | ja |
+| Policies testen | nein | Staged Policies (ab 3.29), Tiers (ab 3.30) |
+
+  * Praktisch am wichtigsten fuer uns:
+    * **GlobalNetworkPolicy**: ein cluster-weites default-deny statt
+      einer Kopie pro Namespace (siehe Uebung)
+    * **order**: definierte Auswertungsreihenfolge statt "alle Policies
+      werden zusammengeworfen"
+    * **Log-Action**: sichtbar machen, WELCHE Regel Traffic verwirft
+
+### Daumenregel: Wann nehme ich was?
+
+  * **Standard-NetworkPolicy**: einfache App-Isolation innerhalb eines
+    Namespaces, oder wenn Manifests portabel bleiben sollen
+    (z.B. Helm-Charts fuer fremde Cluster)
+  * **Calico-Policies**: cluster-weite Grundregeln (default-deny),
+    explizite Deny-Regeln, Compliance-Anforderungen, Node-Schutz,
+    Policy-Debugging
+  * Mischen ist ueblich: Plattform-Team setzt GlobalNetworkPolicies,
+    App-Teams schreiben Standard-Policies fuer ihre Namespaces.
+    Calico liest die Standard-Policies direkt ein und wertet sie
+    zusammen mit den Calico-Policies aus.
+
+### Referenzen
+
+  * https://docs.tigera.io/calico/latest/network-policy/get-started/calico-policy/calico-network-policy
+  * https://docs.tigera.io/calico/latest/network-policy/get-started/kubernetes-policy/kubernetes-network-policy
+
+### Calico-Policies - Grundlagen (Ordering, Implicit Deny, API-Version)
+
+
+### Version 3.30
+
+  * Introduced Tiers
+
+### Ordering (no order set)
+
+  * For the default deny GlobalNetworkPolicy use no order
+    * it will then be evaluated as last rule (catch all)
+
+  * **Ref:** https://docs.tigera.io/calico-cloud/network-policy/default-deny
+
+### Ordering with Number for GlobalNetworkPolicy and NetworkPolicy
 
 ```
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: traefik/whoami
-        ports:
-        - containerPort: 80
----
-## nano 02-service.yaml 
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx
-spec:
-  type: NodePort # Default Wert
-  ports:
-  - port: 80
-    protocol: TCP
-  selector:
-    app: nginx
----
-## nano 03-default-deny.yaml
-## Schritt 2: Policy festlegen, dass kein Ingress-Traffic erlaubt
-## in diesem namespace: policy-demo-$KURZ
-kind: NetworkPolicy
-apiVersion: networking.k8s.io/v1
-metadata:
-  name: default-deny
-spec:
-  podSelector:
-    matchLabels: {}
----
-## nano 05-from-access.yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: access-nginx
-spec:
-  podSelector:
-    matchLabels:
-      app: nginx
-  ingress:
-    - from:
-      - ipBlock:
-          cidr: 138.197.181.70/32
+GlobalNetworkPolicies and NetworkPolicies from calico are mixed
+They are all sorted by order
 
+NetworkPolicy A order 50
+GlobalNetworkPolicy B order 100
+GlobalNetworkPolicy C order 70
+NetworkPolicy D order 80
+```
 
 ```
+results in this execution order -->
+```
+
+```
+NetworkPolicy A order 50
+GlobalNetworkPolicy C order 70
+NetworkPolicy D order 80
+GlobalNetworkPolicy B order 100
+```
+
+### Implicit Deny
+
+  * the selector() defines whom the NetworkPolicy or GlobalNetworkPolicy are for
+  * If no rules apply -> it will be an implicit deny
+
+### crd.projectcalico.org/v1 vs projectcalico.org/v3
+
+```
+Long story short: Please only use projectcalico.org/v3
+They also work with kubectl (when calico apiserver is running - this is the case by default)
+kubectl -n calico-system get pods | grep api
+```
+
+```
+LONG STORY:
+Don't touch crd.projectcalico.org/v1 resources. They are not currently supported for end-users and the entire API group is only used internally within Calico. Using any API within that group means you will bypass API validation and defaulting, which is bad and can result in symptoms like # 2 above. You should use projectcalico.org/v3 instead. Note that projectcalico.org/v3 requires that you install the Calico API server in your cluster, and will result in errors similar to # 1 above if the Calico API server is not running
+```
+
+  * Ref: https://github.com/projectcalico/calico/issues/6412
 
 ### Erweiterte Policies mit Calico - Uebung
 
 
-### Step 1:
+### Step 1: Set global policy
 
 ```
 cd
-mkdir -p manifests
-cd manifests
-mkdir calico
-cd calico
+mkdir -p manifests/calico
+cd manifests/calico
+nano 01-gp.yml
 ```
 
-```
-nano 01-gnp.yml
-```
-
-### Step 2: Set global policy
+  * Best practice no "order" here, will be processed last then
 
 ```
 apiVersion: projectcalico.org/v3
@@ -1263,35 +1395,45 @@ kind: GlobalNetworkPolicy
 metadata:
   name: default-deny
 spec:
-  # Auf alle Namespaces außer kube-system und calico-system anwenden
-  namespaceSelector: kubernetes.io/metadata.name not in {"kube-system","calico-system"}
-
+  namespaceSelector: has(kubernetes.io/metadata.name) && kubernetes.io/metadata.name not in {"kube-system", "calico-system", "tigera-operator"}
   types:
   - Ingress
   - Egress
-
-  # Egress-Ausnahmen (z. B. DNS)
   egress:
+   # allow all namespaces to communicate to DNS pods
   - action: Allow
     protocol: UDP
     destination:
       selector: 'k8s-app == "kube-dns"'
-      ports: [53]
+      ports:
+      - 53
   - action: Allow
     protocol: TCP
     destination:
       selector: 'k8s-app == "kube-dns"'
-      ports: [53]
+      ports:
+      - 53
 ```
 
 ```
 kubectl apply -f .
 ```
 
-### Step 3: nginx ausrollen aus manifests/04-service und testen
+### Step 2: Namespace nptest anlegen und nginx ausrollen
 
 ```
-nano deploy.yml 
+kubectl create ns nptest
+kubectl config set-context --current --namespace=nptest
+```
+
+```
+cd
+mkdir -p manifests/04-service
+cd manifests/04-service
+```
+
+```
+nano deploy.yml
 ```
 
 ```
@@ -1320,7 +1462,6 @@ spec:
 nano service.yml
 ```
 
-
 ```
 apiVersion: v1
 kind: Service
@@ -1334,36 +1475,65 @@ spec:
   - port: 80
     protocol: TCP
   selector:
-    web: my-nginx      
-        
-```        
-
-```
-kubectl apply -f . 
+    web: my-nginx
 ```
 
 ```
-kubectl run -it --rm access --image=busybox 
+kubectl apply -f .
+```
+
+### Step 3: Gleiche Applikation im Namespace fremd ausrollen
+
+```
+kubectl create ns fremd
 ```
 
 ```
-## In der Bbusybox 
-wget -O - http://svc-nginx 
+## gleiche Applikation im anderen namespace ausrollen
+kubectl -n fremd apply -f .
 ```
 
-### Step 4: Traffic erlauben egress von busybox 
+### Step 4: Testen im eigenen Namespace "nptest" und zum -> anderen
 
 ```
-nano 02-egress-allow-busybox.yml  
+kubectl run -it --rm access --image=busybox
+```
+
+**Testen zum svc-nginx-Dienst im eigenen Namespace und google**
+
+```
+## In der Busybox
+## Test innerhalb meines namespaces
+## bekomme die Ausgabe des Ziels nicht
+wget -O - http://svc-nginx
+## Google geht auch nicht
+wget -O - http://www.google.de
+## aber dns lookup geht
+nslookup www.google.de
+```
+
+**Test zum svc-nginx.fremd - Dienst - also im anderen Namespace**
+
+```
+## test mit pod im **fremd** namespace
+wget -O - http://svc-nginx.fremd
+## --> geht auch nicht
+```
+
+### Step 5: Traffic erlauben egress von busybox
+
+```
+cd ~/manifests/calico
+nano 02-egress-allow-busybox.yml
 ```
 
 ```
-## vi 02-egress-allow-busybox.yml
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
   name: allow-busybox-egress
 spec:
+  order: 10
   selector: run == 'access'
   types:
   - Egress
@@ -1372,7 +1542,9 @@ spec:
 ```
 
 ```
-kubectl apply -f . 
+kubectl apply -f 02-egress-allow-busybox.yml
+## cnp = calico network policy
+kubectl get all,cnp
 ```
 
 ```
@@ -1380,22 +1552,33 @@ kubectl run -it --rm access --image=busybox
 ```
 
 ```
-## sollte gehen 
+## sollte gehen
 wget -O - http://www.google.de
 
 ## sollte nicht funktionieren
 wget -O - http://svc-nginx
+
+## sollte nicht funktionieren
+## Ausgehender Traffic geht zwar, aber eingehender
+## Traffic ist nicht gesetzt (auch nicht im anderen namespace)
+## Hier haben wir bisher noch keine Regeln
+wget -O - http://svc-nginx.fremd
 ```
 
-### Step 5: Traffic erlauben für nginx 
+### Step 6: Traffic erlauben fuer nginx
 
 ```
-## 03-allow-ingress-my-nginx.yml 
+nano 03-allow-ingress-my-nginx.yml
+```
+
+```
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
   name: allow-nginx-ingress
 spec:
+  order: 20
+  # fuer welche pods soll das gelten
   selector: web == 'my-nginx'
   types:
   - Ingress
@@ -1410,52 +1593,106 @@ kubectl apply -f .
 ```
 
 ```
-kubectl run -it --rm access --image=busybox 
+kubectl run -it --rm access --image=busybox
 ```
 
 ```
-## In der Bbusybox 
-wget -O - http://svc-nginx 
+## In der Busybox das geht ->
+wget -O - http://svc-nginx
+## das nicht
+wget -O - http://svc-nginx.fremd
+## das geht
+wget -O - http://www.google.de
 ```
 
-### Calico - Services schuetzen
+### Step 7: Optional: Traffic innerhalb des Namespaces erlauben
 
+```
+## alte Regeln rausnehmen
+kubectl delete -f 02-egress-allow-busybox.yml
+kubectl delete -f 03-allow-ingress-my-nginx.yml
+```
 
-### Example 
+```
+nano 04-traffic-allowed-inside-namespace.yml
+```
 
 ```
 apiVersion: projectcalico.org/v3
-kind: GlobalNetworkPolicy
+kind: NetworkPolicy
 metadata:
-  name: allow-cluster-ips
+  name: allow-intra-namespace
 spec:
-  selector: k8s-role == 'node'
+  order: 100
+  selector: all()
   types:
-  - Ingress
-  applyOnForward: true
-  preDNAT: true
+    - Ingress
+    - Egress
   ingress:
-   # Allow 50.60.0.0/16 to access Cluster IP A
-  - action: Allow
-    source:
-      nets:
-      - 50.60.0.0/16
-    destination:
-      nets:
-      - 10.20.30.40/32  Cluster IP A
-   # Allow 70.80.90.0/24 to access Cluster IP B
-  - action: Allow
-    source:
-      nets:
-      - 70.80.90.0/24
-    destination:
-      nets:
-      - 10.20.30.41/32  Cluster IP B
+    - action: Allow
+      source:
+        selector: all()
+  egress:
+    - action: Allow
+      destination:
+        selector: all()
 ```
 
-### Referenz 
+```
+kubectl apply -f 04-traffic-allowed-inside-namespace.yml
+```
 
-  * https://docs.tigera.io/calico/latest/network-policy/services/services-cluster-ips
+```
+kubectl run -it --rm access --image=busybox
+```
+
+```
+## In der Busybox das geht ->
+wget -O - http://svc-nginx
+## das nicht
+wget -O - http://svc-nginx.fremd
+## das geht auch nicht
+wget -O - http://www.google.de
+```
+
+### Step 8 (Optional): Traffic vom Ingress Controller erlauben
+
+  * Nur relevant, wenn ein Ingress Controller (z.B. ingress-nginx) installiert ist
+
+```
+nano 05-allow-ingress-controller-to-nginx.yml
+```
+
+```
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller-to-nginx
+spec:
+  order: 30
+  selector: web == 'my-nginx'
+  types:
+  - Ingress
+  ingress:
+  - action: Allow
+    protocol: TCP
+    source:
+      namespaceSelector: kubernetes.io/metadata.name == "ingress-nginx"
+    destination:
+      ports: [80, 443]
+```
+
+```
+kubectl apply -f 05-allow-ingress-controller-to-nginx.yml
+```
+
+### Aufraeumen
+
+```
+kubectl delete gnp default-deny
+kubectl delete ns fremd nptest
+kubectl config set-context --current --namespace=default
+```
 
 ## RBAC & Identity
 
@@ -1503,6 +1740,16 @@ kubectl auth can-i get pods
 ```
 kubectl auth can-i --list
 ```
+
+### Fuer einen anderen Nutzer (z.B. ServiceAccount)
+
+```
+kubectl auth can-i --list --as system:serviceaccount:default:training
+```
+
+Praktisch kombinierbar mit der [praktischen RBAC-Uebung](../rbac-create-user-kubernetes-1-25.md):
+zeigt alle erlaubten Verben/Ressourcen des ServiceAccount auf einen Blick,
+statt jeden Befehl einzeln mit `can-i get ...` durchzutesten.
 
 ### ServiceAccounts: kubectl im Pod - default ServiceAccount
 
@@ -1822,7 +2069,377 @@ kubectl config use-context kubernetes-admin@kubernetes
 
   * https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/#create-token
 
-## Secrets Management mit HashiCorp Vault / OpenBao
+### Praktische Uebung: RBAC-Hygiene - Label-Konvention pruefen und Nutzung im Audit-Log nachweisen
+
+
+Getestet gegen Kubernetes 1.37 (kubeadm, eigenes Cluster).
+
+Die [Uebung zu Least Privilege](../rbac-create-user-kubernetes-1-25.md) zeigt, wie man
+overprivilegierte ServiceAccounts findet. Diese Uebung geht einen Schritt weiter:
+Kubernetes speichert nirgends, wann eine Role, ClusterRole oder ein RoleBinding
+zuletzt tatsaechlich benutzt wurde - kein Feld, keine API. Wir bauen deshalb eine
+Label-Konvention (`owner`, `purpose`, `review-by`), pruefen sie automatisiert, und
+zeigen anschliessend, wie man ueber das Audit-Log des kube-apiserver einen echten
+Nutzungsnachweis bekommt - und wo dessen Grenzen liegen.
+
+### Voraussetzungen
+
+- Eigenes kubeadm-Cluster mit `kubectl`-Zugriff (Cluster-Admin-Kubeconfig)
+- `jq` installiert
+
+### Ueberblick
+
+```
+Schritt 1: Namespace vorbereiten
+Schritt 2: Drei ServiceAccounts + RoleBindings anlegen (gepflegt / unbeschriftet / abgelaufen)
+Schritt 3: Audit-Query 1 - fehlende Pflicht-Labels finden
+Schritt 4: Audit-Query 2 - abgelaufene review-by-Termine finden
+Schritt 5: Audit-Log am kube-apiserver aktivieren
+Schritt 6: Echten Zugriff erzeugen und im Audit-Log nachweisen
+Schritt 7: Gegenprobe - unbenutzte Bindung im Audit-Log nicht nachweisbar
+Schritt 8: Aufraeumen
+```
+
+---
+
+### Schritt 1: Namespace vorbereiten
+
+```
+kubectl create namespace rbac-hygiene
+```
+
+### Schritt 2: Drei RBAC-Identitaeten anlegen
+
+Ein sauber gepflegter ServiceAccount (`owner`, `purpose`, `review-by` in der Zukunft),
+ein komplett unbeschrifteter (Gegenbeispiel), und einer mit abgelaufenem `review-by`:
+
+```
+## vi 01-rbac-hygiene.yml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: rbac-hygiene
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ci-deploy-payment-api
+  namespace: rbac-hygiene
+  labels:
+    owner: team-payment
+    purpose: ci-deploy-payment-api
+    review-by: "2026-12-09"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ci-deploy-payment-api-binding
+  namespace: rbac-hygiene
+  labels:
+    owner: team-payment
+    purpose: ci-deploy-payment-api
+    review-by: "2026-12-09"
+subjects:
+- kind: ServiceAccount
+  name: ci-deploy-payment-api
+  namespace: rbac-hygiene
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: batch-job-alt
+  namespace: rbac-hygiene
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: batch-job-alt-binding
+  namespace: rbac-hygiene
+subjects:
+- kind: ServiceAccount
+  name: batch-job-alt
+  namespace: rbac-hygiene
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: legacy-export
+  namespace: rbac-hygiene
+  labels:
+    owner: team-data
+    purpose: nightly-export-legacy-crm
+    review-by: "2026-08-11"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: legacy-export-binding
+  namespace: rbac-hygiene
+  labels:
+    owner: team-data
+    purpose: nightly-export-legacy-crm
+    review-by: "2026-08-11"
+subjects:
+- kind: ServiceAccount
+  name: legacy-export
+  namespace: rbac-hygiene
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+
+```
+kubectl apply -f 01-rbac-hygiene.yml
+```
+
+`ci-deploy-payment-api` ist der Normalfall: klarer Owner, klarer Zweck, ein Termin
+in der Zukunft, an dem jemand pruefen muss, ob es das noch braucht. `batch-job-alt`
+ist der haeufigste Fall in echten Clustern: irgendwann angelegt, nie beschriftet.
+`legacy-export` ist beschriftet, aber der Review-Termin ist laengst verstrichen -
+niemand hat reagiert.
+
+### Schritt 3: Fehlende Pflicht-Labels finden
+
+```
+kubectl get serviceaccounts,rolebindings -n rbac-hygiene -o json | jq -r '
+  .items[] |
+  select(.metadata.name != "default") |
+  select((.metadata.labels.owner == null) or (.metadata.labels.purpose == null) or (.metadata.labels["review-by"] == null)) |
+  "\(.kind)/\(.metadata.name): fehlende Pflicht-Labels"
+'
+```
+
+**Erwartete Ausgabe:**
+
+```
+ServiceAccount/batch-job-alt: fehlende Pflicht-Labels
+RoleBinding/batch-job-alt-binding: fehlende Pflicht-Labels
+```
+
+### Schritt 4: Abgelaufene review-by-Termine finden
+
+```
+kubectl get serviceaccounts,rolebindings -n rbac-hygiene -o json | jq -r --arg today "$(date +%F)" '
+  .items[] |
+  select(.metadata.labels["review-by"] != null) |
+  select(.metadata.labels["review-by"] < $today) |
+  "\(.kind)/\(.metadata.name): review-by \(.metadata.labels["review-by"]) liegt in der Vergangenheit"
+'
+```
+
+**Erwartete Ausgabe:**
+
+```
+ServiceAccount/legacy-export: review-by 2026-08-11 liegt in der Vergangenheit
+RoleBinding/legacy-export-binding: review-by 2026-08-11 liegt in der Vergangenheit
+```
+
+**Wichtig:** Diese beiden Queries pruefen nur, ob die Konvention eingehalten wird
+und ob ein Review faellig ist - nicht, ob die Berechtigung tatsaechlich noch
+gebraucht wird. Das kann Kubernetes ohne Weiteres gar nicht beantworten. Genau das
+zeigen die naechsten Schritte.
+
+---
+
+### Schritt 5: Audit-Log am kube-apiserver aktivieren
+
+Echte Nutzungsdaten liefert ausschliesslich das Audit-Log des kube-apiserver -
+nicht Kubelet- oder Anwendungs-Logs. Auf einem kubeadm-Cluster ist der
+kube-apiserver ein Static Pod, dessen Manifest direkt auf dem Control-Plane-Node
+liegt. Wir editieren es ueber `kubectl debug node` - kein SSH-Zugriff auf den Node
+noetig, nur die Cluster-Admin-Kubeconfig:
+
+```
+CP_NODE=$(kubectl get nodes -l node-role.kubernetes.io/control-plane -o jsonpath='{.items[0].metadata.name}')
+kubectl debug node/$CP_NODE -it --image=alpine:3.20 --profile=general -- chroot /host sh
+```
+
+Im Node-Shell (`chroot /host`):
+
+```
+cp /etc/kubernetes/manifests/kube-apiserver.yaml /etc/kubernetes/kube-apiserver.yaml.orig
+mkdir -p /var/log/kubernetes/audit
+
+cat > /etc/kubernetes/audit-policy.yaml <<'EOF'
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+- level: Metadata
+EOF
+
+sed -i '/--authorization-mode=Node,RBAC/a\    - --audit-policy-file=/etc/kubernetes/audit-policy.yaml\n    - --audit-log-path=/var/log/kubernetes/audit/audit.log\n    - --audit-log-maxage=1\n    - --audit-log-maxbackup=1' /etc/kubernetes/manifests/kube-apiserver.yaml
+
+sed -i '/^  hostNetwork: true/i\    - mountPath: /etc/kubernetes/audit-policy.yaml\n      name: audit-policy\n      readOnly: true\n    - mountPath: /var/log/kubernetes/audit\n      name: audit-log' /etc/kubernetes/manifests/kube-apiserver.yaml
+
+sed -i '/^status: {}/i\  - hostPath:\n      path: /etc/kubernetes/audit-policy.yaml\n      type: File\n    name: audit-policy\n  - hostPath:\n      path: /var/log/kubernetes/audit\n      type: DirectoryOrCreate\n    name: audit-log' /etc/kubernetes/manifests/kube-apiserver.yaml
+
+exit
+```
+
+Der Kubelet erkennt die Manifest-Aenderung und startet den kube-apiserver-Pod neu.
+**`kubectl` haengt dabei fuer ca. 30-60 Sekunden** (`connection refused`) - das ist
+erwartet, kein Fehler. Warten und erneut versuchen:
+
+```
+kubectl get nodes
+```
+
+Sobald die Nodeliste wieder kommt, laeuft der apiserver mit Audit-Log.
+
+### Schritt 6: Echten Zugriff erzeugen und nachweisen
+
+Wir tun so, als waere `ci-deploy-payment-api` ein Pod, der ueber seinen
+ServiceAccount-Token auf Pods zugreift:
+
+```
+kubectl get pods -n rbac-hygiene --as=system:serviceaccount:rbac-hygiene:ci-deploy-payment-api
+```
+
+Jetzt im Audit-Log nachsehen, ob und wodurch dieser Zugriff erlaubt wurde:
+
+```
+CP_NODE=$(kubectl get nodes -l node-role.kubernetes.io/control-plane -o jsonpath='{.items[0].metadata.name}')
+kubectl debug node/$CP_NODE --image=alpine:3.20 --profile=general -- chroot /host sh -c \
+  'grep ci-deploy-payment-api-binding /var/log/kubernetes/audit/audit.log | tail -1'
+```
+
+**Erwartete Ausgabe (Auszug):**
+
+```
+"authorization.k8s.io/reason":"RBAC: allowed by RoleBinding \"ci-deploy-payment-api-binding/rbac-hygiene\" of Role \"pod-reader\" to ServiceAccount \"ci-deploy-payment-api/rbac-hygiene\""
+```
+
+Das ist der einzige Weg, mit dem Kubernetes selbst belegt: Diese Bindung wurde
+tatsaechlich gezogen, nicht nur vergeben. Der RBAC-Authorizer schreibt bei jeder
+erlaubten Anfrage genau diese `authorization.k8s.io/reason`-Annotation.
+
+### Schritt 7: Gegenprobe - keine Nutzung nachweisbar
+
+```
+CP_NODE=$(kubectl get nodes -l node-role.kubernetes.io/control-plane -o jsonpath='{.items[0].metadata.name}')
+kubectl debug node/$CP_NODE --image=alpine:3.20 --profile=general -- chroot /host sh -c \
+  'grep -c legacy-export-binding /var/log/kubernetes/audit/audit.log'
+```
+
+**Erwartete Ausgabe:**
+
+```
+0
+```
+
+`legacy-export-binding` taucht im Audit-Log nicht auf - seit das Log laeuft, hat
+niemand darueber zugegriffen. Das ist ein starkes Indiz, aber **kein Beweis**: Es
+belegt nur den beobachteten Zeitraum. Ein Quartalsjob, der einmal alle drei Monate
+laeuft, waere im Log genauso unsichtbar, obwohl er gebraucht wird. Deshalb bleibt
+die Entscheidung am `review-by`-Termin: abgelaufenes Label + keine Spur im
+Audit-Log seit der letzten Pruefung = starker Kandidat zum Loeschen, kein
+Automatismus.
+
+---
+
+### Schritt 8: Aufraeumen
+
+Audit-Log-Konfiguration wieder vom Node entfernen (sonst waechst die Datei
+unbegrenzt weiter):
+
+```
+CP_NODE=$(kubectl get nodes -l node-role.kubernetes.io/control-plane -o jsonpath='{.items[0].metadata.name}')
+kubectl debug node/$CP_NODE -it --image=alpine:3.20 --profile=general -- chroot /host sh
+```
+
+Im Node-Shell (die Sicherung aus Schritt 5 zurueckspielen, statt die Aenderungen
+einzeln per sed zu suchen):
+
+```
+cp /etc/kubernetes/kube-apiserver.yaml.orig /etc/kubernetes/manifests/kube-apiserver.yaml
+rm -f /etc/kubernetes/kube-apiserver.yaml.orig /etc/kubernetes/audit-policy.yaml
+rm -rf /var/log/kubernetes/audit
+exit
+```
+
+Namespace loeschen:
+
+```
+kubectl delete namespace rbac-hygiene
+```
+
+---
+
+### Zusammenfassung
+
+| Frage | Beantwortet durch | Beweist |
+|---|---|---|
+| Sind Owner/Zweck/Review-Termin gepflegt? | Label-Query (Schritt 3) | Compliance mit der Konvention |
+| Ist ein Review faellig? | review-by-Query (Schritt 4) | Faelligkeit, nicht Nutzung |
+| Wurde die Berechtigung tatsaechlich gezogen? | Audit-Log-Reason (Schritt 6) | Echte Nutzung im beobachteten Zeitraum |
+| Wird sie nicht mehr gebraucht? | Kein Tool zuverlaessig | - immer eine Team-Entscheidung am review-by-Termin |
+
+### Referenzen
+
+- https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
+- https://kubernetes.io/docs/reference/labels-annotations-taints/audit-annotations/
+- https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+
+## Secrets Management mit HashiCorp Vault
+
+### Vault-Architektur einfach erklaert
+
+
+### Die Idee: ein Tresorraum fuer Geheimnisse
+
+Stell dir Vault wie den Tresorraum einer Bank vor. Statt Goldbarren liegen
+darin Geheimnisse: Passwoerter, Datenbank-Zugaenge, Zertifikate. Niemand
+schreibt diese Geheimnisse mehr in den Programmcode oder in Konfigurationsdateien -
+wer eines braucht, geht zum Tresor und fragt danach.
+
+![Vault Architektur](images/vault-architektur.svg)
+
+### Die 4 Schritte
+
+1. **Ausweis-Kontrolle (Authentifizierung):** Deine App meldet sich an und
+   beweist, wer sie ist. Dafuer bekommt sie einen Ausweis - den **Token**.
+2. **Regel-Check (Policy):** Vault schaut in seine Regelliste: Was darf
+   dieser Ausweis sehen? Die App bekommt nur genau die Geheimnisse, die
+   fuer sie erlaubt sind - nicht mehr.
+3. **Schublade oeffnen (Secret Engine):** Jede Art von Geheimnis liegt in
+   einer eigenen Schublade. Manche Schubladen geben gespeicherte Passwoerter
+   heraus, andere erzeugen sogar frische Zugangsdaten, die nach kurzer Zeit
+   automatisch wieder ungueltig werden.
+4. **Antwort:** Die App bekommt ihr Geheimnis und kann damit z.B. auf die
+   Datenbank zugreifen.
+
+### Die wichtigsten Begriffe uebersetzt
+
+| Fachbegriff | Einfach gesagt |
+|-------------|----------------|
+| Token | Ausweis, den man nach dem Anmelden bekommt |
+| Policy | Regelliste: wer darf was sehen |
+| Secret Engine | Schublade fuer eine bestimmte Art von Geheimnis |
+| Sealed / Unseal | Tresor verriegelt / Tresor aufschliessen |
+| Audit Log | Besucherbuch: wer hat wann welches Geheimnis geholt |
+
+### Warum der Aufwand?
+
+* Passwoerter stehen nicht mehr im Code oder in Git - dort werden sie
+  am haeufigsten gestohlen.
+* Alle Geheimnisse liegen an EINEM zentralen Ort und sind dort verschluesselt.
+* Jeder Zugriff wird protokolliert - man sieht, wer wann was geholt hat.
+* Geheimnisse lassen sich zentral austauschen oder sperren, ohne dass
+  irgendwo Code angefasst werden muss.
 
 ### HashiCorp Vault als Password-Safe (Overview)
 
@@ -1888,1409 +2505,762 @@ spec:
 
 ### Volumes 
 
-### Architektur-Ueberblick OpenBao
+### Uebung: MariaDB-Deployment mit HashiCorp Vault ueber den Vault Secrets Operator (VSO)
 
 
-OpenBao ist ein Open-Source Fork von HashiCorp Vault (MPL 2.0 Lizenz) zur zentralen Verwaltung von Secrets, Zertifikaten und Verschlüsselungskeys. Hier ein pragmatischer Überblick, wie das Ding unter der Haube funktioniert.
+### Hintergrund
 
----
+Der Vault Secrets Operator (VSO) synchronisiert Secrets aus HashiCorp Vault
+als native Kubernetes Secrets in dein Cluster. Ein Controller im Cluster
+loggt sich bei Vault ein, liest das Secret periodisch neu und legt es als
+`Secret`-Ressource ab - Anwendungen greifen ganz normal per `secretKeyRef`
+darauf zu, ohne selbst etwas von Vault zu wissen.
 
-### Kernkonzept: Die Barrier
+![VSO Datenfluss](../images/vso-datenfluss.svg)
 
-OpenBao verschlüsselt **alles**, bevor es auf die Platte geschrieben wird. Die sogenannte *Barrier* (Verschlüsselungsschicht) trennt die vertrauenswürdige Innenwelt von OpenBao vom untrusted Storage Backend.
+> **Setup:** Alle Teilnehmer nutzen den **gleichen Vault-Server**
+> (`https://vault-bka.do.t3isp.de`), aber jeder arbeitet mit seinem
+> **eigenen Kubernetes-Cluster**. Das MariaDB-Credential
+> (`username`/`password` unter `secret/mariadb`) ist bei allen Teilnehmern
+> **identisch** - es ist ein Trainings-Demo-Wert, kein echtes Secret. Der
+> Kubernetes-Auth-Mount (`kubernetes-<dein-tln>`) ist dagegen pro Teilnehmer
+> eigenstaendig, weil er auf dein Cluster zeigt.
 
-> **Faustregel:** Wer Zugriff auf das Storage Backend hat, sieht nur verschlüsselte Blobs – niemals Klartext.
+### Voraussetzungen
 
-```mermaid
-graph LR
-    Client -->|API Request| Server[OpenBao Server]
-    Server -->|Encrypt/Decrypt| Barrier[🔐 Barrier]
-    Barrier -->|Encrypted Data| Storage[(Storage Backend)]
+- Eigenes kubeadm-Cluster (`kubectl get nodes` funktioniert)
+- Helm v3 installiert
+- Dein Cluster muss `vault-bka.do.t3isp.de` per HTTPS erreichen koennen
+- Der Trainer hat fuer dein `<tln>` bereits einen Kubernetes-Auth-Mount in
+  Vault eingerichtet (Rolle `mariadb`, gebunden an ServiceAccount
+  `mariadb-sa` im Namespace `default`) - siehe Hintergrund unten
 
-    style Barrier fill:#e74c3c,color:#fff
-    style Server fill:#3498db,color:#fff
-    style Storage fill:#95a5a6,color:#fff
-```
+#### Hintergrund: Was der Trainer fuer dich schon eingerichtet hat
 
----
+Vault muss deinem Cluster vertrauen koennen, bevor irgendein Pod sich dort
+einloggen darf. Das ist zweistufig aufgebaut - beide Stufen hat der Trainer
+per Skript (`training-vault-server`) bereits fuer dich erledigt, du musst
+sie nicht selbst anlegen, solltest aber verstehen, was da steht:
 
-### Hauptkomponenten
+1. **In deinem Cluster:** Ein ServiceAccount `vault-auth` mit einem
+   `ClusterRoleBinding` auf `system:auth-delegator`. Vault validiert jeden
+   eingehenden Login-Versuch ueber die Kubernetes-TokenReview-API - dafuer
+   braucht Vault selbst einen Token mit genau dieser Berechtigung. Dieser
+   ServiceAccount ist NICHT der, mit dem sich MariaDB spaeter einloggt
+   (das macht `mariadb-sa`, siehe Schritt 4) - er ist reine
+   Vault-Infrastruktur, einmalig pro Cluster.
+2. **Auf dem Vault-Server:** Ein eigener Kubernetes-Auth-Mount
+   `kubernetes-<dein-tln>` (jeder Teilnehmer bekommt einen eigenen, weil ein
+   Mount fest an EINEN API-Server + dessen CA-Zertifikat + den
+   Reviewer-Token aus Schritt 1 gebunden ist - ein gemeinsamer Mount fuer
+   alle Cluster ist technisch nicht moeglich). Darin ist eine Rolle
+   `mariadb` konfiguriert, die zwei Bedingungen prueft: Der einloggende Pod
+   muss den ServiceAccount `mariadb-sa` im Namespace `default` benutzen -
+   und wenn das stimmt, bekommt er ein Vault-Token mit der Policy
+   `mariadb-read` (liest ausschliesslich `secret/data/mariadb`, sonst
+   nichts).
 
-```mermaid
-graph TB
-    subgraph "OpenBao Server"
-        direction TB
-        API[HTTP API] --> Core[Core]
-        Core --> TokenStore[Token Store]
-        Core --> PolicyStore[Policy Store]
-        Core --> AuthMethods[Auth Methods]
-        Core --> SecretsEngines[Secrets Engines]
-        Core --> AuditDevices[Audit Devices]
-        Core --> Barrier[🔐 Barrier]
-    end
-
-    AuthMethods -.- am1[LDAP]
-    AuthMethods -.- am2[Kubernetes]
-    AuthMethods -.- am3[AppRole]
-    AuthMethods -.- am4[OIDC/JWT]
-
-    SecretsEngines -.- se1[KV v2]
-    SecretsEngines -.- se2[PKI]
-    SecretsEngines -.- se3[Transit]
-    SecretsEngines -.- se4[SSH]
-    SecretsEngines -.- se5[Database]
-
-    Barrier --> Storage[(Raft / Storage)]
-
-    style Barrier fill:#e74c3c,color:#fff
-    style Core fill:#3498db,color:#fff
-```
-
-| Komponente | Was macht das? |
-|---|---|
-| **Core** | Zentrale Steuerung – nimmt Requests entgegen, prüft Policies, leitet an die richtige Engine weiter |
-| **Barrier** | Ver-/Entschlüsselung aller Daten vor dem Schreiben ins Storage |
-| **Token Store** | Verwaltet Tokens nach erfolgreicher Authentifizierung (inkl. Policies, TTLs, Renewals) |
-| **Policy Store** | Speichert ACL-Policies (deny-by-default, pfadbasiert) |
-| **Auth Methods** | Pluggable Authentifizierung – wer bist du? (z.B. Kubernetes, OIDC, AppRole, LDAP) |
-| **Secrets Engines** | Pluggable Backends, gemountet auf Pfaden – hier liegen/entstehen die eigentlichen Secrets |
-| **Audit Devices** | Logging jedes einzelnen Requests (wer hat wann was gemacht?) |
+Kurz: Schritt 1 sagt Vault "ich kann Tokens aus diesem Cluster pruefen",
+Schritt 2 sagt Vault "und genau dieser ServiceAccount-Name in diesem
+Cluster darf dann das MariaDB-Secret lesen". Deine Aufgabe in dieser
+Uebung ist nur noch, den passenden ServiceAccount (`mariadb-sa`) anzulegen
+und die K8s-seitigen Ressourcen (VaultConnection/VaultAuth/
+VaultStaticSecret) zu erstellen, die diesen Mount tatsaechlich benutzen.
 
 ---
 
-### Request-Lebenszyklus
+### Schritt 1: Vorschau - was steht ueberhaupt in Vault?
 
-So läuft ein typischer Request durch OpenBao:
+Bevor wir irgendetwas automatisieren, schauen wir uns das Secret einmal
+direkt per CLI an - auf `client-bka` ist `vault` bereits installiert.
 
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant A as Auth Method
-    participant S as OpenBao Server
-    participant P as Policy Store
-    participant E as Secrets Engine
-    participant B as Barrier/Storage
-
-    C->>S: 1. Login (Credentials)
-    S->>A: 2. Authentifizierung prüfen
-    A-->>S: ✅ Identity + Policies
-    S-->>C: 3. Token zurück
-
-    C->>S: 4. Request mit Token (z.B. GET /secret/data/myapp)
-    S->>P: 5. Policies prüfen (hat der Token Zugriff?)
-    P-->>S: ✅ Erlaubt
-    S->>E: 6. Secrets Engine abfragen
-    E->>B: 7. Daten lesen (entschlüsseln)
-    B-->>E: Klartext-Daten
-    E-->>S: Secret-Daten
-    S-->>C: 8. Response mit Secret
-```
-
----
-
-### Seal / Unseal Mechanismus
-
-OpenBao startet im **Sealed**-Zustand – es kann nichts lesen oder schreiben. Erst durch das Unseal-Verfahren wird der Encryption Key im RAM verfügbar.
-
-```mermaid
-graph LR
-    subgraph "Shamir's Secret Sharing"
-        K1[🔑 Key Share 1]
-        K2[🔑 Key Share 2]
-        K3[🔑 Key Share 3]
-        K4[🔑 Key Share 4]
-        K5[🔑 Key Share 5]
-    end
-
-    K1 & K2 & K3 -->|3 von 5 reichen| RK[Root Key]
-    RK -->|entschlüsselt| EK[Encryption Key]
-    EK -->|im RAM| Unsealed[✅ Unsealed]
-
-    style Unsealed fill:#27ae60,color:#fff
-    style RK fill:#e74c3c,color:#fff
-```
-
-**Zwei Varianten:**
-
-| Variante | Wie funktioniert's? |
-|---|---|
-| **Shamir Seal** | Root Key wird in N Teile gesplittet, M davon werden zum Unseal benötigt (z.B. 3 von 5) |
-| **Auto Unseal** | Root Key wird durch ein externes KMS geschützt (z.B. AWS KMS, Azure Key Vault, Transit-Engine eines anderen OpenBao) – automatisches Unseal beim Start |
-
----
-
-### HA-Cluster mit Integrated Storage (Raft)
-
-Für Produktion läuft OpenBao als Cluster mit **Integrated Storage (Raft)**. Raft ist ein Konsensus-Protokoll – alle Daten werden automatisch zwischen den Nodes repliziert.
-
-```mermaid
-graph TB
-    LB[Load Balancer] --> N1 & N2 & N3
-
-    subgraph Cluster["3-Node Raft Cluster"]
-        N1[🟢 Node 1<br/>LEADER<br/>aktiv]
-        N2[🔵 Node 2<br/>STANDBY<br/>forwarded requests]
-        N3[🔵 Node 3<br/>STANDBY<br/>forwarded requests]
-
-        N1 <-->|Raft Replication| N2
-        N1 <-->|Raft Replication| N3
-        N2 <-->|Raft Replication| N3
-    end
-
-    style N1 fill:#27ae60,color:#fff
-    style N2 fill:#3498db,color:#fff
-    style N3 fill:#3498db,color:#fff
-    style LB fill:#f39c12,color:#fff
-```
-
-**Wichtige Punkte:**
-
-- **1 Leader** bearbeitet alle Schreiboperationen und repliziert an die Follower
-- **Standby-Nodes** leiten Requests per Forwarding an den Leader weiter
-- Ein 3-Node-Cluster toleriert den Ausfall von **1 Node** (Quorum: 2 von 3)
-- Ein 5-Node-Cluster toleriert den Ausfall von **2 Nodes** (Quorum: 3 von 5)
-- Netzwerk-Latenz zwischen Nodes sollte **< 8 ms** sein
-- Performance ist primär durch **Disk I/O und Netzwerk-Latenz** begrenzt
-
----
-
-### Ressourcen-Empfehlung pro Node (3-Node-Cluster)
-
-OpenBao gibt keine eigenen Hardware-Empfehlungen, basiert aber architektonisch auf HashiCorp Vault. Die folgenden Werte orientieren sich an bewährten Praxiswerten:
-
-| Sizing | CPU | RAM | Disk | Anmerkung |
-|---|---|---|---|---|
-| **Minimum** | 2 vCPUs | 4–8 GB | 20 GB SSD | Nur für Dev/Test oder sehr geringe Last |
-| **Empfohlen (Produktion)** | 4 vCPUs | 8–16 GB | 50–100 GB SSD | Standard-Workload, bis zu ein paar hundert RPS |
-| **Groß (High-Traffic)** | 8 vCPUs | 32 GB | 100+ GB SSD | Viele dynamische Secrets, Transit-Encryption, hoher Durchsatz |
-
-#### Hinweise
-
-- **SSD ist Pflicht** – Raft mit BoltDB ist für SSDs optimiert. Spinning Disks führen zu massiven Performance-Einbrüchen
-- **Burstable Instanzen vermeiden** (z.B. AWS `t2`/`t3`) – unter Dauerlast bricht die Performance ein
-- **Audit-Logs** idealerweise auf eine **separate Disk** schreiben
-- RAM-Verbrauch steigt mit der Anzahl aktiver Leases, Tokens und gemounteter Engines
-- Für einen typischen **3-Node-Cluster in der Cloud**: 3× eine VM mit **4 vCPUs, 8 GB RAM, 50 GB SSD** ist ein solider Start
-
-#### Beispiel Cloud-Instanztypen
-
-| Provider | Instanztyp | Specs |
-|---|---|---|
-| **AWS** | `m5.xlarge` | 4 vCPU, 16 GB RAM |
-| **DigitalOcean** | `s-4vcpu-8gb` | 4 vCPU, 8 GB RAM |
-| **Azure** | `Standard_D4s_v3` | 4 vCPU, 16 GB RAM |
-| **GCP** | `e2-standard-4` | 4 vCPU, 16 GB RAM |
-| **Hetzner** | `CPX31` | 4 vCPU, 8 GB RAM |
-
----
-
-### Netzwerk-Ports
-
-| Port | Protokoll | Zweck |
-|---|---|---|
-| `8200` | TCP | API & UI (Client-Zugriff) |
-| `8201` | TCP | Cluster-Kommunikation (Raft, Request Forwarding) |
-
-Beide Ports müssen zwischen den Cluster-Nodes erreichbar sein. Port `8200` wird zusätzlich für Clients / Load Balancer geöffnet.
-
----
-
-### Zusammenfassung
-
-```mermaid
-graph TB
-    subgraph "Was reinfliegt"
-        Clients[Clients / Apps]
-        K8s[Kubernetes Pods]
-        CI[CI/CD Pipelines]
-    end
-
-    Clients & K8s & CI -->|HTTPS :8200| LB[Load Balancer]
-
-    subgraph "OpenBao Cluster"
-        LB --> Leader[Leader Node]
-        Leader <-->|Raft :8201| S1[Standby 1]
-        Leader <-->|Raft :8201| S2[Standby 2]
-    end
-
-    subgraph "Was rausfällt"
-        Leader --> Secrets[Secrets]
-        Leader --> Certs[Zertifikate]
-        Leader --> DynCreds[Dynamische Credentials]
-        Leader --> Encryption[Encryption as a Service]
-    end
-
-    style Leader fill:#27ae60,color:#fff
-    style LB fill:#f39c12,color:#fff
-```
-
-**TL;DR:** OpenBao ist ein verschlüsselter Tresor für Secrets. Alles wird durch eine Barrier verschlüsselt, bevor es gespeichert wird. Authentication und Authorization sind strikt getrennt. Im HA-Modus läuft ein Raft-Cluster mit einem Leader und Standby-Nodes. Für einen produktiven 3-Node-Cluster reichen 3× 4 vCPUs, 8 GB RAM, 50 GB SSD als Startpunkt.
-
-### Was sind Secret-Engines?
-
-
-### Was sind Pfade ? 
-
-Die Pfade existieren nur **innerhalb von OpenBao** – es ist ein virtueller API-Baum, kein echtes Dateisystem auf der Festplatte.
-
-Jeder Zugriff auf OpenBao geht über die HTTP-API, und der Pfad ist einfach der URL-Teil nach `/v1/`:
+Die Demo-Passwoerter des Trainings liegen auf `client-bka` zentral in
+`/etc/training-vault.env` - einmal sourcen, dann stehen sie als Variablen
+bereit und muessen nirgends im Klartext getippt werden:
 
 ```
-GET https://bao-server:8200/v1/mydb/creds/readonly
-                                 ^^^^^^^^^^^^^^^^^^^^^^
-                                 Das ist der Pfad
-```
-
-Oder via CLI:
-
-```
-bao read mydb/creds/readonly
-```
-
-OpenBao schaut sich den ersten Teil des Pfads an (`mydb/`), leitet die Anfrage an die dort gemountete Engine weiter, und die Engine verarbeitet den Rest (`creds/readonly`).
-
-Es ist im Grunde ein **interner Router**: Pfad → Engine → Antwort.
-
-
-
-### Was sind secret engines ?
-
-   * Secrets Engines sind in OpenBao nicht nur für "echte" Secrets da – es sind allgemein Backends, die an einem Pfad gemountet sind und auf API-Anfragen antworten.
-
-```
-Kurz: "Secrets Engine" ist der architektonische Baustein für alles in OpenBao. Wer am Pfad-Router hängt, ist eine Engine – egal ob sie Passwörter generiert, Zertifikate ausstellt oder Groups verwaltet.
-```
-
-
-
-
-### Server-Installation: Standalone hinter nginx Reverse Proxy
-
-
-### Was bereits vorhanden ist
-
-Der Server wurde automatisch vorbereitet. Folgendes ist bereits eingerichtet:
-
-```
-Internet (443/80)
-      |
-   nginx (systemd)
-      |  - Let's Encrypt Zertifikat via certbot
-      |  - HTTP -> HTTPS Redirect
-      |  - HTTPS: statische Seite "Server bereit"
-```
-
-nginx-Konfiguration unter `/etc/nginx/sites-available/openbao`:
-
-```
-server {
-    listen 80;
-    server_name openbao.<DEIN-NAME>.do.t3isp.de;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/html;
-    }
-
-    location / {
-        return 301 https://$host$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl;
-    server_name openbao.<DEIN-NAME>.do.t3isp.de;
-
-    ssl_certificate     /etc/letsencrypt/live/openbao.<DEIN-NAME>.do.t3isp.de/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/openbao.<DEIN-NAME>.do.t3isp.de/privkey.pem;
-    ssl_protocols       TLSv1.2 TLSv1.3;
-    ssl_ciphers         HIGH:!aNULL:!MD5;
-
-    root /var/www/openbao;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ =404;    # <-- wird in Schritt 4 ersetzt
-    }
-}
-```
-
-Ziel nach dieser Uebung:
-
-```
-Internet (443/80)
-      |
-   nginx (TLS-Terminierung)
-      |
-   OpenBao (127.0.0.1:8200, kein eigenes TLS)
-```
-
----
-
-### Schritt 1: Per SSH einloggen
-
-```
-ssh <DEIN-NAME>@openbao.<DEIN-NAME>.do.t3isp.de
-```
-
-Aktuellen Zustand pruefen:
-
-```
-sudo systemctl status nginx
-curl -s https://openbao.<DEIN-NAME>.do.t3isp.de | grep -o '<title>.*</title>'
-```
-
-Erwartete Ausgabe: `<title>Server bereit</title>`
-
----
-
-### Schritt 2: OpenBao installieren
-
-```
-## in root wechseln
-sudo su
-```
-
-```
-wget https://github.com/openbao/openbao/releases/download/v2.5.1/openbao_2.5.1_linux_amd64.deb
-sudo dpkg -i openbao_2.5.1_linux_amd64.deb
-```
-
-Installation pruefen:
-
-```
-bao version
-```
-
-Erwartete Ausgabe:
-
-```
-OpenBao v2.5.1 (...)
-```
-
----
-
-### Schritt 3: OpenBao konfigurieren & Firewall freischalten
-
-OpenBao lauscht nur auf `127.0.0.1` – TLS wird von nginx uebernommen.
-
-```
-sudo tee /etc/openbao/openbao.hcl > /dev/null <<'EOF'
-ui = true
-
-storage "raft" {
-  path    = "/opt/openbao/data"
-  node_id = "node1"
-}
-
-listener "tcp" {
-## IP festlegen, auf dem die API lauschen soll
-## Zugriff von aussen erfolgt über nginx
-## Hier muss dann bei bao_addr im
-## http://openbao.jmetzger.do.t3isp.de (ohne port angegeben werden
-## Weil es intern auf 127.0.0.1:8200 weiterleitet, dort läuft auch die gui
-  address     = "127.0.0.1:8200"
-
-  cluster_address = "10.135.0.5:8201"
-  tls_disable = 1
-}
-
-## Kein 8200. Weil Kommunikation über nginx-proxy von aussen
-api_addr = "https://openbao.tn<tln-nr>.do.t3isp.de"
-## Achtung: Hier Deine private IP eintragen
-## Abfrage mit ip a show eth1 (digitalocean)
-cluster_addr = "https://10.135.0.5:8201"
-EOF
-```
-
-> `api_addr` auf die eigene Domain anpassen – sie wird fuer UI-Redirects und CLI-Ausgaben benoetigt.
-
-```
-## Achtung: Der Port muss in der Firewall geöffnet werden
-ufw allow from 10.135.0.0/24 to 10.135.0.5 port 8201 proto tcp
-
-## Api muss von aussen erreichbar sein (später z.B. für oidc - login notwendig  
-sudo ufw allow to 10.135.0.2 port 8200 proto tcp
-```
-
-
-
-
-
----
-
-### Schritt 4: nginx auf Proxy-Modus umstellen
-
-Der bestehende HTTPS-Block liefert bisher eine statische Seite. Der `location /`-Block
-muss durch einen `proxy_pass` zu OpenBao ersetzt werden.
-
-```
-DOMAIN="openbao.<DEIN-NAME>.do.t3isp.de"
-```
-
-```
-sudo tee /etc/nginx/sites-available/openbao > /dev/null <<EOF
-server {
-    listen 80;
-    server_name ${DOMAIN};
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/html;
-    }
-
-    location / {
-        return 301 https://\$host\$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl;
-    server_name ${DOMAIN};
-
-    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-    ssl_protocols       TLSv1.2 TLSv1.3;
-    ssl_ciphers         HIGH:!aNULL:!MD5;
-
-    location / {
-        proxy_pass         http://127.0.0.1:8200;
-        proxy_set_header   Host              \$host;
-        proxy_set_header   X-Real-IP         \$remote_addr;
-        proxy_set_header   X-Forwarded-For   \$proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto \$scheme;
-    }
-}
-EOF
-```
-
-Konfiguration testen und nginx neu laden:
-
-```
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
----
-
-### Schritt 5: OpenBao starten
-
-```
-sudo systemctl enable openbao
-sudo systemctl start openbao
-sudo systemctl status openbao
-sudo journalctl -u openbao 
+source /etc/training-vault.env
+export VAULT_ADDR=https://vault-bka.do.t3isp.de
+vault login -method=userpass username=training password="$VAULT_TRAINING_PASSWORD"
 ```
 
 Erwartete Ausgabe (Auszug):
 
 ```
-Active: active (running)
-...
-==> OpenBao server started! ...
-```
-
----
-
-### Schritt 6: Umgebungsvariable setzen
-
-```
-export BAO_ADDR='http://127.0.0.1:8200'
-```
-
-Dauerhaft speichern:
-
-```
-echo 'export BAO_ADDR="http://127.0.0.1:8200"' >> ~/.bashrc
-```
-
-Verifizieren
-
-  * Wenn BAO_ADDR nicht richtig gesetzt oder garnicht gesetzt ist kommt ein Fehler oder keine Antwort 
-
-```
-## Letztendlich kommuniziert bao status auch über die https:// api 
-bao status 
-```
-
----
-
-### Schritt 7: Initialisieren
-
-```
-bao operator init -key-shares=5 -key-threshold=3 -format=json | tee ~/openbao-init.json
-
-### das ist das gleiche wie (default) 
-bao operator init -format=json | tee ~/openbao-init.json
-
-```
-
-
-
-Die Ausgabe enthaelt 5 Unseal Keys und den Root Token – diese jetzt sichern:
-
-```
-cat ~/openbao-init.json
-```
-
-Ausgabe (Beispiel):
-
-```
-{
-  "unseal_keys_b64": [
-    "KEY-1",
-    "KEY-2",
-    "KEY-3",
-    "KEY-4",
-    "KEY-5"
-  ],
-  "root_token": "hvs.XXXXXX"
-}
-```
-
-> **SICHERHEITSHINWEIS:**
-> Diese Datei enthaelt hochsensible Daten. Unseal Keys und Root Token muessen
-> an einem sicheren Ort ausserhalb des Servers gespeichert werden (z.B. Passwortmanager,
-> verschluesseltes Laufwerk). Danach die Datei vom Server loeschen:
->
-> ```
-> cp ~/openbao-init.json /sicherer/ort/   # erst sichern!
-> rm ~/openbao-init.json                  # dann loeschen
-> ```
->
-> Wer Zugriff auf diese Datei hat, hat vollen Zugriff auf OpenBao und alle gespeicherten Secrets.
-
----
-
-### Schritt 8: Entsiegeln (Unseal)
-
-OpenBao startet immer im Sealed-Zustand. Zum Entsiegeln werden 3 der 5 Keys benoetigt.
-
-```
-bao operator unseal   # Key 1 eingeben
-bao operator unseal   # Key 2 eingeben
-bao operator unseal   # Key 3 eingeben
-```
-
-Status pruefen:
-
-```
-bao status
-```
-
-Erwartete Ausgabe:
-
-```
-Sealed          false
-Total Shares    5
-Threshold       3
-Version         2.5.1
-```
-
-`Sealed` muss `false` sein.
-
----
-
-### Schritt 9: Anmelden
-
-```
-bao login
-```
-
-Root Token aus `~/openbao-init.json` eingeben.
-
-Erfolgreiche Anmeldung:
-
-```
 Success! You are now authenticated.
-token: hvs.XXXXXX
+...
+policies               ["default" "mariadb-read"]
+```
+
+Das Secret lesen:
+
+```
+vault kv get secret/mariadb
+```
+
+Erwartete Ausgabe (Auszug):
+
+```
+====== Data ======
+Key         Value
+---         -----
+password    <das-mariadb-demo-passwort>
+username    root
+```
+
+Genau dieses `username`/`password`-Paar liefern wir jetzt automatisiert an
+einen MariaDB-Pod aus - einmal per VSO (diese Uebung), einmal per Vault
+Agent Injector (naechste Uebung).
+
+---
+
+### Schritt 2: Arbeitsverzeichnisse anlegen
+
+```
+mkdir -p ~/manifests/vault-vso ~/helm-values/vault-vso
+cd ~/manifests/vault-vso
 ```
 
 ---
 
-### Schritt 10: UI aufrufen
-
-Im Browser oeffnen:
+### Schritt 3: Vault Secrets Operator installieren
 
 ```
-https://openbao.<DEIN-NAME>.do.t3isp.de/ui
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update hashicorp
 ```
 
-Beim ersten Aufruf erscheint der Unseal-Wizard. Mit dem Root Token anmelden.
-
----
-
-### Schritt 11: Ergebnis pruefen
+```
+nano ~/helm-values/vault-vso/vault-secrets-operator-values.yml
+```
 
 ```
-curl -s https://openbao.<DEIN-NAME>.do.t3isp.de/v1/sys/health | python3 -m json.tool
+defaultVaultConnection:
+  enabled: false
+controller:
+  manager:
+    clientCache:
+      persistenceModel: none
+```
+
+```
+helm install vault-secrets-operator hashicorp/vault-secrets-operator \
+  -n vault-secrets-operator --create-namespace \
+  -f ~/helm-values/vault-vso/vault-secrets-operator-values.yml
+```
+
+Pruefen, ob der Operator laeuft:
+
+```
+kubectl -n vault-secrets-operator rollout status deploy/vault-secrets-operator-controller-manager
 ```
 
 Erwartete Ausgabe:
 
 ```
-{
-    "initialized": true,
-    "sealed": false,
-    "standby": false,
-    "version": "2.5.1",
-    ...
-}
-```
-
-| Feld | Erwarteter Wert |
-|---|---|
-| `initialized` | `true` |
-| `sealed` | `false` |
-| `standby` | `false` |
-
----
-
-### Zusammenfassung
-
-```
-Client
-  |
-  | HTTPS (443)
-  v
-nginx  <-- TLS-Terminierung mit Let's Encrypt
-  |
-  | HTTP (127.0.0.1:8200)
-  v
-OpenBao  <-- kein eigenes TLS, nur localhost
-  |
-  v
-/opt/openbao/data  <-- File Storage
-```
-
-| Komponente | Pfad / Adresse |
-|---|---|
-| nginx Config | `/etc/nginx/sites-available/openbao` |
-| OpenBao Config | `/etc/openbao/openbao.hcl` |
-| OpenBao Data | `/opt/openbao/data` |
-| Init-Output | `~/openbao-init.json` |
-| Logs nginx | `journalctl -u nginx -f` |
-| Logs OpenBao | `journalctl -u openbao -f` |
-| API intern | `http://127.0.0.1:8200` |
-| API extern | `https://openbao.<DEIN-NAME>.do.t3isp.de` |
-
-### User/Gruppe fuer Passwort-Authentifizierung aufsetzen
-
-
-### Grafik 
-
-<img width="3227" height="1040" alt="image" src="https://github.com/user-attachments/assets/417bc745-7996-442b-a1d8-0b1210e763aa" />
-
-
-### 1. Userpass Auth-Methode aktivieren (als Nutzer mit root-token) 
-
-  * in unserem Fall root
-
-```bash
-sudo su -
-env | grep BAO_ADDR
-## Ansonsten setzen
-## export BAO_ADDR=http://127.0.0.1:8200
-
-```
-
-```bash
-bao auth enable userpass
-```
-
-<img width="1799" height="526" alt="image" src="https://github.com/user-attachments/assets/4eb7b2ae-6b47-4dc1-913c-2f319d317e6a" />
-
-
-### 2. Prüfen ob gemountet
-
-```bash
-bao auth list
-```
-
-Erwartete Ausgabe: `userpass/` mit Typ `userpass`.
-
-<img width="1326" height="182" alt="image" src="https://github.com/user-attachments/assets/3db71117-c2b4-4437-a8fa-9a0955daf316" />
-
-
-### 3. Admin-Policy erstellen
-
-```
-cd
-mkdir -p openbao-hcl
-cd openbao-hcl 
-nano admin-policy.hcl
-```
-
-```hcl
-## Day-2-Day - Admins - Teams bis 10 Personen
-## Kein unterschiedliche Admin-Rollen 
-## Secrets verwalten
-path "secret/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-## Das ist wichtig, weil wir nach beim token erstellen, hier diesen Pfad brauchen und, wenn wir nicht Schreibrechte hier haben, haben wir nachher nur Leserechte
-## Explizit: volle Rechte auf ssh-Pfade (überstimmt ssh-group-readonly)
-path "secret/data/ssh/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-path "secret/data/ssh-groups/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-## Policies verwalten
-path "sys/policies/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-## Identity (Entities, Gruppen)
-path "identity/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-## Secrets Engines mounten/verwalten
-path "sys/mounts/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-## Für top-level abfragen wie: bao auth list 
-path "sys/auth" {
-  capabilities = ["read", "list" ]
-}
-
-
-## Auth-Methoden mounten/verwalten
-## sudo ist hier als admin zwingend erforderlich 
-path "sys/auth/*" {
-  capabilities = ["create", "read", "update", "delete", "list","sudo"]
-}
-
-## System-Status lesen
-path "sys/health" {
-  capabilities = ["read"]
-}
-
-## Audit lesen (nicht ändern)
-path "sys/audit" {
-  capabilities = ["read"]
-}
-
-## Leases verwalten (Secrets widerrufen)
-path "sys/leases/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-## Auth-Methoden konfigurieren (Rollen, Config, etc.)
-path "auth/*" {
-  capabilities = ["create", "read", "update", "delete", "list"]
-}
-
-```
-
-Policy hochladen:
-
-```bash
-bao policy write admin-policy admin-policy.hcl
-```
-
-### 4. User mit Zufallspasswort anlegen
-
-```bash
-TEMP_PW=$(openssl rand -base64 16)
-bao write auth/userpass/users/admin \
-    password="$TEMP_PW" \
-    token_ttl="1h" \
-    token_max_ttl="4h"
-echo "Initiales Passwort: $TEMP_PW"
-```
-
-### 5. Identity-Gruppe erstellen und Admin-Policy zuweisen
-
-```bash
-bao write identity/group \
-    name="admins" \
-    policies="admin-policy" \
-    type="internal"
-```
-
-### 6. Auth-Accessor ermitteln
-
-```bash
-bao auth list -detailed
-```
-
-Den `accessor` Wert von `userpass/` notieren (z.B. `auth_userpass_abc123`).
-
-### 7. Entity für den User anlegen
-
-```bash
-bao write identity/entity name="admin"
-```
-
-Die `id` aus der Ausgabe notieren.
-
-> **Hinweis:** Alternativ entsteht die Entity automatisch beim ersten Login. Danach die ID mit `bao read identity/entity/name/jochen` abfragen.
-
-### 8. Entity-Alias verknüpfen (Welche Authentifizierungs-Methoden sind für diesen Nutzer)
-
-Verbindet die Entity mit dem Userpass-Account:
-
-```bash
-bao write identity/entity-alias \
-    name="admin" \
-    canonical_id="<ENTITY_ID>" \
-    mount_accessor="<USERPASS_ACCESSOR>"
-```
-
-### 9. User zur Gruppe hinzufügen
-
-```bash
-bao write identity/group \
-    name="admins" \
-    policies="admin-policy" \
-    member_entity_ids="<ENTITY_ID>" # <- aus 7. 
-```
-
-Mehrere User kommasepariert: `member_entity_ids="id1,id2,id3"`
-
-### 10. Login testen
-
-```bash
-bao login -method=userpass username=admin
-```
-
- * Password aus 4. verwenden 
-
-
-### 11. Rechte prüfen
-
-```bash
-## "test" wäre ein beliebiges Secret, was ich anlegen wollen würde 
-bao token capabilities secret/data/test
-bao read identity/group/name/admins
-```
-
-### Optional: Darf ich Passwörter ändern ? 
-
-```
-bao token capabilities auth/userpass/users/*/password
-```
-
-  * So ändere ich meine eigenes Passwort
-
-```
-bao write auth/userpass/users/jochen/password password="neuesPasswort"
-```
-
-  * So teste ich, ob es funktioniert
-
-```
-bao login -method=userpass username=jochen
-```
-
-
-
-
-### Uebung Operator-Variante: MariaDB-Deployment mit Vault Secrets Operator (VSO)
-
-
-### Übersicht
-
-![](/images/openbao_eso_architecture_v2.svg)
-
-
-### Anleitung 
-
-Schritt-für-Schritt-Anleitung: Ein Secret (`MARIADB_ROOT_PASSWORD`) wird in OpenBao gespeichert und über den External Secrets Operator als natives Kubernetes Secret in den MariaDB-Pod injiziert.
-
-> **Setup:** Alle Teilnehmer nutzen den **gleichen OpenBao-Server** (`https://openbao.jmetzger.do.t3isp.de`), aber jeder arbeitet mit seinem **eigenen Kubernetes-Cluster**. Damit sich die Teilnehmer nicht in die Quere kommen, bekommt jeder seinen eigenen Auth-Mount (`kubernetes-<cluster-name>`), eigenen Secret-Pfad (`secret/<cluster-name>/mariadb`) und eigene Policy (`mariadb-read-<cluster-name>`).
-
-> **Warum ESO statt VSO?** Der HashiCorp Vault Secrets Operator (VSO) steht unter der BSL 1.1 Lizenz, die kommerzielle Nutzung einschränkt. Der External Secrets Operator ist ein CNCF-Projekt unter Apache 2.0 Lizenz, vendor-neutral und wird von OpenBao offiziell empfohlen. ESO unterstützt neben Vault/OpenBao auch AWS Secrets Manager, Azure Key Vault, GCP Secret Manager u.v.m.
-
----
-
-### Voraussetzungen
-
-- Eigenes Kubernetes-Cluster (z.B. RKE2, k3s, etc.)
-- Gemeinsamer OpenBao-Server: `https://openbao.jmetzger.do.t3isp.de`
-- `bao` CLI konfiguriert und authentifiziert (jeder TN hat Admin-Rechte)
-- Helm v3 installiert
-- Der K8s-Cluster muss den OpenBao-Server per HTTPS erreichen können
-- **Dein Clustername**: z.B. `cluster-tn1`, `cluster-tn2`, … — wird durchgängig als `<cluster-name>` verwendet
-
----
-
-### Prep 1: Done by trainer: Install bao executable
-
-```bash
-wget https://github.com/openbao/openbao/releases/download/v2.5.1/bao_2.5.1_Linux_x86_64.tar.gz
-tar xzf bao_2.5.1_Linux_x86_64.tar.gz
-sudo mv bao /usr/local/bin/
-```
-
-### Schritt 0: Clusternamen ermitteln und als Variable setzen
-
-Den eigenen Clusternamen als Variable setzen — wird in allen folgenden Schritten verwendet:
-
-```bash
-export CLUSTER_NAME=cluster-jmetzger  # ← Anpassen auf deinen Clusternamen!
-```
-
-> **Tipp:** Wer den Clusternamen nicht kennt: `kubectl config current-context` zeigt den aktuellen Kontext.
-
-> **Hinweis zu YAML-Dateien:** In Bash-Befehlen wird `$CLUSTER_NAME` automatisch aufgelöst. In YAML-Dateien muss `<cluster-name>` **manuell** durch den Clusternamen ersetzt werden (z.B. `cluster-tn1`).
-
----
-
-### Schritt 1: KV Secrets Engine aktivieren
-
-```bash
-## Kann auch in die ~/.bashrc
-export BAO_ADDR=https://openbao.jmetzger.do.t3isp.de
-bao login -method=userpass username=admin
-bao secrets enable -path=secret kv-v2
-```
-
-> Falls bereits aktiviert (z.B. von einem anderen TN), überspringen — die Fehlermeldung `path is already in use` ist harmlos.
-
----
-
-### Schritt 2: Secret in OpenBao anlegen
-
-Jeder Teilnehmer legt sein Secret unter seinem Clusternamen ab:
-
-```bash
-bao kv put secret/$CLUSTER_NAME/mariadb root-password="meinSuperGeheimesPasswort"
-```
-
-Kontrolle:
-
-```bash
-bao kv get secret/$CLUSTER_NAME/mariadb
+deployment "vault-secrets-operator-controller-manager" successfully rolled out
 ```
 
 ---
 
-### Schritt 3: Policy erstellen
+### Schritt 4: ServiceAccount fuer MariaDB anlegen
 
-```bash
-cd
-mkdir -p openbao-hcl/mariadb
-cd openbao-hcl/mariadb
+```
+nano 00-mariadb-sa.yml
 ```
 
-```bash
-cat > mariadb-read-$CLUSTER_NAME.hcl <<EOF
-path "secret/data/$CLUSTER_NAME/mariadb" {
-  capabilities = ["read"]
-}
-EOF
 ```
-
-Policy schreiben:
-
-```bash
-bao policy write mariadb-read-$CLUSTER_NAME mariadb-read-$CLUSTER_NAME.hcl
-```
-
-> **Hinweis:** Bei KV-v2 ist der tatsächliche Pfad immer `secret/data/<path>`, auch wenn man mit `bao kv` nur `secret/<path>` angibt.
-
----
-
-### Schritt 4: External Secrets Operator (ESO) installieren
-
-```bash
-helm repo add external-secrets https://charts.external-secrets.io
-helm repo update
-
-helm install external-secrets external-secrets/external-secrets \
-  -n external-secrets \
-  --create-namespace \
-  --set installCRDs=true
-```
-
-Prüfen, ob der Operator läuft:
-
-```bash
-kubectl get pods -n external-secrets
-```
-
-> **Hinweis:** ESO erstellt einen eigenen ServiceAccount für den Operator, aber dieser dient nur dem Operator selbst. Er hat **keine** `system:auth-delegator`-Berechtigung und kann nicht für die TokenReview-Validierung durch OpenBao verwendet werden.
-
----
-
-### Schritt 5: Kubernetes Auth Method aktivieren und konfigurieren
-
-Da OpenBao **außerhalb** des Clusters läuft, muss es den API-Server erreichen und ServiceAccount-Tokens validieren können. Dafür braucht es explizit:
-
-- `kubernetes_host` — API-Server-Adresse (von außen erreichbar)
-- `kubernetes_ca_cert` — CA-Zertifikat des Clusters
-- `token_reviewer_jwt` — ein langlebiger Token mit `system:auth-delegator`-Berechtigung
-
-> **Warum ein eigener Auth-Mount pro Teilnehmer?** Ein Auth-Mount kann nur **einen** Kubernetes-Cluster bedienen (`kubernetes_host`, `kubernetes_ca_cert`, `token_reviewer_jwt` sind cluster-spezifisch). Da jeder TN sein eigenes Cluster hat, braucht jeder seinen eigenen Auth-Mount.
-
-#### 5a: ServiceAccount und ClusterRoleBinding für Token-Review anlegen (im eigenen Cluster)
-
-```bash
-kubectl create serviceaccount vault-auth -n default
-
-kubectl create clusterrolebinding vault-auth-delegator \
-  --clusterrole=system:auth-delegator \
-  --serviceaccount=default:vault-auth
-```
-
-#### 5b: Langlebigen (nicht-ablaufenden) Token erzeugen
-
-```bash
-nano vault-auth-token.yaml
-```
-
-```yaml
-## vault-auth-token.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: vault-auth-token
-  namespace: default
-  annotations:
-    kubernetes.io/service-account.name: vault-auth
-type: kubernetes.io/service-account-token
-```
-
-```bash
-kubectl apply -f vault-auth-token.yaml
-```
-
-#### 5c: Werte auslesen
-
-```bash
-## Token
-TOKEN_REVIEWER_JWT=$(kubectl get secret vault-auth-token -o jsonpath='{.data.token}' | base64 -d)
-
-## Kubernetes CA Cert
-KUBE_CA_CERT=$(kubectl get secret vault-auth-token -o jsonpath='{.data.ca\.crt}' | base64 -d)
-
-## API Server Adresse
-KUBE_HOST=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
-```
-
-#### 5d: Auth Method in OpenBao aktivieren (eigener Mount pro TN)
-
-```bash
-bao auth enable -path=kubernetes-$CLUSTER_NAME kubernetes
-```
-
-#### 5e: OpenBao konfigurieren
-
-```bash
-bao write auth/kubernetes-$CLUSTER_NAME/config \
-  kubernetes_host="$KUBE_HOST" \
-  kubernetes_ca_cert="$KUBE_CA_CERT" \
-  token_reviewer_jwt="$TOKEN_REVIEWER_JWT"
-```
-
-> **Wichtig:** `kubernetes_host` muss die **externe** Adresse des API-Servers sein, die vom OpenBao-Server aus erreichbar ist — nicht `https://kubernetes.default.svc:443`.
-
-#### 5f: Rolle anlegen
-
-```bash
-bao write auth/kubernetes-$CLUSTER_NAME/role/mariadb \
-  bound_service_account_names=mariadb-sa \
-  bound_service_account_namespaces=default \
-  policies=mariadb-read-$CLUSTER_NAME \
-  ttl=1h
-```
-
----
-
-### Schritt 6: ServiceAccount für MariaDB anlegen
-
-```bash
-nano mariadb-sa.yaml
-```
-
-```yaml
-## mariadb-sa.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: mariadb-sa
-  namespace: default
 ```
 
-```bash
-kubectl apply -f mariadb-sa.yaml
+```
+kubectl apply -f 00-mariadb-sa.yml -n default
 ```
 
 ---
 
-### Schritt 7: SecretStore erstellen
+### Schritt 5: VaultConnection erstellen
 
-Der SecretStore teilt ESO mit, wie es sich mit OpenBao verbinden und authentifizieren soll.
+Die VaultConnection sagt dem Operator, mit welchem Vault-Server er reden
+soll.
 
 ```
-cat <<EOF > secret-store.yaml
-apiVersion: external-secrets.io/v1
-kind: SecretStore
+nano 01-vault-connection.yml
+```
+
+```
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultConnection
 metadata:
-  name: openbao-backend
-  namespace: default
+  name: vault-connection
 spec:
-  provider:
-    vault:
-      server: "https://openbao.jmetzger.do.t3isp.de"
-      path: "secret"
-      version: "v2"
-      auth:
-        kubernetes:
-          mountPath: "kubernetes-${CLUSTER_NAME}"
-          role: "mariadb"
-          serviceAccountRef:
-            name: "mariadb-sa"
-EOF
+  address: https://vault-bka.do.t3isp.de
 ```
 
-> Falls OpenBao ein selbstsigniertes Zertifikat nutzt, muss `spec.provider.vault.caProvider` konfiguriert werden (z.B. via ConfigMap oder Secret mit dem CA-Cert).
-
-```bash
-kubectl apply -f secret-store.yaml
 ```
-
-Prüfen, ob der SecretStore valid ist:
-
-```bash
-kubectl get secretstore openbao-backend
+kubectl apply -f 01-vault-connection.yml -n default
 ```
-
-Der STATUS sollte `Valid` zeigen. Falls nicht:
-
-```bash
-kubectl describe secretstore openbao-backend
-```
-
-
-#### Achtung: Fehlerteufel 
-
-```
-* Wenn der mountPath falsch ist, dann sucht er an der falschen Stelle, z.B. an einer Stelle die nicht konfiguriert ist.
-* Dann kommt ein ProviderConfigFehler -> er kann also den Provider nicht finden
-* z.B. mountPath: kubernetes-tln2 statt korrekt mountPath: kubernetes-cluster-tln2
-```
-
-<img width="1138" height="55" alt="image" src="https://github.com/user-attachments/assets/43f6c70c-2d02-416c-990d-61ca02660825" />
-
-```
-## Weitere Auskünfte liefer kubectl describe
-## Es kommt ein permission denied, weil es ein Pfad ist, der nicht konfiguriert ist. (kubernetes-tln2 statt korrekt kubernetes-cluster-tln2)
-```
-
-<img width="1891" height="223" alt="image" src="https://github.com/user-attachments/assets/0bda3a09-2344-47fc-bf0c-2fd96c5d6008" />
-
-```
-bao auth list
-```
-
-<img width="1212" height="125" alt="image" src="https://github.com/user-attachments/assets/32c22686-b4f2-46b8-846a-c2dbd591382e" />
-
-
 
 ---
 
-### Schritt 8: ExternalSecret erstellen
+### Schritt 6: VaultAuth erstellen
 
-Das ExternalSecret definiert, welches Secret aus OpenBao geholt und wie das resultierende Kubernetes Secret aussehen soll.
+Die VaultAuth sagt dem Operator, WIE er sich bei Vault einloggen soll -
+die beiden Felder `mount` und `role` bedeuten dabei:
 
-```bash
-cat <<EOF > external-secret.yaml
-apiVersion: external-secrets.io/v1
-kind: ExternalSecret
+![VaultAuth: mount und role](../images/vaultauth-mount-role.svg)
+
+```
+nano 02-vault-auth.yml
+```
+
+```
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-auth
+spec:
+  vaultConnectionRef: vault-connection
+  method: kubernetes
+  mount: kubernetes-tln1
+  kubernetes:
+    role: mariadb
+    serviceAccount: mariadb-sa
+```
+
+> **Wichtig:** `mount: kubernetes-tln1` auf deinen eigenen Teilnehmernamen
+> anpassen (z.B. `kubernetes-tln4`)!
+
+```
+kubectl apply -f 02-vault-auth.yml -n default
+```
+
+---
+
+### Schritt 7: VaultStaticSecret erstellen
+
+Das VaultStaticSecret definiert, welcher Pfad in Vault gelesen wird und wie
+das resultierende Kubernetes Secret heissen soll.
+
+```
+nano 03-vault-static-secret.yml
+```
+
+```
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
 metadata:
   name: mariadb-secret
-  namespace: default
 spec:
-  refreshInterval: "60s"
-  secretStoreRef:
-    name: openbao-backend
-    kind: SecretStore
-  target:
-    name: mariadb-k8s-secret
-    creationPolicy: Owner
-  data:
-    - secretKey: root-password
-      remoteRef:
-        key: ${CLUSTER_NAME}/mariadb
-        property: root-password
-EOF
+  vaultAuthRef: vault-auth
+  mount: secret
+  type: kv-v2
+  path: mariadb
+  refreshAfter: 60s
+  destination:
+    name: mariadb-vault-secret
+    create: true
 ```
 
 ```
-kubectl apply -f external-secret.yaml
+kubectl apply -f 03-vault-static-secret.yml -n default
 ```
 
-Prüfen, ob das Kubernetes Secret erstellt wurde:
+Pruefen, ob das Secret synchronisiert wurde:
 
-```bash
-kubectl get externalsecret mariadb-secret
-kubectl get secret mariadb-k8s-secret -o yaml
+```
+kubectl get vaultstaticsecret mariadb-secret -n default
 ```
 
-> **Vergleich zu VSO:** Statt `VaultConnection` + `VaultAuth` + `VaultStaticSecret` (3 CRDs) braucht ESO nur `SecretStore` + `ExternalSecret` (2 CRDs). Die Authentifizierung ist direkt im SecretStore konfiguriert.
+Erwartete Ausgabe:
+
+```
+NAME             SYNCED   HEALTHY   READY   AGE
+mariadb-secret   True     True      True    14s
+```
+
+Die entstandenen Keys im Kubernetes Secret pruefen (ohne Werte auszugeben):
+
+```
+kubectl describe secret mariadb-vault-secret -n default
+```
+
+Erwartete Ausgabe (Auszug):
+
+```
+Data
+====
+_raw:      197 bytes
+password:  22 bytes
+username:  4 bytes
+```
+
+> **Hinweis:** `_raw` enthaelt das komplette Secret als JSON, `password` und
+> `username` sind die einzelnen Felder aus Vault.
 
 ---
 
-### Schritt 9: MariaDB Deployment ausrollen
+### Schritt 8: MariaDB per Helm ausrollen
 
-```bash
-nano mariadb-deployment.yaml
+Wir nutzen den `cloudpirates/mariadb` Chart und referenzieren das eben
+erstellte Kubernetes Secret als Root-Passwort-Quelle.
+
+```
+nano ~/helm-values/vault-vso/mariadb-values.yml
 ```
 
-```yaml
-## mariadb-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
+```
+auth:
+  existingSecret: mariadb-vault-secret
+  secretKeys:
+    rootPasswordKey: password
+persistence:
+  enabled: false
+```
+
+> `persistence.enabled: false` - dieses Training hat (noch) keine
+> StorageClass fuer die kubeadm-Cluster eingerichtet, siehe README.
+
+```
+helm install mariadb-vso oci://registry-1.docker.io/cloudpirates/mariadb \
+  -n default \
+  -f ~/helm-values/vault-vso/mariadb-values.yml
+```
+
+```
+kubectl -n default rollout status statefulset/mariadb-vso
+```
+
+---
+
+### Schritt 9: Verifikation - Login-Test
+
+```
+source /etc/training-vault.env
+kubectl exec -n default mariadb-vso-0 -- mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SELECT 1 AS login_test;"
+```
+
+Erwartete Ausgabe:
+
+```
+login_test
+1
+```
+
+Das Passwort kam nicht aus einem `kubectl apply`-Manifest, sondern wurde
+vom Operator live aus Vault gezogen - `refreshAfter: 60s` sorgt dafuer,
+dass eine Aenderung in Vault spaetestens nach 60 Sekunden im Kubernetes
+Secret ankommt.
+
+> **Aber: MariaDB merkt davon nichts.** Der Container liest das Passwort
+> nur einmal beim Start als Umgebungsvariable - eine Rotation erreicht
+> die App erst mit einem Neustart (siehe Bonus in Schritt 10).
+
+---
+
+### Schritt 10 (Bonus): Rotation automatisch bis in den Pod
+
+VSO hat fuer den fehlenden Neustart ein Bordmittel eingebaut (das
+uebernimmt hier die Aufgabe, fuer die man sonst Tools wie Stakater
+Reloader installiert): `rolloutRestartTargets`. Damit sagst du dem
+Operator: "Immer wenn du dieses Secret neu schreibst, starte auch das
+StatefulSet neu durch."
+
+Ergaenze in `03-vault-static-secret.yml` unter `spec:` drei Zeilen:
+
+```
+## vi 03-vault-static-secret.yml
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
 metadata:
-  name: mariadb
-  namespace: default
+  name: mariadb-secret
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mariadb
-  template:
-    metadata:
-      labels:
-        app: mariadb
-    spec:
-      serviceAccountName: mariadb-sa
-      containers:
-        - name: mariadb
-          image: mariadb:11
-          ports:
-            - containerPort: 3306
-          env:
-            - name: MARIADB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mariadb-k8s-secret
-                  key: root-password
+  vaultAuthRef: vault-auth
+  mount: secret
+  type: kv-v2
+  path: mariadb
+  refreshAfter: 60s
+  destination:
+    name: mariadb-vault-secret
+    create: true
+  rolloutRestartTargets:
+    - kind: StatefulSet
+      name: mariadb-vso
 ```
 
-```bash
-kubectl apply -f mariadb-deployment.yaml
 ```
+kubectl apply -f 03-vault-static-secret.yml -n default
+```
+
+Die Kette laeuft ab jetzt automatisch durch:
+
+1. Passwort in Vault aendern (macht der Trainer zentral - das Secret ist
+   fuer alle Teilnehmer dasselbe, und eure Policy `mariadb-read` darf nur
+   lesen)
+2. VSO schreibt das Kubernetes Secret neu (spaetestens nach 60s)
+3. VSO macht einen Rolling Restart des StatefulSets - erkennbar an der
+   Annotation `vso.secrets.hashicorp.com/restartedAt` und einem frischen
+   Pod
+4. Der neue Pod liest die Umgebungsvariable frisch und kennt das neue
+   Passwort
+
+> **Trainer-Hinweis - so wird zentral rotiert:** Auf dem Vault-Server mit
+> Admin-Token anmelden und
+> `vault kv put secret/mariadb username=root password='<neuer-wert>'`
+> ausfuehren - bei allen Teilnehmern folgen Secret-Update und
+> Auto-Restart. Danach auf demselben Weg den Demo-Wert aus
+> `/etc/training-vault.env` wiederherstellen.
+
+Beobachten, waehrend der Trainer rotiert:
+
+```
+kubectl get pods -n default -w
+```
+
+Erwartete Ausgabe (nach ca. einer Minute):
+
+```
+mariadb-vso-0   1/1     Running       0          25m
+mariadb-vso-0   1/1     Terminating   0          26m
+mariadb-vso-0   0/1     Pending       0          0s
+mariadb-vso-0   1/1     Running       0          31s
+```
+
+> **Wichtig: Das loest das eigentliche Problem noch nicht.** Der Neustart
+> bringt das neue Passwort nur bis zur App - in den Systemtabellen der
+> Datenbank rotiert dabei nichts (hier klappt es nur, weil die DB ohne
+> Persistenz leer neu startet). Echte Rotation - Datenbank und Vault im
+> Gleichschritt - macht die Vault **Database Secrets Engine**.
 
 ---
 
-### Schritt 10: Verifizieren
+### Troubleshooting
 
-#### Pod-Status prüfen
-
-```bash
-kubectl get pods -l app=mariadb
-```
-
-#### Env-Variable im Pod prüfen
-
-```bash
-kubectl exec deploy/mariadb -- env | grep MARIADB_ROOT_PASSWORD
-```
-
-#### MariaDB-Login testen
-
-```bash
-kubectl exec -it deploy/mariadb -- mariadb -uroot -p
-```
+| Problem | Loesung |
+|---------|---------|
+| `VaultAuth` Status nicht `Accepted` | `kubectl describe vaultauth vault-auth -n default` - meist falscher `mount`-Name |
+| `VaultStaticSecret` zeigt `SYNCED: False` | `kubectl describe vaultstaticsecret mariadb-secret -n default` - Events pruefen |
+| `permission denied` beim Sync | Policy-Pfad in Vault pruefen: `secret/data/mariadb` (nicht `secret/mariadb`) - bei KV-v2 immer mit `data/` |
+| MariaDB-Pod startet nicht, `CrashLoopBackOff` | `kubectl logs mariadb-vso-0 -n default` - haeufig falscher `rootPasswordKey` (muss exakt der Key im Secret sein, siehe `kubectl describe secret`) |
+| `VaultConnection`/`VaultAuth` gefunden, aber Login schlaegt fehl | Dein `kubernetes-<tln>`-Mount existiert noch nicht - beim Trainer nachfragen, ob `setup-participant.sh` fuer dich gelaufen ist |
 
 ---
 
-### Überblick: ServiceAccounts in diesem Setup
+### Aufraeumen
 
-| ServiceAccount | Namespace | Zweck |
-|---|---|---|
-| `vault-auth` | default | TokenReview – damit OpenBao von außen K8s-Tokens validieren kann |
-| ESO-eigener SA | external-secrets | Operator-Betrieb – CRDs watchen, K8s Secrets anlegen |
-| `mariadb-sa` | default | Pod-Identität + SecretStore-Auth – der SA authentifiziert sich bei OpenBao |
-
----
-
-### Überblick: TN-spezifische Ressourcen auf dem gemeinsamen OpenBao-Server
-
-| Ressource | Namensschema | Beispiel |
-|---|---|---|
-| Auth-Mount | `kubernetes-<cluster-name>` | `kubernetes-cluster-tn3` |
-| Secret-Pfad | `secret/<cluster-name>/mariadb` | `secret/cluster-tn3/mariadb` |
-| Policy | `mariadb-read-<cluster-name>` | `mariadb-read-cluster-tn3` |
-| Rolle | `auth/kubernetes-<cluster-name>/role/mariadb` | `auth/kubernetes-cluster-tn3/role/mariadb` |
-
----
-
-### Vergleich: ESO vs. VSO
-
-| Aspekt | ESO (External Secrets Operator) | VSO (Vault Secrets Operator) |
-|---|---|---|
-| **Lizenz** | Apache 2.0 (CNCF-Projekt) | BSL 1.1 (HashiCorp) |
-| **Provider** | Multi-Provider (Vault, AWS, Azure, GCP, …) | Nur Vault/OpenBao |
-| **CRDs für diesen Use-Case** | 2 (SecretStore + ExternalSecret) | 3 (VaultConnection + VaultAuth + VaultStaticSecret) |
-| **Helm Repo** | `external-secrets/external-secrets` | `hashicorp/vault-secrets-operator` |
-| **Empfehlung OpenBao** | Ja, offiziell empfohlen | Funktioniert, aber BSL-Lizenz |
+```
+helm uninstall mariadb-vso -n default
+kubectl delete -f ~/manifests/vault-vso/ -n default
+helm uninstall vault-secrets-operator -n vault-secrets-operator
+kubectl delete namespace vault-secrets-operator
+```
 
 ---
 
 ### Zusammenfassung: Datenfluss
 
 ```
-Gemeinsamer OpenBao-Server (openbao.jmetzger.do.t3isp.de)
-  └── secret/<cluster-name>/mariadb
+Gemeinsamer Vault-Server (vault-bka.do.t3isp.de)
+  └── secret/mariadb (username + password, fuer alle TN identisch)
         │
-        ▼  (HTTPS + K8s Auth via kubernetes-<cluster-name>)
-   ESO im eigenen Cluster synct alle 60s
-        │
-        ▼
-K8s Secret (mariadb-k8s-secret)
+        ▼  (K8s-Auth ueber kubernetes-<tln>, Rolle mariadb)
+   VSO-Controller im eigenen Cluster synct alle 60s
         │
         ▼
-Pod env: MARIADB_ROOT_PASSWORD (via secretKeyRef)
+K8s Secret (mariadb-vault-secret)
+        │
+        ▼
+MariaDB-Pod (Helm-Chart cloudpirates/mariadb, auth.existingSecret)
 ```
+
+### Uebung: MariaDB-Deployment mit dem Vault Agent Injector
+
+
+### Hintergrund
+
+Der Vault Agent Injector arbeitet grundlegend anders als der Vault Secrets
+Operator aus der letzten Uebung: Er erzeugt **kein** Kubernetes Secret.
+Stattdessen laeuft es so ab:
+
+1. Ein Admission-Webhook mutiert jeden Pod mit der passenden Annotation:
+   Er haengt ihm einen `vault-agent`-Init-Container und einen
+   `vault-agent`-Sidecar an.
+2. Der Init-Container loggt sich bei Vault ein, rendert das Secret als
+   Datei in ein `emptyDir`-Volume (`/vault/secrets/...`) und beendet sich.
+3. Der Sidecar haelt das Secret aktuell (Renewal, periodisches Re-Rendern).
+4. Die Anwendung liest ganz normal eine lokale Datei - ein Kubernetes
+   Secret existiert zu keinem Zeitpunkt.
+
+![Agent Injector Datenfluss](../images/agent-injector-datenfluss.svg)
+
+| Aspekt | VSO (letzte Uebung) | Agent Injector (diese Uebung) |
+|---|---|---|
+| Kubernetes Secret? | Ja (`mariadb-vault-secret`) | **Nein** - nie |
+| Wo landet das Secret? | K8s-Secret-Objekt (etcd) | Datei in `emptyDir` im Pod |
+| Wie kommt es in den Container? | `secretKeyRef` (Chart-Feature) | Datei + `_FILE`-Env-Var (App-Feature) |
+| Zusaetzliche Container im Pod | Keiner | `vault-agent-init` (Init) + `vault-agent` (Sidecar) |
+| Wo laeuft die Vault-Authentifizierung? | Operator-Pod (clusterweit) | Jeder App-Pod einzeln |
+
+> **Setup:** Gleicher Vault-Server, gleiches Secret (`secret/mariadb`) wie in
+> der VSO-Uebung. Wenn du die VSO-Uebung schon durchgespielt hast, ist die
+> Vorschau (`vault kv get secret/mariadb`) bereits bekannt - dieser Schritt
+> kann dann uebersprungen werden.
+
+### Voraussetzungen
+
+- Eigenes kubeadm-Cluster, Helm v3
+- Dein `kubernetes-<tln>`-Auth-Mount in Vault existiert bereits, inkl. der
+  Rolle `mariadb` (gebunden an ServiceAccount `mariadb-sa`/Namespace
+  `default`, Policy `mariadb-read`) - der Trainer hat das fuer dich
+  eingerichtet, siehe "Hintergrund: Was der Trainer fuer dich schon
+  eingerichtet hat" in der VSO-Uebung (`01-mariadb-vault-secrets-operator.md`)
+  fuer die Details. Diese Uebung nutzt exakt denselben Mount und dieselbe
+  Rolle wie die VSO-Uebung - der Unterschied liegt nur darin, WIE der Pod
+  sich damit einloggt (siehe Vergleichstabelle oben), nicht in der
+  Auth-Konfiguration selbst.
+- ServiceAccount `mariadb-sa` im Namespace `default` existiert (aus der
+  VSO-Uebung, sonst siehe Schritt 3 unten)
+
+---
+
+### Schritt 1: Arbeitsverzeichnisse anlegen
+
+```
+mkdir -p ~/manifests/vault-agent ~/helm-values/vault-agent
+cd ~/manifests/vault-agent
+```
+
+---
+
+### Schritt 2: Vault Agent Injector installieren
+
+Anders als bei VSO installieren wir hier den **offiziellen HashiCorp
+Vault-Chart** - aber nur mit `injector.enabled`, ohne eigenen Vault-Server
+(`server.enabled: false`), da wir den bereits laufenden Server extern
+ansprechen.
+
+```
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update hashicorp
+```
+
+```
+nano ~/helm-values/vault-agent/vault-injector-values.yml
+```
+
+```
+global:
+  externalVaultAddr: https://vault-bka.do.t3isp.de
+injector:
+  enabled: true
+  authPath: "auth/kubernetes-tln1"
+server:
+  enabled: false
+csi:
+  enabled: false
+```
+
+> **Wichtig:** `authPath` auf deinen eigenen Teilnehmernamen anpassen (z.B.
+> `auth/kubernetes-tln4`)! Der Injector nutzt diesen Pfad als Default fuer
+> alle Pods, die er mutiert - eine Pod-Annotation kann ihn zwar pro Pod
+> ueberschreiben, wir setzen ihn hier aber gleich global richtig.
+
+```
+helm install vault hashicorp/vault \
+  -n vault-injector --create-namespace \
+  -f ~/helm-values/vault-agent/vault-injector-values.yml
+```
+
+```
+kubectl -n vault-injector rollout status deploy/vault-agent-injector
+```
+
+Erwartete Ausgabe:
+
+```
+deployment "vault-agent-injector" successfully rolled out
+```
+
+---
+
+### Schritt 3: ServiceAccount fuer MariaDB (falls noch nicht vorhanden)
+
+```
+nano 00-mariadb-sa.yml
+```
+
+```
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mariadb-sa
+```
+
+```
+kubectl apply -f 00-mariadb-sa.yml -n default
+```
+
+---
+
+### Schritt 4: MariaDB mit Agent-Injector-Annotations ausrollen
+
+Die Injection wird komplett ueber Pod-Annotations gesteuert - der
+`cloudpirates/mariadb`-Chart kennt Vault gar nicht, wir reichen die
+Annotations einfach ueber `podAnnotations` durch.
+
+```
+nano ~/helm-values/vault-agent/mariadb-values.yml
+```
+
+```
+auth:
+  enabled: false
+persistence:
+  enabled: false
+podAnnotations:
+  vault.hashicorp.com/agent-inject: "true"
+  vault.hashicorp.com/role: "mariadb"
+  vault.hashicorp.com/agent-inject-secret-mariadb-root-password: "secret/data/mariadb"
+  vault.hashicorp.com/agent-inject-template-mariadb-root-password: |
+    {{- with secret "secret/data/mariadb" -}}
+    {{ .Data.data.password }}
+    {{- end -}}
+extraEnvVars:
+  - name: MARIADB_ROOT_PASSWORD_FILE
+    value: /vault/secrets/mariadb-root-password
+serviceAccount:
+  create: false
+  name: mariadb-sa
+  automountServiceAccountToken: true
+```
+
+> **Drei Stolpersteine, die hier schon geloest sind:**
+> 1. `auth.enabled: false` - sonst setzt der Chart selbst ein
+>    `MARIADB_ROOT_PASSWORD` (aus einem auto-generierten Secret), das sich
+>    mit `MARIADB_ROOT_PASSWORD_FILE` beisst (`Both ... are set (but are
+>    exclusive)`, Container crasht).
+> 2. `serviceAccount.automountServiceAccountToken: true` - der Chart
+>    deaktiviert das Automounten standardmaessig aus Sicherheitsgruenden.
+>    Der Vault-Agent im Pod braucht aber genau dieses Token, um sich bei
+>    Vault einzuloggen (`failed to find service account volume mount`,
+>    Pod-Erstellung wird vom Webhook abgelehnt).
+> 3. Das Template rendert **nur** das rohe Passwort (kein `key: value`,
+>    kein JSON) - passend zum `_FILE`-Konsum durch das offizielle
+>    MariaDB-Image (Docker-Secrets-Konvention).
+
+```
+helm install mariadb-agent oci://registry-1.docker.io/cloudpirates/mariadb \
+  -n default \
+  -f ~/helm-values/vault-agent/mariadb-values.yml
+```
+
+```
+kubectl -n default rollout status statefulset/mariadb-agent
+```
+
+---
+
+### Schritt 5: Verifikation
+
+Pod-Status - zwei zusaetzliche Container gegenueber der VSO-Uebung:
+
+```
+kubectl get pod mariadb-agent-0 -n default -o jsonpath='{.spec.initContainers[*].name}{"\n"}{.spec.containers[*].name}{"\n"}'
+```
+
+Erwartete Ausgabe:
+
+```
+vault-agent-init
+mariadb vault-agent
+```
+
+Die vom Agent gerenderte Datei ansehen (Existenz + Groesse, nicht den Inhalt):
+
+```
+kubectl exec mariadb-agent-0 -n default -c mariadb -- ls -la /vault/secrets/
+```
+
+Erwartete Ausgabe:
+
+```
+-rw-r--r-- 1 100 mysql 22 ... mariadb-root-password
+```
+
+Login-Test:
+
+```
+source /etc/training-vault.env
+kubectl exec -n default mariadb-agent-0 -c mariadb -- mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SELECT 2 AS agent_login_test;"
+```
+
+Erwartete Ausgabe:
+
+```
+agent_login_test
+2
+```
+
+Zum Vergleich - es existiert wirklich kein Kubernetes Secret mit dem
+Passwort darin (nur das Helm-Release-Bookkeeping, kein `Opaque`-Secret):
+
+```
+kubectl get secrets -n default --field-selector type=Opaque
+```
+
+Erwartete Ausgabe:
+
+```
+No resources found in default namespace.
+```
+
+> **Hinweis:** `kubectl get secrets -n default` zeigt trotzdem einen
+> Treffer namens `sh.helm.release.v1.mariadb-agent.v1` - das ist Helms
+> eigenes Release-Bookkeeping (Typ `helm.sh/release.v1`), kein
+> Anwendungs-Secret und enthaelt keine MariaDB-Zugangsdaten.
 
 ---
 
 ### Troubleshooting
 
-| Problem | Lösung |
-|---------|--------|
-| `path is already in use` bei `secrets enable` | Harmlos — ein anderer TN hat `secret/` bereits aktiviert |
-| `path is already in use` bei `auth enable` | Prüfen ob du den richtigen Clusternamen verwendest: `-path=kubernetes-<cluster-name>` |
-| SecretStore zeigt nicht `Valid` | `kubectl describe secretstore openbao-backend` → Events prüfen |
-| ExternalSecret zeigt `SyncError` | `kubectl describe externalsecret mariadb-secret` → Fehlermeldung lesen |
-| Auth schlägt fehl | ServiceAccount-Name und Namespace müssen exakt mit der OpenBao-Rolle übereinstimmen |
-| `permission denied` | Policy-Pfad prüfen: `secret/data/<cluster-name>/mariadb` (nicht `secret/<cluster-name>/mariadb`) |
-| TLS-Fehler zum OpenBao-Server | CA-Cert im SecretStore via `caProvider` hinterlegen |
-| Token-Review schlägt fehl | Prüfen ob `vault-auth` SA + ClusterRoleBinding existieren und `token_reviewer_jwt` aktuell ist |
-| ESO Pods nicht ready | `kubectl logs -n external-secrets deploy/external-secrets` |
+| Problem | Loesung |
+|---------|---------|
+| Pod-Erstellung schlaegt fehl: `failed to find service account volume mount` | `serviceAccount.automountServiceAccountToken: true` fehlt in den Values |
+| Container `mariadb` crasht: `Both MARIADB_ROOT_PASSWORD and ..._FILE are set` | `auth.enabled: false` fehlt - der Chart setzt sonst selbst ein Passwort |
+| `vault-agent-init` haengt / Timeout | `authPath` in den Injector-Values falsch (nicht dein `kubernetes-<tln>`-Mount) - `kubectl logs <pod> -c vault-agent-init` pruefen |
+| Datei `/vault/secrets/mariadb-root-password` fehlt oder leer | Annotation-Name der Template-Annotation muss exakt zum `agent-inject-secret-<name>` passen (`<name>` identisch in beiden Annotation-Keys) |
+| `permission denied` im Agent-Log | Policy/Rolle pruefen - dieselbe Rolle `mariadb` wie in der VSO-Uebung, Pfad `secret/data/mariadb` |
 
 ---
 
-### Aufräumen
+### Aufraeumen
 
-#### Im eigenen Cluster
-
-```bash
-kubectl delete -f mariadb-deployment.yaml
-kubectl delete -f external-secret.yaml
-kubectl delete -f secret-store.yaml
-kubectl delete -f mariadb-sa.yaml
-kubectl delete secret mariadb-k8s-secret 2>/dev/null
-kubectl delete -f vault-auth-token.yaml
-kubectl delete clusterrolebinding vault-auth-delegator
-kubectl delete serviceaccount vault-auth -n default
-helm uninstall external-secrets -n external-secrets
-kubectl delete namespace external-secrets
+```
+helm uninstall mariadb-agent -n default
+kubectl delete -f ~/manifests/vault-agent/ -n default
+helm uninstall vault -n vault-injector
+kubectl delete namespace vault-injector
 ```
 
-#### Auf dem OpenBao-Server
+---
 
-```bash
-bao auth disable kubernetes-$CLUSTER_NAME
-bao policy delete mariadb-read-$CLUSTER_NAME
-bao kv delete secret/$CLUSTER_NAME/mariadb
+### Zusammenfassung: Datenfluss
+
+```
+Gemeinsamer Vault-Server (vault-bka.do.t3isp.de)
+  └── secret/mariadb (username + password, fuer alle TN identisch)
+        │
+        ▼  (K8s-Auth ueber kubernetes-<tln>, Rolle mariadb - Login IM Pod)
+   vault-agent-init (Init-Container) rendert Datei, beendet sich
+        │
+        ▼
+/vault/secrets/mariadb-root-password (emptyDir, nur im Pod sichtbar)
+        │
+        ▼  (MARIADB_ROOT_PASSWORD_FILE)
+MariaDB-Container liest die Datei beim Start
 ```
 
 ## Workload-Skalierung
@@ -3382,6 +3352,46 @@ This code defines a simple index.php page that performs some CPU intensive compu
 ?>
 ```
 
+### Schritt 1: Metrics-Server installieren (Voraussetzung)
+
+  * Der HorizontalPodAutoscaler braucht die Metrics API (metrics-server), um die CPU-Auslastung der Pods auszulesen.
+  * Auf unseren kubeadm-Trainingsclustern ist der metrics-server NICHT vorinstalliert.
+  * Ohne ihn zeigt `kubectl get hpa` beim TARGET dauerhaft `<unknown>` und es wird nie skaliert.
+
+```
+helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+helm repo update
+```
+
+```
+cd
+mkdir -p helm-charts/metrics-server
+cd helm-charts/metrics-server
+nano values.yml
+```
+
+```
+## Die kubelets im Trainingscluster nutzen selbst-signierte Zertifikate,
+## daher braucht der metrics-server dieses Flag
+args:
+  - --kubelet-insecure-tls
+```
+
+```
+helm -n kube-system upgrade --install metrics-server metrics-server/metrics-server --version 3.13.0 -f values.yml
+```
+
+```
+## Pruefen - dauert ca. 1 Minute, bis der Pod Ready ist
+kubectl -n kube-system get pods | grep metrics-server
+```
+
+```
+## Sobald er Ready ist, liefert die Metrics API Daten:
+kubectl top nodes
+kubectl top pods -A
+```
+
 ### Walkthrough 
 
 ```
@@ -3434,7 +3444,8 @@ kubectl apply -f 01-php-apache-deploy.yml
 
 ```
 ## autoscaler erstellen
-kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+## (--cpu-percent=50 ist deprecated, aktuelle Syntax:)
+kubectl autoscale deployment php-apache --cpu=50% --min=1 --max=10
 kubectl get hpa 
 kubectl get hpa -o yaml 
 
@@ -3476,6 +3487,424 @@ php-apache   7/7      7           7           19m
 ### Ref:
 
   * https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/ 
+
+### Uebung: HPA mit eigener Metrik (KEDA + eigener Prometheus)
+
+
+### Hintergrund
+
+  * Der HorizontalPodAutoscaler (HPA) kennt von Haus aus nur die Kubernetes-Metrics-APIs:
+    `metrics.k8s.io` (CPU/Memory, ueber den metrics-server), `custom.metrics.k8s.io` und
+    `external.metrics.k8s.io`. Er kann NIE direkt PromQL gegen Prometheus sprechen.
+  * Fuer eine eigene (Business-/App-)Metrik braucht es einen Adapter, der zwischen
+    Prometheus und dieser Metrics-API uebersetzt. Zwei Wege:
+    * **Prometheus Adapter** - klassisch, aber fummelige Rule-Konfiguration
+    * **KEDA** (Kubernetes-based Event-Driven Autoscaling, CNCF-Projekt) - du definierst
+      ein einfaches `ScaledObject` mit einer PromQL-Query, KEDA fragt Prometheus selbst ab
+      und erzeugt/pflegt automatisch ein ganz normales HPA im Hintergrund
+  * Wir verwenden KEDA. Als Beispiel-Metrik nehmen wir die **Worker-Auslastung eines
+    PHP-FPM-Pools** (aktive / gesamt Worker in %) - ein typisches App-Level-Signal, das
+    CPU-Auslastung nicht zeigen wuerde (ein Worker kann voll ausgelastet sein, obwohl er
+    nur auf eine langsame Datenbank wartet und dabei kaum CPU braucht).
+
+### Voraussetzung
+
+  * Keine - diese Uebung bringt ihren eigenen, schlanken Prometheus mit (Schritt 2, im
+    Namespace `scaling-monitoring`) und braucht NICHT den vollen kube-prometheus-stack aus
+    "Monitoring mit Prometheus" (Tag 2, Namespace `monitoring`, mit
+    Grafana/Traefik-Ingress/Letsencrypt/basic-auth). Deshalb passt sie hier unter
+    Workload-Skalierung, direkt nach der normalen HPA-Uebung.
+
+### Schritt 1: KEDA installieren
+
+```
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+helm upgrade --install keda kedacore/keda --namespace keda --create-namespace
+```
+
+```
+kubectl -n keda get pods
+## 3 Pods sollten Running sein (operator, operator-metrics-apiserver, admission-webhooks)
+```
+
+### Schritt 2: Eigenen, schlanken Prometheus installieren
+
+  * Nur fuer diese Uebung gedacht - ohne Grafana, ohne Ingress/TLS/basic-auth (das kommt
+    erst mit dem vollen Setup auf Tag 2). Reicht, damit KEDA intern PromQL-Queries
+    stellen kann.
+  * Bewusst ein **eigener Namespace `scaling-monitoring`**, getrennt vom Namespace
+    `monitoring`, den Tag 2 fuer den vollen Stack (Grafana, Ingress, ...) nutzt - keine
+    Vermischung der beiden Installationen.
+
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
+  --namespace scaling-monitoring --create-namespace --version 72.3.0 \
+  --set grafana.enabled=false \
+  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+```
+
+```
+kubectl -n scaling-monitoring get pods
+## Warten, bis u.a. prometheus-prometheus-kube-prometheus-prometheus-0 Running/Ready ist
+```
+
+### Schritt 3: Vorbereitung
+
+```
+cd
+mkdir -p manifests
+cd manifests
+mkdir php-fpm-hpa
+cd php-fpm-hpa
+```
+
+### Schritt 4: Namespace
+
+```
+## vi 01-namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: php-fpm-demo
+```
+
+```
+kubectl apply -f 01-namespace.yaml
+```
+
+### Schritt 5: Die App - ConfigMap mit PHP-Skript, FPM-Pool und nginx-Config
+
+  * `sleep(5)` simuliert eine "teure" Anfrage (z.B. langsamer DB-Call), die einen
+    PHP-FPM-Worker fuer 5 Sekunden blockiert
+  * `pm = static` + `pm.max_children = 3` -> der Pool hat IMMER genau 3 Worker (bewusst
+    klein gehalten, damit sich die Uebung schnell in eine Ueberlastsituation bringen laesst)
+  * `pm.status_path = /status` aktiviert die eingebaute FPM-Statusseite
+
+```
+## vi 02-app-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: php-fpm-app
+  namespace: php-fpm-demo
+data:
+  index.php: |
+    <?php
+    // Simuliert eine "teure" Anfrage, die einen PHP-FPM-Worker
+    // fuer 5 Sekunden blockiert (z.B. langsamer DB-Call, PDF-Export, ...)
+    sleep(5);
+    echo "OK - Worker war 5 Sekunden belegt\n";
+  zz-status.conf: |
+    ; Achtung: pm.status_path liefert NUR Zahlen des eigenen Pools.
+    ; Ein zweiter, dedizierter "Status-Pool" (mit eigenem Port) wuerde
+    ; sich nur selbst vermessen - nicht den Workload-Pool "www". Deshalb
+    ; bleibt der Status-Endpoint bewusst im selben Pool wie die Worker.
+    [www]
+    pm = static
+    pm.max_children = 3
+    pm.status_path = /status
+  default.conf: |
+    server {
+      listen 80;
+      root /var/www/html;
+      index index.php;
+
+      location / {
+        try_files $uri $uri/ /index.php$is_args$args;
+      }
+
+      location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+      }
+    }
+```
+
+```
+kubectl apply -f 02-app-configmap.yaml
+```
+
+  * **Hinweis (warum das oben wichtig ist):** Wenn alle 3 Worker mit der 5-Sekunden-Anfrage
+    beschaeftigt sind, muss sich auch die Status-Abfrage selbst in dieselbe Warteschlange
+    einreihen - sie teilt sich den Pool mit dem Workload. Bei extremer Ueberlast (z.B. 10+
+    parallele Anfragen gegen nur 3 Worker) kann das dazu fuehren, dass Prometheus den
+    Scrape-Timeout reisst und die Metrik zeitweise fehlt. Deshalb erzeugen wir in Schritt 10
+    bewusst nur moderate Ueberlast (8 parallele Requests gegen 3 Worker) - genug zum
+    Skalieren, aber die Status-Abfrage kommt trotzdem noch durch.
+
+### Schritt 6: Deployment (3 Container: php-fpm, nginx, Exporter) + Service
+
+  * `nginx` reicht `.php`-Requests per FastCGI an `php-fpm` weiter (Port 9000, localhost)
+  * `exporter` (`hipages/php-fpm_exporter`) fragt die FPM-Statusseite ab und wandelt sie
+    in Prometheus-Metriken um (`phpfpm_active_processes`, `phpfpm_total_processes`, ...)
+
+```
+## vi 03-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-fpm-app
+  namespace: php-fpm-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-fpm-app
+  template:
+    metadata:
+      labels:
+        app: php-fpm-app
+    spec:
+      containers:
+      - name: php-fpm
+        image: php:8.3-fpm
+        volumeMounts:
+        - name: app
+          mountPath: /var/www/html/index.php
+          subPath: index.php
+        - name: app
+          mountPath: /usr/local/etc/php-fpm.d/zz-status.conf
+          subPath: zz-status.conf
+        resources:
+          requests:
+            cpu: 50m
+          limits:
+            cpu: 200m
+      - name: nginx
+        image: nginx:stable
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: app
+          mountPath: /var/www/html/index.php
+          subPath: index.php
+        - name: app
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      - name: exporter
+        image: hipages/php-fpm_exporter:2.2.0
+        args:
+        - "server"
+        - "--phpfpm.scrape-uri=tcp://127.0.0.1:9000/status"
+        ports:
+        - containerPort: 9253
+      volumes:
+      - name: app
+        configMap:
+          name: php-fpm-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-fpm-app
+  namespace: php-fpm-demo
+  labels:
+    app: php-fpm-app
+spec:
+  selector:
+    app: php-fpm-app
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  - name: metrics
+    port: 9253
+    targetPort: 9253
+```
+
+```
+kubectl apply -f 03-deployment.yaml
+kubectl -n php-fpm-demo rollout status deployment/php-fpm-app
+```
+
+### Schritt 7: Exporter-Metriken pruefen
+
+```
+kubectl -n php-fpm-demo run test-metrics --image=busybox:1.36 --restart=Never --rm -i --command -- wget -qO- http://php-fpm-app.php-fpm-demo:9253/metrics
+```
+
+```
+## Erwartete Ausgabe (Ausschnitt):
+phpfpm_active_processes{pool="www",...} 0
+phpfpm_idle_processes{pool="www",...} 3
+phpfpm_total_processes{pool="www",...} 3
+```
+
+### Schritt 8: ServiceMonitor
+
+```
+## vi 04-servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: php-fpm-app
+  namespace: php-fpm-demo
+  labels:
+    release: prometheus  # muss zu Helm-Werten passen!
+spec:
+  selector:
+    matchLabels:
+      app: php-fpm-app
+  namespaceSelector:
+    matchNames:
+    - php-fpm-demo
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 15s
+    scrapeTimeout: 10s
+```
+
+```
+kubectl apply -f 04-servicemonitor.yaml
+```
+
+  * **Warum das hier noetig ist:** KEDA fragt im naechsten Schritt NICHT unsere App direkt,
+    sondern schickt seine PromQL-Query an den Prometheus-Server. Damit dort ueberhaupt
+    etwas steht, muss Prometheus unsere Metrik vorher eingesammelt haben - genau das
+    erledigt dieser ServiceMonitor (er sagt Prometheus: "scrape den Exporter alle 15s").
+    Ohne ihn liefe KEDAs Query ins Leere.
+
+```
+## Ist der Target in Prometheus gruen? Kein Ingress fuer diesen schlanken
+## Stack (siehe Schritt 2) - deshalb per Port-Forward pruefen:
+kubectl -n scaling-monitoring port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090
+```
+
+```
+## In einem zweiten Terminal (oder Browser):
+http://localhost:9090/targets
+## suchen nach: php-fpm-demo/php-fpm-app/0
+```
+
+### Schritt 9: ScaledObject (KEDA) - die eigentliche Skalierungslogik
+
+  * Statt `%CPU` nehmen wir hier `avg(active) / avg(total) * 100` - die Worker-Auslastung
+    in Prozent, ueber alle Pods gemittelt. Genau dasselbe Muster wie bei der CPU-HPA-Uebung
+    (Ziel-Prozentwert), nur mit einer App-eigenen Kennzahl statt einer Infra-Kennzahl.
+  * `pollingInterval`/`cooldownPeriod` lassen wir bewusst weg - die sind nur relevant,
+    wenn `minReplicaCount` (oder `idleReplicaCount`) auf 0 steht (Scale-to-Zero).
+
+```
+## vi 05-scaledobject.yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: php-fpm-app
+  namespace: php-fpm-demo
+spec:
+  scaleTargetRef:
+    name: php-fpm-app
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+  - type: prometheus
+    metadata:
+      # serverAddress zeigt auf Prometheus, NICHT auf unsere App/den Exporter!
+      # KEDA fragt hier den Prometheus-Server per PromQL ab (die Daten dafuer
+      # hat der ServiceMonitor aus Schritt 8 vorher dort hineingescraped).
+      # Der grosse Vorteil: avg(...) aggregiert automatisch ueber ALLE Pods -
+      # ein einzelner Pod koennte seine eigene Auslastung kennen, aber nicht,
+      # wie ausgelastet das gesamte Deployment gerade ist.
+      serverAddress: http://prometheus-kube-prometheus-prometheus.scaling-monitoring.svc.cluster.local:9090
+      query: avg(phpfpm_active_processes{namespace="php-fpm-demo"}) / avg(phpfpm_total_processes{namespace="php-fpm-demo"}) * 100
+      threshold: "70"
+```
+
+```
+kubectl apply -f 05-scaledobject.yaml
+```
+
+```
+## KEDA erzeugt jetzt automatisch ein HPA im Hintergrund:
+kubectl -n php-fpm-demo get scaledobject
+kubectl -n php-fpm-demo get hpa
+
+## NAME                   REFERENCE                TARGETS      MINPODS   MAXPODS   REPLICAS   AGE
+## keda-hpa-php-fpm-app   Deployment/php-fpm-app   0/70 (avg)   1         5         1          15s
+```
+
+### Schritt 10: Last erzeugen und Skalierung beobachten
+
+  * 8 parallele Dauerschleifen gegen einen Pool mit nur 3 Workern - reicht zum
+    Ueberschreiten der 70%-Schwelle, ohne die Status-Abfrage zu blockieren (siehe Hinweis
+    oben bei Schritt 5)
+
+```
+## vi 06-load-generator.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: load-generator
+  namespace: php-fpm-demo
+spec:
+  restartPolicy: Never
+  containers:
+  - name: load-generator
+    image: busybox:1.36
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      for i in $(seq 1 8); do
+        (while true; do wget -q -O- http://php-fpm-app.php-fpm-demo >/dev/null; done) &
+      done
+      wait
+```
+
+```
+kubectl apply -f 06-load-generator.yaml
+```
+
+```
+## In einem zweiten Terminal beobachten:
+kubectl -n php-fpm-demo get hpa keda-hpa-php-fpm-app --watch
+```
+
+```
+## So in etwa laeuft es (Beispiel aus dem Test):
+## NAME                   REFERENCE                TARGETS           MINPODS   MAXPODS   REPLICAS   AGE
+## keda-hpa-php-fpm-app   Deployment/php-fpm-app   41667m/70 (avg)   1         5         1          28m
+## keda-hpa-php-fpm-app   Deployment/php-fpm-app   83333m/70 (avg)   1         5         1          28m   <- ueber 70% -> skaliert
+## keda-hpa-php-fpm-app   Deployment/php-fpm-app   50/70 (avg)       1         5         2          29m   <- 2 Pods, Last verteilt sich
+```
+
+```
+kubectl -n php-fpm-demo get deployment php-fpm-app
+## READY sollte jetzt 2/2 zeigen (oder mehr, je nach Last)
+```
+
+### Schritt 11: Last stoppen und Scale-down beobachten
+
+```
+kubectl -n php-fpm-demo delete pod load-generator
+kubectl -n php-fpm-demo get hpa keda-hpa-php-fpm-app --watch
+```
+
+  * Der Zielwert faellt sofort unter 70%, die Anzahl der Replicas bleibt aber laut Standard-HPA-
+    Verhalten noch ein paar Minuten stehen (Stabilization-Window, standardmaessig 5 Minuten),
+    bevor auf 1 Replica zurueckskaliert wird - das verhindert staendiges Hoch-/Runterschaukeln
+    bei schwankender Last.
+
+### Aufraeumen
+
+```
+kubectl delete ns php-fpm-demo
+kubectl delete ns scaling-monitoring
+helm -n keda uninstall keda
+kubectl delete ns keda
+```
+
+### Ref
+
+  * https://keda.sh/docs/latest/concepts/scaling-deployments/
+  * https://keda.sh/docs/latest/scalers/prometheus/
+  * https://github.com/hipages/php-fpm_exporter
+  * https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-more-specific-metrics
 
 ## Monitoring mit Prometheus
 
@@ -3529,58 +3958,133 @@ Quelle: https://www.devopsschool.com/
   * Mit Grafana kann ich einfach Dashboards verwenden 
   * Ich kann sehr leicht festlegen (Durch Data Sources), wo meine Daten herkommen
 
-### Prometheus/Grafana-Stack installieren mit helm
+### Prometheus/Grafana-Stack installieren mit helm (Traefik + Letsencrypt)
 
 
-  * using the kube-prometheus-stack (recommended !: includes important metrics)
+  * Wir verwenden den kube-prometheus-stack (empfohlen! Bringt die wichtigen Metriken gleich mit)
+  * Als Ingress-Controller nutzen wir Traefik, die externe IP kommt von MetalLB (Kapitel Tag 1)
 
-### Attention: Upgrades and uninstall can be a bit tricky 
+### Achtung: Upgrades und Uninstall sind etwas tricky
 
-  * CRD's need to deleted manually after uninstall
-  * Before Upgrade update the CRD's
+  * CRDs muessen nach einem Uninstall manuell geloescht werden
+  * Vor einem Upgrade erst die CRDs aktualisieren
   * https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/UPGRADE.md
 
-### What do we want to do ? 
+### Was wollen wir erreichen?
 
-  * We want to protect prometheus with basic-auth
-  * We want to protect alertmanager with basic-auth 
-  * We want to use letsencrypt 
+  * Prometheus und Alertmanager mit basic-auth schuetzen
+  * Zertifikate von Letsencrypt (http01-Challenge)
+  * Alles ueber Traefik als Ingress-Controller
 
-### Prerequisites 
+### Hintergrund: Warum funktioniert Letsencrypt (http01) mit MetalLB?
 
-```
-## 1. With have setup ingress-controller Service type:LoadBalancer -> external
-## 2. We have a subdomain 
-## 3. Already done for you 
-sudo apt install apache2-utils
-```
+  * Letsencrypt muss `http://<host>/.well-known/acme-challenge/...` auf Port 80 von aussen erreichen
+  * Unser MetalLB-Pool enthaelt die oeffentlichen IPs der Worker-Nodes -
+    der Traefik-LoadBalancer-Service bekommt also eine von aussen erreichbare IP
+  * Zeigt der DNS-Eintrag auf diese IP, laeuft die Challenge ganz normal durch
 
-### Step 1: Create our project - folder (just to be organized) 
+### Voraussetzungen
+
+  * MetalLB aus dem Tag-1-Kapitel ist installiert ([Kubernetes Load Balancer - metallb](../../metallb.md))
+  * `htpasswd` ist auf dem Client vorhanden (`sudo apt install apache2-utils` - schon erledigt)
+  * `/etc/training-dns.env` liegt auf dem Client (DNS-Token, stellt der Trainer
+    bereit) - brauchen wir in Schritt 3 fuer den Wildcard-DNS-Eintrag
+
+### Schritt 1: Projekt-Ordner anlegen (nur der Ordnung halber)
 
 ```
 cd
-mkdir -p manifests 
-cd manifests 
-mkdir -p monitoring 
-cd monitoring 
+mkdir -p manifests
+cd manifests
+mkdir -p monitoring
+cd monitoring
 ```
 
-### Step 2: Create basic-auth  
+### Schritt 2: Traefik installieren
 
 ```
-kubectl create ns monitoring 
-htpasswd -c auth admin  # Enter your desired password
-kubectl create secret generic prometheus-basic-auth --from-file=auth -n monitoring
+helm repo add traefik https://traefik.github.io/charts
+helm repo update
 ```
 
-### Step 3: Install cert-manager  
+```
+helm upgrade --install traefik traefik/traefik --namespace traefik --create-namespace --version 41.4.0
+```
+
+```
+## Warten bis der Pod laeuft
+kubectl -n traefik get pods
+
+## WICHTIG: Die EXTERNAL-IP kommt von MetalLB - diese IP brauchen wir fuer die DNS-Eintraege
+kubectl -n traefik get svc traefik
+
+## Beispiel-Output:
+## NAME      TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)                      AGE
+## traefik   LoadBalancer   10.96.196.15   165.22.73.43   80:30848/TCP,443:31534/TCP   17s
+```
+
+### Schritt 3: Wildcard-DNS auf deine Traefik-IP setzen
+
+  * Wir legen EINEN Wildcard-Record `*.<du>.do.t3isp.de` an - der deckt
+    prometheus, grafana, alertmanager und alle spaeteren Hostnamen ab
+  * Das Script nutzt die DigitalOcean-DNS-API; das Token kommt aus
+    `/etc/training-dns.env`
+  * WICHTIG: Die Namen erst NACH dem Anlegen per dig abfragen - wer vorher
+    abfragt, handelt sich Negative-Caching ein (bis zu 30 min Wartezeit)
+
+```
+curl -sO https://raw.githubusercontent.com/jmetzger/workshop-kubernetes-advanced-2026-Q3/main/scripts/create-wildcard-dns.sh
+chmod +x create-wildcard-dns.sh
+
+## Name wird automatisch aus deinem Login-User gesetzt (z.B. tln1)
+## <traefik-ip> = EXTERNAL-IP aus Schritt 2
+./create-wildcard-dns.sh <traefik-ip>
+```
+
+```
+## Pruefen (Beispiel):
+dig +short prometheus.<du>.do.t3isp.de
+## -> muss deine Traefik-IP zeigen
+```
+
+### Schritt 4: basic-auth anlegen
+
+  * Traefik erwartet die htpasswd-Daten in einem Secret unter dem Key `users`
+
+```
+kubectl create ns monitoring
+htpasswd -c auth admin  # Wunsch-Passwort eingeben
+kubectl create secret generic prometheus-basic-auth --from-file=users=auth -n monitoring
+```
+
+  * Bei Traefik wird basic-auth nicht per Annotation-Trio wie bei nginx konfiguriert,
+    sondern ueber eine `Middleware`-Ressource (CRD von Traefik), die dann am Ingress
+    referenziert wird
+
+```
+## vi 01-middleware.yml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: prometheus-basic-auth
+spec:
+  basicAuth:
+    secret: prometheus-basic-auth
+```
+
+```
+kubectl apply -f 01-middleware.yml -n monitoring
+```
+
+### Schritt 5: cert-manager installieren
 
 ```
 helm repo add jetstack https://charts.jetstack.io
+helm repo update
 ```
 
 ```
-nano cert-manager-values.yml 
+nano cert-manager-values.yml
 ```
 
 ```
@@ -3590,13 +4094,13 @@ crds:
 
 ```
 helm upgrade --install cert-manager jetstack/cert-manager \
-  --namespace cert-manager --create-namespace --version 1.17.2 -f cert-manager-values.yml 
+  --namespace cert-manager --create-namespace --version 1.17.2 -f cert-manager-values.yml
 ```
 
-### Step 4: Create ClusterIssuer 
+### Schritt 6: ClusterIssuer anlegen
 
 ```
-nano clusterissuer.yaml
+nano 02-clusterissuer.yml
 ```
 
 ```
@@ -3606,24 +4110,30 @@ metadata:
   name: letsencrypt-prod
 spec:
   acme:
-    email: training.tn1@t3company.de
+    email: training.<du>@t3company.de
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
       - http01:
           ingress:
-            class: nginx
+            ingressClassName: traefik
 ```
 
 ```
-kubectl apply -f clusterissuer.yaml 
+kubectl apply -f 02-clusterissuer.yml
+kubectl get clusterissuer
 ```
 
-### Step 5: Prepare Monitoring Stack (values - file) 
+### Schritt 7: Monitoring-Stack vorbereiten (values-Datei)
+
+  * `<du>` ueberall durch deinen Teilnehmer-Namen ersetzen (z.B. tln5)
+  * Das `adminPassword` fuer Grafana bitte durch ein eigenes ersetzen
+  * basic-auth haengt als Traefik-Middleware am Prometheus- und Alertmanager-Ingress
+    (Format der Referenz: `<namespace>-<middleware-name>@kubernetescrd`)
 
 ```
-nano monitoring-values.yaml
+nano monitoring-values.yml
 ```
 
 ```
@@ -3634,8 +4144,8 @@ grafana:
   adminPassword: "yourStrongPassword"
   ingress:
     enabled: true
+    ingressClassName: traefik
     annotations:
-      kubernetes.io/ingress.class: nginx
       cert-manager.io/cluster-issuer: letsencrypt-prod
     hosts:
       - grafana.<du>.do.t3isp.de
@@ -3647,15 +4157,12 @@ grafana:
         secretName: grafana-tls
 
 prometheus:
-  fullnameOverride: prometheus 
   ingress:
     enabled: true
+    ingressClassName: traefik
     annotations:
-      kubernetes.io/ingress.class: nginx
-      nginx.ingress.kubernetes.io/auth-type: basic
-      nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
-      nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
       cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.middlewares: monitoring-prometheus-basic-auth@kubernetescrd
     hosts:
       - prometheus.<du>.do.t3isp.de
     paths:
@@ -3666,21 +4173,17 @@ prometheus:
           - prometheus.<du>.do.t3isp.de
         secretName: prometheus-tls
 
-## Optional: Persist data
 prometheusOperator:
   admissionWebhooks:
     enabled: true
 
 alertmanager:
-  fullnameOverride: alertmanager
   ingress:
     enabled: true
+    ingressClassName: traefik
     annotations:
-      kubernetes.io/ingress.class: nginx
-      nginx.ingress.kubernetes.io/auth-type: basic
-      nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
-      nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
       cert-manager.io/cluster-issuer: letsencrypt-prod
+      traefik.ingress.kubernetes.io/router.middlewares: monitoring-prometheus-basic-auth@kubernetescrd
     hosts:
       - alertmanager.<du>.do.t3isp.de
     paths:
@@ -3691,7 +4194,6 @@ alertmanager:
           - alertmanager.<du>.do.t3isp.de
         secretName: alertmanager-tls
 
-
 kube-state-metrics:
   fullnameOverride: kube-state-metrics
 
@@ -3699,14 +4201,15 @@ prometheus-node-exporter:
   fullnameOverride: node-exporter
 ```
 
-### Step 6: Install with helm 
+### Schritt 8: Mit helm installieren
 
 ```
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f monitoring-values.yaml --namespace monitoring --create-namespace --version 72.3.0
+helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
+  -f monitoring-values.yml --namespace monitoring --version 72.3.0
 ```
 
-### Step 6.5 Check, if everything works 
+### Schritt 9: Pruefen, ob alles funktioniert
 
 ```
 kubectl -n monitoring get pods
@@ -3714,91 +4217,104 @@ kubectl -n cert-manager get pods
 ```
 
 ```
-## ein neue Ressource cert-manager
-## True ? 
+## Neue Ressourcen von cert-manager anschauen
 kubectl get clusterissuer
-kubectl -n monitoring get certicaterequests
-## Alertmanager has a problem
-kubectl -n monitoring describe certificaterequests alertmanager-tls-1 
-
-
+kubectl -n monitoring get certificaterequests
 kubectl -n monitoring get certificates
-kubectl -n monitoring describe cert alertmanager-tls 
 
-```
-
-
-### Step 7: Connect to prometheus from the outside world 
-
-```
-https://prometheus.<du>.do.t3isp.de
-```
-
-### Step 8: Connect to the grafana from the outside world 
-
-```
-https://grafana.<du>.do.t3isp.de
+## Waehrend die Challenge laeuft, sieht man temporaere cm-acme-http-solver-Ingresse:
+kubectl -n monitoring get ingress
+kubectl -n monitoring get challenges
 ```
 
 ```
-## ändern in euer port + teilnehmer
-## d.h. z.B. 3000 + tln1 = 3001 statt 3010 
-kubectl -n monitoring port-forward deploy/grafana 3010:3000 & 
-## if on remote - system do a ssh-tunnel 
-## ssh -L 3010:127.0.0.1:3010 user@remote-ip 
+## Nach 1-3 Minuten sollten alle drei Zertifikate READY=True sein:
+## NAME               READY   SECRET             AGE
+## alertmanager-tls   True    alertmanager-tls   2m
+## grafana-tls        True    grafana-tls        2m
+## prometheus-tls     True    prometheus-tls     2m
 
+## Es ist normal, dass ein Zertifikat 1-2 Minuten spaeter fertig wird als die
+## anderen (ACME-Backoff nach dem ersten Versuch) - einfach nochmal abfragen.
+
+## Falls ein Zertifikat laenger haengt:
+kubectl -n monitoring describe challenge <name-aus-get-challenges>
 ```
 
-![image](https://github.com/user-attachments/assets/1f6022d2-b94d-4699-9995-31f3fc13e1b0)
+### Schritt 10: Prometheus von aussen erreichen
 
-
-### Step 9: Connect to alertmanager from the outside world 
+  * Browser: `https://prometheus.<du>.do.t3isp.de` -> Login-Popup (basic-auth)
 
 ```
-https://alertmanager.<du>.do.t3isp.de
+## oder per curl testen:
+curl -s -o /dev/null -w "%{http_code}\n" https://prometheus.<du>.do.t3isp.de
+## 401 (ohne Auth - gut so!)
+
+curl -s -o /dev/null -w "%{http_code}\n" -u admin:<dein-passwort> https://prometheus.<du>.do.t3isp.de/graph
+## 302/200 (mit Auth)
 ```
 
-### Attention: No persistent storage 
+  * Ohne Auth kommt ein sauberes 401 vom Traefik-Middleware (nicht von Prometheus selbst):
 
-  * In this chart prometheus by default uses EmptyDir, only exists as long as pod runs
-  * Retention time: is 10d currenty, so this long will data be there 
+![Prometheus ohne Basic-Auth: 401 Unauthorized von Traefik](screenshots/04-prometheus-401.png)
+
+  * Mit Auth: unter `Status > Target health` siehst Du alle ServiceMonitor-Targets (hier
+    `kube-state-metrics` und `node-exporter` auf allen Workern, alle `UP`):
+
+![Prometheus Target health: alle Targets UP](screenshots/05-prometheus-targets.png)
+
+  * Beispiel-Query (Reiter "Query" -> Feld oben, danach auf "Graph" wechseln): CPU-Rate
+    pro Pod im eigenen `monitoring`-Namespace
+
+```
+sum(rate(container_cpu_usage_seconds_total{namespace="monitoring"}[5m])) by (pod)
+```
+
+![Prometheus: PromQL-Query mit Graph-Ansicht](screenshots/08-prometheus-query-graph.png)
+
+### Schritt 11: Grafana von aussen erreichen
+
+  * Browser: `https://grafana.<du>.do.t3isp.de` -> Login mit admin + deinem adminPassword
+
+![Grafana Login](screenshots/01-grafana-login.png)
+
+  * Der kube-prometheus-stack bringt fertige Dashboards mit (Ordner "Kubernetes" unter
+    "Dashboards"). Fuer Pods interessant: **Kubernetes / Compute Resources / Namespace (Pods)**
+    - Namespace-Variable oben auf `monitoring` stellen, dann siehst Du CPU- und
+    Memory-Verbrauch je Pod (hier die eigenen Prometheus/Grafana/Alertmanager-Pods):
+
+![Grafana Dashboard "Kubernetes / Compute Resources / Namespace (Pods)"](screenshots/07-grafana-pods-dashboard.png)
+
+### Schritt 12: Alertmanager von aussen erreichen
+
+  * Browser: `https://alertmanager.<du>.do.t3isp.de` -> Login-Popup (basic-auth)
+  * Der kube-prometheus-stack legt eine `Watchdog`-Alert an, die dauerhaft feuert (Beweis,
+    dass die Alerting-Pipeline lebt):
+
+![Alertmanager mit der staendig aktiven Watchdog-Alert](screenshots/06-alertmanager.png)
+
+### Achtung: Kein persistenter Storage
+
+  * Prometheus nutzt in diesem Chart per Default EmptyDir - Daten leben nur so lange wie der Pod
+  * Retention: aktuell 10d
 
 ```
   prometheus-prometheus-kube-prometheus-prometheus-db:
     Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
-    Medium:
-    SizeLimit:  <unset>
 ```
 
-#### Set to storageclass 
+#### Optional: StorageClass verwenden (nur wenn im Cluster vorhanden!)
 
 ```
-nano monitoring-values.yaml
+## Erst pruefen - auf unseren Trainingsclustern gibt es aktuell KEINE StorageClass:
+kubectl get storageclass
 ```
 
-```
-grafana:
-  fullnameOverride: grafana
-  enabled: true
-  adminUser: admin
-  adminPassword: "yourStrongPassword"
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    hosts:
-      - grafana.<du>.do.t3isp.de
-    path: /
-    pathType: Prefix
-    tls:
-      - hosts:
-          - grafana.<du>.do.t3isp.de
-        secretName: grafana-tls
+  * Falls eine StorageClass vorhanden ist, in `monitoring-values.yml` unter
+    `prometheus:` ergaenzen (Name anpassen!) und erneut ausrollen:
 
+```
 prometheus:
-  fullnameOverride: prometheus 
-### That is the storageclass part
   prometheusSpec:
     storageSpec:
       volumeClaimTemplate:
@@ -3807,77 +4323,33 @@ prometheus:
           resources:
             requests:
               storage: 20Gi
-          storageClassName: "standard"
-#######
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      nginx.ingress.kubernetes.io/auth-type: basic
-      nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
-      nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    hosts:
-      - prometheus.<du>.do.t3isp.de
-    paths:
-      - /
-    pathType: Prefix
-    tls:
-      - hosts:
-          - prometheus.<du>.do.t3isp.de
-        secretName: prometheus-tls
-
-## Optional: Persist data
-prometheusOperator:
-  admissionWebhooks:
-    enabled: true
-
-alertmanager:
-  fullnameOverride: alertmanager
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      nginx.ingress.kubernetes.io/auth-type: basic
-      nginx.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
-      nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    hosts:
-      - alertmanager.<du>.do.t3isp.de
-    paths:
-      - /
-    pathType: Prefix
-    tls:
-      - hosts:
-          - alertmanager.<du>.t3isp.de
-        secretName: alertmanager-tls
-
-
-kube-state-metrics:
-  fullnameOverride: kube-state-metrics
-
-prometheus-node-exporter:
-  fullnameOverride: node-exporter
+          storageClassName: "<deine-storageclass>"
 ```
 
+### Aufraeumen
+
+  * ACHTUNG: Erst NACH der ServiceMonitor-Uebung aufraeumen - sie baut auf diesem Stack auf!
+
 ```
-## ausrollen
-helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f monitoring-values.yaml --namespace monitoring --create-namespace --version 72.3.0
+helm -n monitoring uninstall prometheus
+kubectl delete ns monitoring
+## CRDs bleiben nach dem Uninstall stehen - Liste zum manuellen Loeschen:
+## https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/UPGRADE.md
+## cert-manager und traefik koennen stehen bleiben (werden ggf. weiterverwendet)
 ```
 
-### References:
+### Referenzen:
 
   * https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md
-  * https://artifacthub.io/packages/helm/prometheus-community/prometheus
-
-  
+  * https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
+  * https://doc.traefik.io/traefik/middlewares/http/basicauth/
 
 ### Uebung: nginx mit ServiceMonitor und Exporter (Sidecar)
 
 
 ### Voraussetzung:
 
-  * kube-prometheus-stack muss installiert sein -> [Kube-Prometheus-Stack installieren](#prometheusgrafana-stack-installieren-mit-helm)
+  * kube-prometheus-stack muss installiert sein -> [Kube-Prometheus-Stack installieren](../../prometheus-grafana/prometheus-grafana/install-with-helm-traefik-letsencrypt-basic-auth.md)
 
 
 ### 🔧 Vorbereitung: Verzeichnisstruktur anlegen
@@ -4202,149 +4674,173 @@ Oben rechts auf neues Dashboard erstellen klicken
 
 
 
-## Logging-Stack: Fluentd -> Elasticsearch
+## Logging-Stack: EFK (Elasticsearch/Fluentd/Kibana)
 
-### Fluentd - Grundlagen
-
-
-### Components of the ELK Stack 
- 
-  * E : Elasticsearch (Suchmaschine) 
-  * F : Fluentd (Datensammler)
-  * K : Kibana (Grafische Frontend für die Datenauswertung) 
-
-### What is fluentd ? 
-
-  * fluentd aggregates different data like (app logs, systems logs a.s.o) - see References 
-
-### Walkthrough 
-
-```
-###  1. On ubuntu server 22.04. (4 GB)  
-
-snap install --classic microk8s 
-microk8s status
-
-## in microk8s 1.24 you need to activate the community repo firstly
-microk8s enable common 
-
-## With microk8s you can enable this stack. 
-microk8s enable fluentd 
-```
-
-```
-### 2. on windows client 
+### EFK-Stack: Aufbau, Fluentd vs. Fluent Bit, DaemonSet vs. Sidecar
 
 
-## Activate wsl ubuntu subsystem on windows 
-## and start ubuntu 
-## in cmd.exe or powershell
-wsl --install
+Kein Walkthrough - hier geht es um den Aufbau eines zentralen
+Logging-Stacks in Kubernetes und die Architektur-Entscheidungen dahinter:
+Welche Komponenten braucht man, ist Fluentd noch zeitgemaess, und laeuft
+der Log-Collector als DaemonSet oder als Sidecar?
 
+### Warum ueberhaupt zentrales Logging?
 
-## in ubuntu shell (open from icon ubuntu in windows) 
-## change to root 
-sudo su -
-cd
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-chmod u+x kubectl 
-mv ./kubectl /usr/local/bin 
+  * `kubectl logs` liest nur, was die Container-Runtime lokal auf dem Node
+    vorhaelt - stirbt der Pod oder der Node, sind die Logs weg.
+  * Bei vielen Nodes und Pods will niemand Logs pro Pod einsammeln -
+    man braucht eine zentrale, durchsuchbare Ablage mit Retention.
+  * Debugging ueber mehrere Services hinweg (wer hat wann welchen Request
+    gesehen?) geht nur mit einer gemeinsamen Sicht.
 
-## now setup config for kubectl 
-cd 
-mkdir .kube
-cd .kube
-## on microk8s get config 
-## microk8s config 
-## and copy it to config
-vi config 
+### Die Komponenten (E-F-K)
 
-## should work now
-kubectl cluster-info 
+| Buchstabe | Komponente | Aufgabe |
+|-----------|------------|---------|
+| E | Elasticsearch | Speichert und indiziert die Logs, macht sie durchsuchbar |
+| F | Fluentd (bzw. heute meist Fluent Bit) | Sammelt die Logs auf den Nodes ein, reichert sie an, leitet sie weiter |
+| K | Kibana | Web-Frontend fuer Suche, Filter und Dashboards auf den Elasticsearch-Indizes |
 
-## Tschakka ! 
-## Now open a port-forwarding directly to your client
-kubectl port-forward -n kube-system service/kibana-logging 8181:5601
+### Aufbau: Wie fliesst ein Log durch den Cluster?
 
-## Bamm ! You can now open kibana in your local browser
-## e.g. Chrome / Edge 
-http://127.0.0.1:8181
+![Log-Flow im EFK-Stack](images/efk-log-flow.svg)
 
-```
+Die wichtigsten Punkte daran:
 
-```
-## In interface 
+  1. Die App loggt einfach nach **stdout/stderr** (12-Factor-Prinzip) -
+     sie weiss nichts von Elasticsearch.
+  2. Die Container-Runtime persistiert das pro Node unter
+     `/var/log/pods/`, mit sprechenden Symlinks unter `/var/log/containers/`.
+  3. Der Collector laeuft **einmal pro Node**, mountet diese Verzeichnisse
+     vom Host und liest alle Container-Logs des Nodes.
+  4. Er reichert jede Zeile ueber die Kubernetes-API mit Metadaten an
+     (Namespace, Pod-Name, Labels) - dadurch kann man in Kibana z.B. nach
+     `kubernetes.namespace_name` filtern.
+  5. Er puffert (Backpressure!) und schickt die Daten an Elasticsearch.
 
-## Click on left menu discover
-## Create an index 
-## it will already be available in the list 
-## logstash-* 
-## On page Step 2
-## choose filter -> @timestamp (from dropdown)
+### Ist Fluentd noch zeitgemaess?
 
-## See also 
-## scroll a bit to the screenshots !!
-##https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes#step-4-creating-the-fluentd-# daemonset
+Kurze Antwort: **Deprecated ist Fluentd nicht - aber als Node-Collector
+fuer einen Neuaufbau meist nicht mehr erste Wahl. Der Nachfolger im
+eigenen Haus heisst Fluent Bit.**
 
+  * **Fluentd** (seit 2011, Ruby + C, CNCF graduated) wird aktiv gepflegt
+    (fluent-package v6 LTS mit Support bis mindestens Ende 2027) und hat
+    ein riesiges Plugin-Oekosystem (1000+). Aber: relativ schwergewichtig
+    (typisch einige hundert MB RAM pro Instanz) - als DaemonSet auf jedem
+    Node zahlt man das mal Anzahl Nodes.
+  * **Fluent Bit** (gleiches Projekt-Umfeld, in C geschrieben, wenige MB
+    RAM) ist heute der De-facto-Standard als Node-Collector. Wer heute
+    "EFK" aufbaut, meint praktisch immer Elasticsearch + **Fluent Bit** +
+    Kibana.
+  * Verbreitetes Muster in grossen Umgebungen: Fluent Bit als leichter
+    Collector auf jedem Node, optional ein zentrales Fluentd als
+    **Aggregator** (Routing, aufwendige Filter, viele Ziele) - dort spielt
+    das Plugin-Oekosystem seine Staerke aus, ohne jeden Node zu belasten.
+    Fluent Bit kann inzwischen auch selbst als Aggregator dienen - die
+    zweistufige Architektur ist optional, nicht Pflicht.
+  * Bestehende Fluentd-Setups laufen zu lassen ist voellig legitim -
+    es gibt keinen Migrationszwang.
 
-## After that click on discover again !! 
-## Left menu
-Discover
+Alternativen ausserhalb der Fluent-Familie:
 
-```
+| Tool | Einordnung |
+|------|------------|
+| OpenTelemetry Collector | Sinnvoll, wenn man OTel sowieso fuer Traces/Metriken einsetzt - ein Agent fuer alle drei Signale |
+| Vector | Moderner Collector in Rust (Datadog), sehr performant, eigene Transformationssprache |
+| Filebeat / Elastic Agent | Die Elastic-eigene Variante, eng mit dem Elastic-Stack verzahnt (dann "ELK" statt "EFK") |
+| Promtail / Grafana Alloy | Collector fuer Grafana Loki - anderes Backend-Konzept (Label-Index statt Volltext), guenstiger im Betrieb als Elasticsearch |
 
+Mit den "drei Signalen" der Observability sind gemeint:
 
+  1. **Logs** - Textereignisse mit Zeitstempel ("was ist passiert?") -
+     darum geht es in diesem Kapitel.
+  2. **Metriken** - numerische Zeitreihen ("wie viel / wie schnell?"),
+     z.B. CPU, RAM, Requests/s - siehe Prometheus/Grafana-Kapitel.
+  3. **Traces** - der Weg eines einzelnen Requests durch mehrere Services
+     ("wo haengt's?"), jeder Service steuert einen Span bei.
 
+Klassisch braucht man dafuer drei verschiedene Agenten auf dem Node
+(z.B. Fluent Bit + Node Exporter + Tracing-Agent) - der OpenTelemetry
+Collector kann alle drei Signale mit einem einzigen Agenten einsammeln.
 
-### References:
+### DaemonSet oder Sidecar?
 
-  *
+**Der Standard ist das DaemonSet.** Ein Collector pro Node liest die Logs
+aller Container dieses Nodes:
+
+  * Ressourcen: 1 Collector pro **Node** statt 1 pro **Pod** - bei 30 Pods
+    pro Node ist das Faktor 30.
+  * Zentrale Konfiguration: ein Ort fuer Parsing, Filter, Ziele.
+  * Die Anwendungen bleiben unangetastet - loggen nach stdout reicht,
+    keine Aenderung an Pod-Specs noetig.
+
+**Der Sidecar ist die Ausnahme fuer Sonderfaelle.** Dabei laeuft ein
+zusaetzlicher Container im selben Pod, der ueber ein geteiltes
+`emptyDir`-Volume an die Logs der App kommt. Zwei Varianten:
+
+  1. **Streaming-Sidecar**: Die App schreibt in Dateien im Container
+     (Legacy-Software, laesst sich nicht auf stdout umbiegen, oder mehrere
+     getrennte Logdateien wie `access.log` / `error.log` / `audit.log`).
+     Der Sidecar macht `tail -f` auf die Datei und schreibt sie auf sein
+     eigenes stdout - ab da greift wieder der normale DaemonSet-Weg.
+     Pro Logdatei ein Sidecar, und man kann die Streams in Kibana getrennt
+     filtern.
+  2. **Sidecar mit eigenem Agent**: Der Sidecar ist selbst ein
+     Fluent-Bit/Fluentd und schickt direkt an ein Backend - z.B. wenn ein
+     Team seine Logs an ein **anderes Ziel** schicken muss als der Rest des
+     Clusters, mit eigenem Parsing, ohne die clusterweite
+     Collector-Konfiguration anzufassen. Oder wenn man gar keine
+     DaemonSets ausrollen darf (stark eingeschraenkte Multi-Tenant- oder
+     Managed-Umgebung ohne Zugriff auf Node-Ebene).
+
+Warum man den Sidecar nicht als Default nimmt:
+
+  * RAM/CPU-Overhead in **jedem** Pod, nicht einmal pro Node.
+  * Konfiguration verteilt sich ueber viele Pod-Specs statt an einer Stelle.
+  * Beim Streaming-Sidecar liegen die Logs doppelt auf der Platte
+    (Datei im Volume + stdout-Kopie der Runtime), und um die Log-Rotation
+    im `emptyDir` muss man sich selbst kuemmern.
+  * Logs des Sidecar-Agent-Musters (Variante 2) tauchen nicht in
+    `kubectl logs` auf.
+
+| Kriterium | DaemonSet | Sidecar |
+|-----------|-----------|---------|
+| Ressourcenverbrauch | 1x pro Node | 1x pro Pod |
+| Konfiguration | zentral | pro Pod/Team |
+| App loggt nach stdout | perfekt | unnoetig |
+| App loggt in Dateien | geht nicht direkt | genau dafuer (Streaming-Sidecar) |
+| Abweichendes Log-Ziel pro Team | aufwendig (Routing-Regeln) | einfach (Variante 2) |
+| Kein Node-Zugriff erlaubt | geht nicht | einzige Option |
+
+**Faustregel:** DaemonSet als Default. Sidecar nur gezielt dort, wo eine
+App nicht nach stdout loggen kann oder Logs ein abweichendes Ziel bzw.
+eigenes Handling brauchen.
+
+### Zusammenfassung
+
+  * Aufbau: App -> stdout -> Node-Dateisystem -> Collector (DaemonSet) ->
+    Elasticsearch -> Kibana.
+  * Merksatz: "EFK" heisst heute praktisch **Elasticsearch + Fluent Bit +
+    Kibana** - Fluentd lebt weiter als optionaler Aggregator und in
+    Bestandsumgebungen.
+  * Fuer Neuaufbauten auch OpenTelemetry Collector (ein Agent fuer Logs,
+    Metriken und Traces) oder Vector pruefen.
+  * DaemonSet ist der Normalfall, Sidecar das Werkzeug fuer Ausnahmen -
+    und man sollte begruenden koennen, warum man es einsetzt.
+
+### Referenzen
+
+  * https://kubernetes.io/docs/concepts/cluster-administration/logging/
+    (offizielle Doku zu genau diesen Mustern: Node-Agent, Streaming-Sidecar,
+    Sidecar mit Agent)
   * https://www.fluentd.org/architecture
-
-### Alternatives (set it up step by step) 
-
-  * https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes
- 
-### Injection (sidecar for sending data of containers
-
-  * https://github.com/h3poteto/fluentd-sidecar-injector
-
-### Fluentd/Kibana/Elasticsearch - Walkthrough
-
-
-### Installieren 
-
-```
-microk8s enable fluentd
-
-## Zum anzeigen von kibana 
-kubectl port-forward -n kube-system service/kibana-logging 8181:5601
-## in anderer Session Verbindung aufbauen mit ssh und port forwarding 
-ssh -L 8181:127.0.0.1:8181 11trainingdo@167.172.184.80
-
-## Im browser 
-http://localhost:8181 aufrufen 
-```
-
-### Konfigurieren 
-
-```
-Discover:
-Innerhalb von kibana -> index erstellen 
-auch nochmal in Grafiken beschreiben (screenshots von kibana) 
-https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes
-
-```
+  * https://docs.fluentbit.io/manual/about/fluentd-and-fluent-bit
 
 ## Alternative: Splunk-Integration
 
-### Architektur & Konzept: Splunk extern vs. im Cluster
+### Theorie: Kubernetes mit Splunk verbinden
 
-
-Architekturüberblick: was eine Splunk-Instanz braucht, um Daten aus einem
-Kubernetes-Cluster zu bekommen. Im Mittelpunkt steht hier die Anbindung an einen
-**externen** Splunk-Server — das ist der in der Praxis übliche Weg. Der Betrieb von Splunk
-**innerhalb** des Clusters wird am Ende als optionale Variante beschrieben.
 
 ### Was ist Splunk
 
@@ -4356,19 +4852,18 @@ bei der Suche extrahiert.
 |---|---|
 | **Gegründet** | 2003, San Francisco — der Name kommt von „spelunking“, dem Erforschen von Höhlen |
 | **Lizenz** | Proprietär. Trial 60 Tage, danach automatisch Free License (500 MB/Tag, Single-User) |
-| **Typische Daten** | App-Logs, Syslog, Security-Events, Kubernetes-Events, Metriken via HEC |
+| **Typische Daten** | App-Logs, Syslog, Security-Events, Kubernetes-Events, Metriken via HEC (HTTP Event Collector) |
 | **Abfragesprache** | SPL (Search Processing Language) — mächtiger als reine Volltextsuche |
 
-### Was „Standalone“ bedeutet
+### Wie kann ich Splunk betreiben (Architektur)
 
-Splunk lässt sich als verteiltes System betreiben — separate Indexer-Cluster,
-Search-Head-Cluster, Lizenz-Manager, jeweils eigene Instanzen. Für eine Teststellung reicht
-das nicht nur nicht, es würde den Bogen überspannen: **Standalone** heißt, eine einzige
-Instanz übernimmt alle drei Rollen gleichzeitig:
+Splunk laesst sich als **Standalone**-Instanz (eine Instanz uebernimmt Indexer, Search Head
+und Web-UI gleichzeitig), als **verteiltes System** (separate Indexer-Cluster,
+Search-Head-Cluster, Lizenz-Manager), als **Cloud-Service** (Splunk Cloud Platform, gehostet
+von Splunk) oder **in Kubernetes** (via Splunk Operator) betreiben.
 
-- **Indexer** — nimmt Daten per HEC entgegen, schreibt sie in den Index
-- **Search Head** — wertet SPL-Suchen gegen den lokalen Index aus
-- **Web-UI** — Login, Suche, Dashboards, alles auf Port 8000
+Fuer das Training arbeiten wir mit Splunk Standalone. Der Server ist bereits eingerichtet
+und erreichbar unter https://splunk-external.do.t3isp.de.
 
 ### Die Anbindung: Splunk extern, Kubernetes liefert nur zu
 
@@ -4380,69 +4875,20 @@ Splunk-Instanz überträgt.
 
 ![Architektur: Splunk extern auf eigener VM](uebungen/screenshots/05-architektur-variante-b.svg)
 
-Das hat drei praktische Vorteile gegenüber Splunk im Cluster:
+Unser Setup:
 
-- **Skaliert auf mehrere Cluster** — eine externe Splunk-Instanz kann Daten aus beliebig
-  vielen Clustern gleichzeitig einsammeln, statt 1:1 an einen Cluster gebunden zu sein
-- **Entkoppelter Lifecycle** — Node-Upgrades, Drains oder ein kompletter Cluster-Ausfall
-  betreffen die bereits gesendeten Logs nicht, sie liegen sicher außerhalb
-- **Kein Operator, keine PVCs im Cluster** — der Cluster selbst bleibt schlank, die
-  Splunk-spezifische Komplexität (Storage, Lifecycle, Lizenz) liegt vollständig auf der
-  externen Seite
-
-Die technischen Bausteine der externen Anbindung im Detail:
-
-- **HEC aktiviert + Token** — HTTP Event Collector auf Port `8088`, Token wird bei der
-  externen VM selbst gewählt (per Terraform-Variable), nicht von Splunk generiert
-- **Log-Forwarder als DaemonSet** — Splunk OpenTelemetry Collector, 1 Pod pro Node, liest
-  `/var/log/pods/*/*.log` und schickt sie über HEC nach außen
-- **Netzwerkpfad Forwarder → HEC** — Firewall/VPC-Routing der externen VM muss den
-  Pod-Traffic aus dem Cluster durchlassen; Pod-Traffic wird beim Verlassen des Clusters auf
-  die Node-IP maskiert, das VPC-CIDR muss das beruecksichtigen
-- **Reverse-Proxy + TLS-Zertifikat** — Web-UI selbst bleibt intern (Port 8000 gesperrt),
-  nginx terminiert HTTPS mit Let's-Encrypt-Zertifikat auf 80/443
-- **Eigene Server-Infrastruktur** — VM per Terraform/Cloud-Init, natives
-  Splunk-Enterprise-Paket (.deb), kein Docker, kein Kubernetes-Operator nötig
+- **Kubernetes-Cluster** — Logs werden per DaemonSet (ein Pod auf jedem Node) geforwarded
+- **Splunk-VM** — bereits ausgerollt (per Terraform/Cloud-Init)
 
 ### Hands-on: externe Anbindung
 
 Schritt-für-Schritt-Übungen zur externen Variante:
 
-1. [Zugang zum bestehenden Cluster](uebungen/01-cluster-zugang.md)
-2. [Externe Splunk-VM per Terraform aufsetzen](uebungen/02-externe-splunk-vm.md)
-3. [Log-Forwarder an die externe Splunk-VM anbinden](uebungen/03-forwarder-an-externe-splunk.md)
-4. [Log-Suche und CrashLoopBackOff-Debugging](uebungen/04-log-suche-crashloop-debugging.md)
-5. [Aufräumen](uebungen/05-aufraeumen.md)
-
-### Optional: Splunk im Cluster betreiben
-
-Splunk lässt sich alternativ auch **im Cluster** selbst betreiben, über den offiziellen
-Splunk Operator und eigene Custom Resources. Das ist der seltenere Weg (an einen Cluster
-gebunden, zusätzlicher Operator- und Storage-Overhead), aber lehrreich, weil sichtbar wird,
-was der Operator im Hintergrund automatisiert. Der Log-Forwarder ist in beiden Varianten
-identisch — der einzige strukturelle Unterschied ist, ob der HEC-Aufruf die Cluster-Grenze
-verlässt oder nicht.
-
-![Architektur: Log-Forwarder ist in beiden Varianten identisch, der Unterschied ist ob der HEC-Aufruf die Cluster-Grenze verlässt](uebungen/screenshots/04-architektur-varianten.svg)
-
-| Aspekt | 🟠 Extern (Hauptpfad) | 🔵 Im Cluster (optional) |
-|---|---|---|
-| Splunk läuft auf | eigenem Server / VM, unabhängig vom Cluster | Pod im selben Cluster wie die Workloads |
-| Zusätzlich nötig | eigene Infrastruktur (VM, Terraform, Reverse-Proxy für TLS) | Splunk-Operator, CRDs, PVCs (Block-Storage) |
-| Skaliert auf mehrere Cluster | ja — mehrere Cluster, ein Sammelbecken | nein — 1:1 an den Cluster gebunden |
-| Lifecycle-Kopplung | entkoppelt — Cluster-Wartung stört Splunk nicht | Node-Upgrades/Drains im Cluster betreffen auch Splunk |
-| Typisch für | Produktions-Logging, mehrere Teams/Cluster | Test-/Dev-Umgebungen, Kubernetes-native Teams |
-
-Zusätzlich für die In-Cluster-Variante nötig:
-
-- [ ] Splunk-Operator-CRDs — per `kubectl apply --server-side`, zu groß für Helm (>1 MB)
-- [ ] Splunk Operator + Standalone-Chart — Helm-Repo `splunk.github.io/splunk-operator`, Lizenz per `SPLUNK_GENERAL_TERMS` akzeptieren
-- [ ] Persistenter Storage — StorageClass mit Block-Storage, Standalone braucht getrennte Volumes für `/etc` und `/var`
-
-Hands-on zur optionalen In-Cluster-Variante: [uebungen/10](uebungen/10-optional-splunk-operator-installieren.md)
-bis [uebungen/14](uebungen/14-optional-aufraeumen-in-cluster.md).
-
-Infrastruktur-Aufbau und Kosten: siehe [README](README.md).
+1. (Optional) [Externe Splunk-VM per Terraform aufsetzen](uebungen/02-externe-splunk-vm.md)
+2. [Log-Forwarder an die externe Splunk-VM anbinden](uebungen/03-forwarder-an-externe-splunk.md)
+3. [Log-Suche und CrashLoopBackOff-Debugging](uebungen/04-log-suche-crashloop-debugging.md)
+4. [CrashLoopBackOff-Alert einrichten (optional)](uebungen/05-alert-crashloop-backoff.md)
+5. [Aufräumen](uebungen/06-aufraeumen.md)
 
 Welche Splunk-Menuepunkte davon in der Uebung tatsaechlich vorkommen (und welche bewusst
 aussen vor bleiben, weil sie den Betrieb von Splunk selbst statt die Kubernetes-Anbindung
@@ -4456,9 +4902,7 @@ die Einschaetzung, ob das jeweilige Feature fuer *dieses* Kubernetes-Training ge
 
 Verifiziert an der laufenden externen Instanz aus [UEBERSICHT.md](UEBERSICHT.md) /
 [uebungen/02-externe-splunk-vm.md](uebungen/02-externe-splunk-vm.md):
-`https://splunk-external.do.t3isp.de`, Splunk 10.4.2, Stand 31.08.2026. Grundlagen (was
-Splunk ist, Standalone-Rolle, externe vs. In-Cluster-Anbindung) stehen in
-[UEBERSICHT.md](UEBERSICHT.md) - hier geht es nur um die Menuestruktur.
+`https://splunk-external.do.t3isp.de`, Splunk 10.4.2, Stand 31.08.2026. 
 
 ### App-Auswahl (linke Seitenleiste)
 
@@ -4479,7 +4923,7 @@ Splunk ist, Standalone-Rolle, externe vs. In-Cluster-Anbindung) stehen in
 | Analytics Workspace | Klick-basierte Alternative zu SPL (Pivot-Nachfolger) fuer Nutzer ohne SPL-Kenntnisse | Nein - Trainingsziel ist SPL selbst zu ueben, nicht der Klick-Weg drumherum |
 | Datasets | Verwaltung von Data Models/Table Datasets als wiederverwendbare Datenbasis fuer Pivot | Nein - Aufbauthema, ueberschneidet sich mit Analytics Workspace, nicht im Scope |
 | Reports | Gespeicherte Suchen mit Zeitplan, Ergebnis-Export | Nein direkt - waere ein sinnvoller naechster Schritt nach Uebung 4, aber kein eigener Uebungsinhalt |
-| Alerts | Bedingte Benachrichtigung aus einer Suche heraus (E-Mail, Webhook, Skript) | Ja - explizit in [Uebung 4, Schritt 5](uebungen/04-log-suche-crashloop-debugging.md) als optionaler Schritt angelegt (BackOff-Alert) |
+| Alerts | Bedingte Benachrichtigung aus einer Suche heraus (E-Mail, Webhook, Skript) | Ja - eigene, optionale [Uebung 5](uebungen/05-alert-crashloop-backoff.md) (BackOff-Alert) |
 | Dashboards | Visualisierungen/Panels aus gespeicherten Suchen | Optional - "Visualize your data" wird auf der Startseite beworben, ist aber keine eigene Uebung; waere naheliegende Erweiterung fuer ein Kubernetes-Log-Dashboard |
 | Modules | SPL2-Suchmodule (mehrere Suchen kombinieren, neueres API-Konzept) | Nein - SPL2 ist ein Splunk-internes Nachfolgekonzept zu SPL, kein Kubernetes-Bezug |
 
@@ -4522,7 +4966,7 @@ die BackOff-Suche aus Uebung 4 dauerhaft zu speichern.
 ![Alerts](screenshots-menue/05-alerts.jpg)
 Liste aller konfigurierten Alerts (Bedingung -> Aktion). Sinnvoll fuer die
 Kubernetes-Anbindung: ja - hier taucht der optionale BackOff-Alert aus
-[Uebung 4, Schritt 5](uebungen/04-log-suche-crashloop-debugging.md) auf, falls angelegt.
+[Uebung 5](uebungen/05-alert-crashloop-backoff.md) auf, falls angelegt.
 
 **Dashboards**
 ![Dashboards](screenshots-menue/06-dashboards.jpg)
@@ -4543,14 +4987,15 @@ dafuer noetige Zusatzkomponente.
 | Menuepunkt | Was er tut | Fuer K8s-Training gebraucht? |
 |---|---|---|
 | Jobs | Laufende/abgeschlossene Suchjobs verwalten (abbrechen, Ergebnisse nachladen) | Nein direkt - nuetzlich falls eine Suche in Uebung 4 haengt, aber kein eigener Uebungsinhalt |
-| Triggered Alerts | Historie ausgeloester Alerts | Nein direkt - haengt am optionalen Alert aus Uebung 4, Schritt 5 |
+| Triggered Alerts | Historie ausgeloester Alerts | Nein direkt - haengt am optionalen Alert aus Uebung 5 |
 
 ### Fazit
 
 Fuer dieses Training zaehlen im Kern nur wenige Menuepunkte wirklich: **Search** und
 **Alerts** aus der Search & Reporting App - das deckt den Weg "Log/Event trifft in Splunk
-ein -> wird per SPL gefunden -> loest optional einen Alert aus" ab, der
-[Uebung 4](uebungen/04-log-suche-crashloop-debugging.md) traegt. Analytics Workspace,
+ein -> wird per SPL gefunden -> loest optional einen Alert aus" ab, den
+[Uebung 4](uebungen/04-log-suche-crashloop-debugging.md) und
+[Uebung 5](uebungen/05-alert-crashloop-backoff.md) tragen. Analytics Workspace,
 Datasets, Reports und Modules sind Aufbau- bzw. Alternativkonzepte ohne eigenen
 Uebungsschritt, Dashboards eine naheliegende, aber optionale Erweiterung. Das
 Settings-Menue (Administration der Splunk-Instanz selbst: Server, Lizenz, Indizes,
@@ -4566,58 +5011,109 @@ konfiguriert.
 
 ### Hintergrund
 
+![Warum ein Log-Forwarder: der Weg eines Log-Eintrags](screenshots/06-forwarder-ablauf.svg)
+
+Diese Uebung installiert den **Splunk OpenTelemetry Collector** als DaemonSet und richtet
+ihn auf den HEC-Endpoint der externen VM aus Uebung 2 aus.
+
+<details>
+<summary>Ausfuehrlicher Text (optional)</summary>
+
 Container-Logs landen standardmaessig nur temporaer auf dem Node (stdout/stderr, von
 containerd rotiert). Nach einem Pod-Neustart oder Node-Wechsel sind sie weg. Ein Forwarder
 liest sie laufend ein und schickt sie ueber HEC (HTTP Event Collector) an Splunk, bevor sie
-verloren gehen. Diese Uebung installiert den **Splunk OpenTelemetry Collector** als
-DaemonSet und richtet ihn auf den HEC-Endpoint der externen VM aus Uebung 2 aus.
+verloren gehen.
 
-Da der HEC-Token in Uebung 2 selbst gewaehlt wurde (nicht von Splunk generiert), muss er
-hier nicht erst aus einem Kubernetes-Secret extrahiert werden - er steht bereits in der
-eigenen `.env`.
+Da der HEC-Token beim Aufsetzen der VM selbst gewaehlt wurde (nicht von Splunk generiert),
+muss er hier nicht erst aus einem Kubernetes-Secret extrahiert werden. Er wird vom Trainer
+bekannt gegeben - wer die VM in Uebung 2 selbst aufgesetzt hat, hat ihn in der eigenen `.env`.
 
-### Schritt 1: Token in eine Secret-Values-Datei eintragen
+</details>
+
+### Schritt 1: Arbeitsverzeichnis anlegen
+
+Alle Dateien dieser Uebung landen in einem eigenen Verzeichnis, die folgenden Schritte
+werden von dort ausgefuehrt:
+
+```
+cd
+mkdir -p helm-values/splunk-otel
+cd helm-values/splunk-otel
+```
+
+### Schritt 2: Token in eine Secret-Values-Datei eintragen
 
 Den Token **nicht** per `--set` auf der Kommandozeile uebergeben (landet sonst in der
 Bash-History und ggf. in `helm history`), sondern in eine eigene, kleine YAML-Datei
-schreiben. Diese Datei bleibt nur lokal auf dem Bastion, wird nicht committed und ist die
-einzige Stelle, an der der Token im Klartext steht:
+schreiben. Diese Datei bleibt nur lokal auf dem Bastion und ist die einzige Stelle, an
+der der Token im Klartext steht:
 
 ```
-nano /tmp/hec-token-values.yml
+nano hec-token-values.yml
 ```
 
 Inhalt:
 
 ```
 splunkPlatform:
-  token: <TF_VAR_splunk_hec_token aus deiner .env, Uebung 2 Schritt 1>
+  token: <HEC-Token - gibt der Trainer bekannt; bei selbst aufgesetzter VM: TF_VAR_splunk_hec_token aus Uebung 2 Schritt 1>
 ```
 
-### Schritt 2: Helm-Repo hinzufuegen
+### Schritt 3: Collector-Konfiguration als Values-Datei anlegen
+
+Der Rest der Konfiguration ist nicht geheim und kommt in eine zweite Values-Datei.
+Den folgenden Block als Ganzes ins Terminal kopieren - `$(whoami)` ersetzt die Shell
+dabei automatisch durch den eigenen Bastion-Username. Der dient als eindeutige
+Cluster-Kennung: alle Teilnehmer senden an dieselbe Splunk-Instanz in denselben Index,
+und ueber das Feld `k8s.cluster.name`, das der Forwarder aus `clusterName` erzeugt und
+an jedes Event anhaengt, lassen sich die eigenen Daten spaeter wieder herausfiltern:
+
+```
+cat > collector-values.yml << EOF
+clusterName: $(whoami)
+splunkPlatform:
+  # HEC-Endpoint der externen Splunk-VM aus Uebung 2
+  endpoint: "https://splunk-external.do.t3isp.de:8088/services/collector"
+  index: main
+  # HEC (Port 8088) nutzt Splunks eigenes, selbstsigniertes Zertifikat -
+  # das Let's-Encrypt-Zertifikat gilt nur fuer die Web-UI hinter Nginx
+  insecureSkipVerify: true
+EOF
+cat collector-values.yml
+```
+
+Die erste Zeile der Ausgabe muss den eigenen Username zeigen (Beispiel Teilnehmer 5:
+`clusterName: tln5`).
+
+### Schritt 4: Helm-Repo hinzufuegen
 
 ```
 helm repo add splunk-otel https://signalfx.github.io/splunk-otel-collector-chart
 helm repo update
 ```
 
-### Schritt 3: Forwarder installieren
+### Schritt 5: Forwarder installieren
 
 ```
 kubectl create namespace splunk-forwarder
 helm install splunk-log-forwarder \
-  -f splunk-manifests/04-splunk-otel-collector-external-values.yml \
-  -f /tmp/hec-token-values.yml \
+  -f collector-values.yml \
+  -f hec-token-values.yml \
   splunk-otel/splunk-otel-collector \
   -n splunk-forwarder
 ```
 
 Der Cluster enthaelt damit **nur** den Forwarder - kein Splunk-Operator, keine
-Splunk-Instanz. Der HEC-Endpoint in
-`splunk-manifests/04-splunk-otel-collector-external-values.yml` zeigt auf die IP/den
-Hostnamen der externen VM aus Uebung 2.
+Splunk-Instanz. Der HEC-Endpoint in `collector-values.yml` zeigt auf die
+externe VM aus Uebung 2.
 
-### Schritt 4: Status pruefen
+Jedes Event traegt damit zwei Kennungen, ueber die sich in [Uebung 4](04-log-suche-crashloop-debugging.md)
+die eigenen Daten von denen der anderen Teilnehmer trennen lassen: die Cluster-Kennung aus
+Schritt 3 (Feld `k8s.cluster.name`, z.B. `tln5`) und automatisch den echten Node-Hostnamen
+im `host`-Feld (die Nodes heissen `k8s-<username>-cp`, `k8s-<username>-w1`, ...,
+z.B. `k8s-tln5-cp`).
+
+### Schritt 6: Status pruefen
 
 ```
 kubectl get pods -n splunk-forwarder
@@ -4626,21 +5122,23 @@ kubectl logs -n splunk-forwarder -l app=splunk-otel-collector --tail=20
 
 Erwartete Ausgabe: DaemonSet-Pods `Running`, keine `Exporting failed`-Meldungen. Falls doch:
 
-- Endpoint in `splunk-manifests/04-splunk-otel-collector-external-values.yml` gegen
+- Endpoint in `collector-values.yml` gegen
   `terraform -chdir=terraform-external-splunk output` pruefen
 - HEC (Port 8088) verlangt HTTPS, auch wenn andere Ports auf der VM ggf. nur HTTP sprechen
-- `401`/`403` deutet auf einen falschen Token hin (Schritt 1 gegen die `.env` gegenpruefen)
+- `401`/`403` deutet auf einen falschen Token hin (Schritt 2 wiederholen, Token beim
+  Trainer gegenpruefen)
 
-### Schritt 5: Aufraeumen der Secret-Datei (optional, aber empfohlen)
+### Schritt 7: Aufraeumen der Secret-Datei (optional, aber empfohlen)
 
 Sobald der Forwarder laeuft, kann die lokale Token-Datei geloescht werden - der Token steckt
 danach nur noch im Kubernetes-Secret, das der Helm-Release selbst angelegt hat:
 
 ```
-rm /tmp/hec-token-values.yml
+rm ~/helm-values/splunk-otel/hec-token-values.yml
 ```
 
-Fuer eine spaetere Aenderung (`helm upgrade`) einfach Schritt 1 wiederholen.
+Die `collector-values.yml` aus Schritt 3 enthaelt kein Secret und kann liegen bleiben.
+Fuer eine spaetere Aenderung (`helm upgrade`) einfach Schritt 2 wiederholen.
 
 Weiter mit [Uebung 4: Log-Suche und CrashLoopBackOff-Debugging](04-log-suche-crashloop-debugging.md),
 um den Forwarder mit echten Daten zu fuellen und in der Splunk-Web-UI zu suchen.
@@ -4649,6 +5147,8 @@ um den Forwarder mit echten Daten zu fuellen und in der Splunk-Web-UI zu suchen.
 
 
 ### Hintergrund
+
+![Vom Absturz zur Ursache: Debugging ueber die zentrale Splunk-Suche](screenshots/07-crashloop-debugging-flow.svg)
 
 Wenn ein Pod wiederholt abstuerzt und neu gestartet wird (`CrashLoopBackOff`), sind seine
 Logs mit reinem `kubectl` schwer nachzuvollziehen: `kubectl logs` zeigt nur den aktuellen und
@@ -4661,11 +5161,60 @@ dort erhalten - genau das Sammelbecken-Prinzip aus der [Architektur-Uebersicht](
 Szenario: ein Service `payment-service` kann seine Datenbank nicht erreichen und beendet sich
 deshalb beim Start immer wieder selbst.
 
-### Schritt 1: Demo-Deployment ausrollen
+### Schritt 1: Demo-Deployment anlegen und ausrollen
+
+Arbeitsverzeichnis anlegen:
+
+```
+cd
+mkdir -p manifests/crashloop-demo
+cd manifests/crashloop-demo
+```
+
+```
+nano 01-crashloop-demo.yml
+```
+
+Das Manifest per Copy & Paste im Editor anlegen (wichtig: im Editor, nicht per
+`cat`-Heredoc - die `$(date ...)`-Aufrufe gehoeren zum Container und duerfen nicht
+schon lokal von der Shell ersetzt werden):
+
+```
+## vi 01-crashloop-demo.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "$(date -Iseconds) INFO  payment-service startet..."
+              echo "$(date -Iseconds) INFO  Verbinde zu Datenbank db-payments.internal:5432 ..."
+              sleep 2
+              echo "$(date -Iseconds) ERROR Verbindung zu db-payments.internal:5432 fehlgeschlagen: Connection refused"
+              echo "$(date -Iseconds) ERROR payment-service kann ohne Datenbankverbindung nicht starten, beende Prozess"
+              exit 1
+```
+
+Ausrollen:
 
 ```
 kubectl create namespace crashloop-demo
-kubectl apply -f splunk-manifests/02-crashloop-demo.yml -n crashloop-demo
+kubectl apply -f . -n crashloop-demo
 ```
 
 ### Schritt 2: CrashLoopBackOff beobachten
@@ -4689,13 +5238,22 @@ Zeigt u.a. `Warning BackOff ... Back-off restarting failed container payment-ser
 
 ### Schritt 3: In der Splunk-Web-UI nach den Kubernetes-Events suchen
 
-Login wie in [Uebung 2, Schritt 5](02-externe-splunk-vm.md) beschrieben:
-`https://splunk-external.do.t3isp.de`.
+Login unter `https://splunk-external.do.t3isp.de` - die Zugangsdaten (`admin` + Passwort)
+gibt der Trainer bekannt (Details zur VM: [Uebung 2, Schritt 5](02-externe-splunk-vm.md)).
 
-Suche in Splunk Web (Suche > Neue Suche):
+Suche in Splunk Web - bei mehreren angebundenen Clustern - (Suche > Neue Suche):
 
 ```
-index=main k8s.container.name="payment-service"
+## <tlnX> durch Deine Teilnehmer-Nr ersetzen, z.B. tln1
+## index=main k8s.container.name="payment-service" k8s.cluster.name="tln1"
+index=main k8s.container.name="payment-service" k8s.cluster.name="<dein-username>"
+```
+
+Alternativ ueber den Node-Hostnamen im `host`-Feld - die Node-Namen enthalten den eigenen
+user (tlnX) (`k8s-tln5-cp`, `k8s-tln5-w1`, ...) :
+
+```
+index=main k8s.container.name="payment-service" host="k8s-<tlnX>-*"
 ```
 
 ![Kubernetes BackOff-Event in Splunk](screenshots/02-kube-events-backoff.jpg)
@@ -4710,7 +5268,7 @@ Breitere Suche (auch aeltere, laengst rotierte Container-Log-Dateien sind hier n
 vorhanden, weil sie zentral in Splunk liegen statt nur auf dem Node):
 
 ```
-index=main payment
+index=main payment k8s.cluster.name="<dein-username>"
 ```
 
 ![Container-Log-Zeilen mit der Fehlerursache](screenshots/03-container-logs-search.jpg)
@@ -4733,27 +5291,131 @@ mehr laufen, da die Daten schon auf der externen VM liegen.
 Splunk-Suche kurzzeitig fehlen, wenn der Log-Forwarder die neue Log-Datei noch nicht entdeckt
 hat (Poll-Intervall). Bei Bedarf 1-2 Neustarts abwarten und die Suche wiederholen.
 
-### Schritt 5: Alert bauen (optional)
+Der `crashloop-demo`-Namespace bleibt fuer die naechste Uebung noch bestehen - der
+weiter abstuerzende `payment-service` liefert dort die Daten fuer den Alert.
 
-Aus der Event-Suche aus Schritt 3 liesse sich ein Alert bauen, der bei mehr als 3 BackOff-
-Events pro Pod in 10 Minuten eine Benachrichtigung ausloest - in Splunk Web ueber
-"Speichern als > Benachrichtigung" direkt aus dem Suchergebnis heraus.
+Weiter mit [Uebung 5: CrashLoopBackOff-Alert einrichten](05-alert-crashloop-backoff.md),
+um Splunk bei zu vielen Neustarts automatisch Bescheid geben zu lassen.
 
-### Aufraeumen des Demo-Namespace
+### CrashLoopBackOff-Alert einrichten (optional)
+
+
+### Hintergrund
+
+![Vom BackOff-Zaehler zur Benachrichtigung: wie der Alert entsteht](screenshots/09-alert-flow-ueberblick.svg)
+
+### Schritt 1: Die Suche fuer den Alert bauen
+
+Ausgangspunkt ist eine eigene, praezise Suche - nicht die aus Uebung 4, denn dort ging es
+nur um Anzeigen, hier soll konkret **gezaehlt** und **gefiltert** werden. In Splunk Web
+(Suche > Neue Suche):
+
+```
+index=main sourcetype=kube:events k8s.event.reason=BackOff k8s.container.name="payment-service" k8s.cluster.name="<dein-username>" k8s.event.count>2
+```
+
+`<dein-username>` wieder durch den eigenen Bastion-Usernamen ersetzen (z.B. `tln5`) - wie
+in Uebung 3/4 begrenzt das die Suche auf den eigenen Cluster, wenn mehrere Teilnehmer
+gleichzeitig gegen dieselbe externe Splunk-Instanz arbeiten. Ohne dieses Feld wuerde der
+Alert spaeter auf Neustarts **irgendeines** Teilnehmer-Clusters reagieren, nicht nur auf
+den eigenen.
+
+Was die einzelnen Teile der Suche tun:
+
+| Teil | Zweck |
+|---|---|
+| `sourcetype=kube:events` | nur Kubernetes-Events, keine Container-Log-Zeilen |
+| `k8s.event.reason=BackOff` | nur echte Neustart-Ereignisse, nicht z.B. `Pulled`/`Created` |
+| `k8s.container.name="payment-service"` | nur dieser eine Container |
+| `k8s.cluster.name="<dein-username>"` | nur der eigene Cluster |
+| `k8s.event.count>2` | der eigentliche Schwellwert - Kubernetes' eigener Wiederholungszaehler |
+
+Oben rechts den Zeitraum auf **Letzte 15 Minuten** stellen (`Letzte 5 Minuten` gibt es im
+Zeitraum-Dropdown nicht als Preset - nur unter "Echtzeit", das hier nicht gewollt ist).
+Ausfuehren - solltet ihr noch
+im Anschluss an Uebung 4 sein, liefert die Suche sofort mindestens ein Ergebnis (der
+Demo-Container crasht dort bereits laenger als eine Minute).
+
+### Schritt 2: Als Benachrichtigung speichern
+
+Nach dem Ausfuehren oben rechts ueber der Ergebnisliste auf **Speichern als** klicken und
+**Benachrichtigung** waehlen.
+
+### Schritt 3: Einstellungen im Dialog "Als Benachrichtigung speichern"
+
+![Alert-Dialog, oberer Teil: Titel, Zeitplan, Cron-Ausdruck und Trigger-Bedingung erklaert](screenshots/08-alert-dialog-oben-annotiert.svg)
+
+- **Titel**: z.B. `payment-service-backoff-alert`
+- **Berechtigungen**: `Privat` reicht fuer die Uebung
+- **Benachrichtigungstyp**: `Geplant` (nicht `Echtzeit` - braucht mehr Ressourcen/Lizenz)
+- Zeitplan-Dropdown (Standard "Jede Woche ausfuehren") auf **Nach Cron-Zeitplan
+  ausfuehren** umstellen - die Presets bieten nur Stunde/Tag/Woche/Monat, fuer den
+  gewuenschten 5-Minuten-Takt braucht es einen eigenen Cron-Ausdruck
+- **Zeitspanne**: `Letzte 15 Minuten` (aus Schritt 1 uebernommen)
+- **Cron-Ausdruck**: `*/5 * * * *` (alle 5 Minuten pruefen)
+- **Trigger-Bedingungen** > "Benachrichtigung ausloesen, wenn": Standardwert
+  `Anzahl der Ergebnisse` **groesser ist als** `0` **unveraendert lassen** - die
+  eigentliche Filterung (`k8s.event.count>2`) steckt schon in der Suche selbst
+- **Trigger**: `Ein Mal` reicht (ein Treffer pro Lauf genuegt zum Ausloesen)
+- **Einschraenkung aktivieren** (Checkbox) - **wichtig**: ohne sie feuert der Alert
+  sonst alle 5 Minuten erneut, solange derselbe Pod weiter crasht. Danach
+  "Ausloesung unterdruecken fuer" auf `30` `Minute(n)` stellen
+
+### Schritt 4: Aktion hinzufuegen - wohin geht die Benachrichtigung wirklich?
+
+![Alert-Dialog, unterer Teil: Einschraenkung, Aktionen und wohin die Benachrichtigung tatsaechlich geht](screenshots/08-alert-dialog-unten-annotiert.svg)
+
+**Ohne diesen Schritt passiert beim Ausloesen des Alerts gar nichts sichtbar** - "Aktionen
+ausloesen" legt erst fest, wohin die Benachrichtigung tatsaechlich geht.
+
+Unter **Aktionen ausloesen** auf **+ Aktionen hinzufuegen** klicken und
+**Zu "Ausgeloeste Benachrichtigungen" hinzufuegen** waehlen. Das ist die einzig
+sinnvolle Aktion auf dieser Trainings-VM: `E-Mail senden` waere die naheliegende
+Ergaenzung, wurde live geprueft und ist **nicht funktionsfaehig** - unter
+Einstellungen > E-Mail-Einstellungen steht als Mailhost nur der unkonfigurierte
+Standardwert `localhost`, es laeuft kein Mailserver auf der VM. Die Benachrichtigung
+bleibt also bewusst **innerhalb von Splunk**: sichtbar nur, wer sich einloggt und
+nachschaut.
+
+Optional **Schweregrad** setzen (Info/Gering/Mittel/Hoch/Kritisch) - fuer einen
+CrashLoopBackOff ist `Hoch` angemessen.
+
+### Schritt 5: Speichern und Ergebnis pruefen
+
+**Speichern** klicken. Splunk zeigt dabei die Warnung *"This scheduled search will not
+run after the Splunk Enterprise Trial License expires."* - diese Splunk-Instanz laeuft
+auf einer Trial-Lizenz, fuer die Dauer des Trainings ist das unproblematisch, die
+Warnung also ignorieren.
+
+Ergebnis pruefen: links in der Navigation von Search & Reporting auf
+**Benachrichtigungen** - der neue Alert erscheint dort mit Status `Aktiviert` und dem
+naechsten geplanten Zeitpunkt. Nach dem naechsten Lauf (max. 5 Minuten warten) taucht
+er unter dem Aktivitaets-Symbol oben rechts (Pulslinie) **> Ausgeloeste
+Benachrichtigungen** auf - Spalten Schweregrad, Typ (`Geplant`) und Modus (`Digest`).
+Ueber **Ergebnisse anzeigen** in der Zeile laesst sich das genaue Event nachvollziehen,
+das den Alert ausgeloest hat.
+
+### Schritt 6: Aufraeumen nach der Uebung
+
+Da alle Teilnehmer dieselbe externe Splunk-Instanz nutzen, den eigenen Alert danach
+wieder loeschen - **Benachrichtigungen**, Zeile des Alerts > **Bearbeiten** >
+**Loeschen**.
+
+Anschliessend den Demo-Namespace aus Uebung 4 abbauen:
 
 ```
 kubectl delete namespace crashloop-demo
 ```
 
-Fuer den vollstaendigen Abbau der Uebung (Forwarder, externe VM, Cluster) siehe
-[Uebung 5: Aufraeumen](05-aufraeumen.md).
+Fuer den vollstaendigen Abbau der gesamten Uebungsreihe (Forwarder, externe VM,
+Cluster) weiter mit [Uebung 6: Aufraeumen](06-aufraeumen.md).
 
 ### Optional: Splunk im Cluster betreiben (Splunk Operator)
 
 
 > **Optionaler Anhang.** Diese Uebung und die folgenden (10-14) betreiben Splunk selbst
 > **im Cluster**, als Alternative zur externen VM aus Uebung 2. Fuer den Praxisbetrieb ist
-> das der seltenere Weg (siehe [UEBERSICHT.md](../UEBERSICHT.md)) - hier aber lehrreich, weil
+> das der seltenere Weg (siehe [splunk-im-cluster-optional.md](../splunk-im-cluster-optional.md)) - hier aber lehrreich, weil
 > sichtbar wird, was der Splunk Operator im Hintergrund automatisiert.
 
 ### Hintergrund
@@ -4835,12 +5497,21 @@ kubectl run --image=nginx nginx
 kubectl debug -it nginx --image=busybox
 ```
 
+```
+## processe des original containers anzeigen
+## z.B. nginx
+## name des containers rausfinden
+kubectl debug -it nginx --target=nginx --image=busybox
+```
+
+
 
 ### Walkthrough Debug Node 
 
 ```
-kubectl get nodes 
-kubectl debug node/mynode -it --image=ubuntu
+kubectl get nodes
+## so auch root-rechte auf node 
+kubectl debug node/mynode -it --profile=sysadmin --image=ubuntu
 ```
 
 
@@ -5372,7 +6043,7 @@ Mit Native Sidecars weiß Kubernetes, dass `istio-proxy` ein Sidecar ist und bee
 
 
 
-## Service Mesh - Praktischer Aufbau im Cluster
+## Service Mesh - Praktischer Aufbau im Cluster (Sidecar-Modus)
 
 ### Istio-Installation mit istioctl (demo-Profil)
 
@@ -5410,12 +6081,15 @@ cat istio-manifest.yaml | grep -i -A20 "^Kind" | less
 
 ```
 cd 
-## current version of istio is 1.28.0
-curl -L https://istio.io/downloadIstio | sh -
-ln -s ~/istio-1.28.0 ~/istio
-echo "export PATH=~/istio-1.28.0/bin:$PATH" >> ~/.bashrc
+## aktuelle stabile Version ist 1.31.0 (Stand 2026-09)
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.31.0 sh -
+ln -s ~/istio-1.31.0 ~/istio
+echo "export PATH=~/istio-1.31.0/bin:$PATH" >> ~/.bashrc
 source ~/.bashrc 
 ```
+
+> [!TIP]
+> Istio empfiehlt, dass `istioctl` (Client) exakt dieselbe Version wie die Control-Plane (`istiod`) hat - "using matching versions helps avoid unforeseen issues". Prüfen mit `istioctl version` (zeigt Client-, Control-Plane- und Data-Plane-Version).
 
 #### Schritt 2: bash completion integrieren 
 
@@ -5463,7 +6137,7 @@ istioctl install -f ~/istio/samples/bookinfo/demo-profile-no-gateways.yaml -y
 
 ```
 kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
-{ kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=v1.4.0" | kubectl apply -f -; }
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.2/standard-install.yaml
 ```
 
 ### Reference: Get started 
@@ -5473,7 +6147,7 @@ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
 ### istioctl Cheatsheet zum Debuggen
 
 
-> Ohne Install-/Uninstall-/Manifest-/Profile-Kommandos. Alle Kommandos verifiziert gegen die offizielle Istio v1.29 Referenz.
+> Ohne Install-/Uninstall-/Manifest-/Profile-Kommandos. Alle Kommandos verifiziert gegen die offizielle Istio v1.31 Referenz.
 
 ---
 
@@ -5836,7 +6510,7 @@ istioctl x workload group create --name foo --namespace bar
 
 ---
 
-*Quelle: [istio.io/latest/docs/reference/commands/istioctl](https://istio.io/latest/docs/reference/commands/istioctl/) — Stand: Istio v1.29*
+*Quelle: [istio.io/latest/docs/reference/commands/istioctl](https://istio.io/latest/docs/reference/commands/istioctl/) — Stand: Istio v1.31*
 
 ### Uebung: Sidecar-Injection
 
@@ -5918,12 +6592,13 @@ Erwartetes Ergebnis: `READY 2/2`
 
 ### Vorbereitung
 
-#### Gateway API - CRD's installieren (Stand 2026-03-12)
+#### Gateway API - CRD's installieren (Stand 2026-09-11)
 
    * falls nicht bereits vorher geschehen
 
 ```
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.0/standard-install.yaml
+kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.2/standard-install.yaml
 ```
 
 
@@ -6323,7 +6998,1044 @@ exit
 kubectl -n bookinfo run --rm -it podtester --image=busybox --overrides='{ "spec": { "serviceAccount": "bookinfo-productpage" }  }'
 ```
 
-## GitOps - kurze Einfuehrung
+## Service Mesh - Praktischer Aufbau mit Ambient-Mode (Gateway API statt Sidecar)
+
+### Istio-Installation mit istioctl (Ambient-Profil)
+
+
+  * Genau wie im Sidecar-Modus die einfachste Installationsart
+  * Statt einem Envoy-Sidecar pro Pod: ein `ztunnel`-Agent pro Node (Layer 4) + optional Waypoint-Proxies pro Namespace (Layer 7)
+  * `istioctl install --set profile=ambient` installiert automatisch: Istio-Core, Istiod, das Istio-CNI-Plugin UND ztunnel (alles in einem Schritt)
+
+### Unterschied zum Helm-Weg
+
+  * Mit Helm installiert man `base`, `istiod`, `cni` und `ztunnel` als vier einzelne Charts (siehe [03-install-with-helm.md](03-install-with-helm.md))
+  * Mit istioctl reicht ein Kommando
+
+### Schritt 1: istio runterladen und installieren
+
+  * Falls schon aus der Sidecar-Installation vorhanden, kann dieser Schritt übersprungen werden - istioctl kann beide Profile
+
+```
+cd
+## aktuelle stabile Version ist 1.31.0 (Stand 2026-09)
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.31.0 sh -
+ln -s ~/istio-1.31.0 ~/istio
+echo "export PATH=~/istio-1.31.0/bin:$PATH" >> ~/.bashrc
+source ~/.bashrc
+```
+
+> [!TIP]
+> Istio empfiehlt, dass `istioctl` (Client) exakt dieselbe Version wie die Control-Plane (`istiod`) hat - "using matching versions helps avoid unforeseen issues". Prüfen mit `istioctl version` (zeigt Client-, Control-Plane- und Data-Plane-Version).
+
+### Schritt 2: Installation mit dem Ambient-Profil
+
+```
+istioctl install --set profile=ambient --skip-confirmation
+```
+
+> [!CAUTION]
+> Wenn hier eine Warnung kommt: `detected Calico CNI with 'bpfConnectTimeLoadBalancing=TCP'; this must be set to 'Disabled'` - siehe Schritt 3, VOR dem weiteren Testen fixen.
+
+**Erwartetes Ergebnis:**
+
+```
+kubectl get pods -n istio-system
+```
+
+  * `istio-cni-node-*` (DaemonSet, ein Pod pro Node)
+  * `istiod-*`
+  * `ztunnel-*` (DaemonSet, ein Pod pro Node)
+  * KEIN `istio-ingressgateway` - das brauchen wir nicht, wir nutzen die Kubernetes Gateway API
+
+### Schritt 3: Calico-Fix (nur bei Calico-CNI-Clustern nötig)
+
+**Warum das nötig ist (einfach erklärt):** Calico klinkt sich mit dem Feature "Connect-Time Load Balancing" (CTLB) schon beim `connect()`-Aufruf einer Anwendung ein und schreibt die Ziel-IP direkt um (z.B. Service-IP -> Pod-IP), bevor das Paket überhaupt losgeschickt wird. Istio Ambient braucht aber das unveränderte Paket, um es per iptables/eBPF zum `ztunnel` umzuleiten (dort passiert mTLS + Routing). Schreibt Calico die Ziel-IP vorher schon um, sieht `ztunnel` die Verbindung nicht mehr richtig - die Ambient-Umleitung greift dann nicht zuverlässig, oft ohne sichtbaren Fehler. Deshalb muss dieses eine Calico-Feature abgeschaltet werden (der Rest von Calico - Networking, NetworkPolicies - bleibt unangetastet).
+
+```
+kubectl patch felixconfiguration default --type merge \
+  -p '{"spec":{"bpfConnectTimeLoadBalancing":"Disabled"}}'
+
+## Kontrolle
+kubectl get felixconfiguration default -o jsonpath='{.spec.bpfConnectTimeLoadBalancing}{"\n"}'
+```
+
+Erwartete Ausgabe: `Disabled`
+
+### Schritt 4: Gateway API CRD's installieren
+
+```
+kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.2/standard-install.yaml
+```
+
+### Reference: Get started
+
+  * https://istio.io/latest/docs/ambient/getting-started/
+
+### istioctl Cheatsheet zum Debuggen
+
+
+> Ohne Install-/Uninstall-/Manifest-/Profile-Kommandos. Alle Kommandos verifiziert gegen die offizielle Istio v1.31 Referenz.
+
+---
+
+### Version & Preflight
+
+```bash
+## Client- und Control-Plane-Version anzeigen
+istioctl version
+```
+
+---
+
+### Proxy Status (ps)
+
+Zeigt den Sync-Status aller Envoy-Proxies mit Istiod.
+
+```bash
+## Alle Proxies im Mesh
+istioctl proxy-status
+istioctl ps                    # Kurzform
+
+## Nach Namespace filtern
+istioctl ps --namespace bookinfo
+
+## Diff zwischen Envoy-Config und Istiod für einen bestimmten Proxy
+istioctl ps <pod-name>.<namespace>
+```
+
+---
+
+### Proxy Config (pc)
+
+Envoy-Konfiguration eines Pods inspizieren.
+
+```bash
+## Listeners
+istioctl proxy-config listeners <pod>.<ns>
+istioctl pc l <pod>.<ns>
+
+## Routes
+istioctl pc routes <pod>.<ns>
+istioctl pc r <pod>.<ns>
+
+## Clusters (Upstream-Services)
+istioctl pc clusters <pod>.<ns>
+istioctl pc c <pod>.<ns>
+
+## Endpoints
+istioctl pc endpoints <pod>.<ns>
+istioctl pc ep <pod>.<ns>
+
+## Bootstrap-Konfiguration
+istioctl pc bootstrap <pod>.<ns>
+istioctl pc b <pod>.<ns>
+
+## ECDS (Extension Config Discovery)
+istioctl pc ecds <pod>.<ns>
+
+## Alles auf einmal (JSON-Dump)
+istioctl pc all <pod>.<ns> -o json
+
+## Envoy Log-Level abfragen (einzelner Pod)
+istioctl pc log <pod>.<ns>
+
+## Envoy Log-Level setzen (einzelner Pod)
+istioctl pc log <pod>.<ns> --level debug
+istioctl pc log <pod>.<ns> --level info    # zurücksetzen
+
+## Einzelne Envoy-Logger gezielt setzen
+istioctl pc log <pod>.<ns> --level connection:debug,router:debug
+istioctl pc log <pod>.<ns> --level rbac:debug,conn_handler:warning
+
+## Per Deployment — iteriert über ALLE Pods im Deployment
+istioctl pc log deploy/productpage-v1 -n bookinfo              # abfragen
+istioctl pc log deploy/productpage-v1 -n bookinfo --level debug # setzen
+istioctl pc log deploy/productpage-v1 -n bookinfo --level rbac:debug,conn_handler:warning
+
+## Funktioniert analog auch mit svc/ und rs/ (ReplicaSet)
+istioctl pc log svc/productpage -n bookinfo --level debug
+istioctl pc log rs/productpage-v1-abc123 -n bookinfo --level debug
+
+## Andere pc-Subcommands akzeptieren ebenfalls deploy/svc/rs
+istioctl pc l deploy/productpage-v1 -n bookinfo
+```
+
+---
+
+### Analyze
+
+Konfiguration auf Fehler und Warnungen prüfen.
+
+```bash
+## Aktuellen Namespace analysieren
+istioctl analyze
+
+## Bestimmten Namespace
+istioctl analyze -n bookinfo
+
+## Alle Namespaces
+istioctl analyze --all-namespaces
+
+## Lokale YAML-Dateien prüfen (ohne Cluster)
+istioctl analyze my-virtualservice.yaml --use-kube=false
+
+## Bestimmte Meldungen unterdrücken
+istioctl analyze -n default --suppress "IST0102=Namespace default"
+
+## Mehrere Meldungen unterdrücken + Wildcards
+istioctl analyze --all-namespaces \
+  --suppress "IST0102=Namespace frod" \
+  --suppress "IST0107=Pod *.baz"
+```
+
+---
+
+### Validate
+
+YAML-Dateien gegen das Istio-Schema validieren.
+
+```bash
+istioctl validate -f my-resource.yaml
+
+## Kurzform
+istioctl v -f my-resource.yaml
+
+## Ganzes Verzeichnis
+istioctl validate -f samples/bookinfo/networking/
+
+## Aus stdin
+kubectl get vs -o yaml | istioctl validate -f -
+```
+
+---
+
+### Dashboard (dash / d)
+
+Dashboards per Port-Forward öffnen.
+
+```bash
+istioctl dashboard kiali
+istioctl dashboard grafana
+istioctl dashboard jaeger
+istioctl dashboard zipkin
+
+## Envoy Admin UI eines Pods
+istioctl dashboard envoy <pod>.<ns>
+istioctl dash envoy deploy/productpage-v1
+
+## Proxy Dashboard (auch für ztunnel/waypoint)
+istioctl dashboard proxy <pod>.<ns>
+
+## ControlZ UI (Istiod)
+istioctl dashboard controlz deploy/istiod.istio-system
+```
+
+---
+
+### Kube-Inject
+
+Sidecar manuell in ein Deployment injizieren.
+
+```bash
+## On-the-fly beim Apply
+kubectl apply -f <(istioctl kube-inject -f deployment.yaml)
+
+## In eine Datei schreiben
+istioctl kube-inject -f deployment.yaml -o deployment-injected.yaml
+
+## Bestimmte Revision verwenden
+istioctl kube-inject -f deployment.yaml --revision canary
+```
+
+---
+
+### Admin Log
+
+Istiod-Logging-Level abrufen und ändern.
+
+```bash
+## Aktuelle Log-Level von Istiod
+istioctl admin log
+
+## Bestimmten Istiod-Pod abfragen
+istioctl admin log <istiod-pod>
+
+## Log-Level ändern
+istioctl admin log --level ads:debug,authorization:debug
+
+## Alle zurücksetzen
+istioctl admin log --log-reset
+```
+
+---
+
+### Bug Report
+
+Diagnose-Bundle für Support erstellen.
+
+```bash
+## Vollständiger Bug-Report
+istioctl bug-report
+
+## Auf bestimmte Namespaces beschränken
+istioctl bug-report --include default,bookinfo
+
+## Zeitraum begrenzen
+istioctl bug-report --duration 30m
+```
+
+---
+
+### Tag (Revision Tags)
+
+Revision-Tags für Canary-Upgrades verwalten.
+
+```bash
+## Alle Tags auflisten
+istioctl tag list
+
+## Tag erstellen/setzen
+istioctl tag set prod --revision 1-22-0
+
+## Tag entfernen
+istioctl tag remove prod
+```
+
+---
+
+### Waypoint (Ambient Mode)
+
+Waypoint-Proxies für Ambient Mode verwalten.
+
+```bash
+## Waypoint deployen
+istioctl waypoint apply -n default
+istioctl waypoint apply -n default --name my-waypoint
+
+## Für Workloads statt Services
+istioctl waypoint apply -n default --name wp --for workload
+
+## YAML generieren (ohne Apply)
+istioctl waypoint generate -n default --for service
+
+## Alle Waypoints auflisten
+istioctl waypoint list -n default
+istioctl waypoint list -A                # clusterweilt
+
+## Status prüfen
+istioctl waypoint status -n default
+
+## Waypoint löschen
+istioctl waypoint delete my-waypoint -n default
+istioctl waypoint delete --all -n default
+```
+
+---
+
+### Ztunnel Config (Ambient Mode)
+
+Ztunnel-Konfiguration inspizieren.
+
+```bash
+## Workloads
+istioctl ztunnel-config workload
+istioctl ztunnel-config workload <ztunnel-pod>.<ns> --node <node-name>
+
+## Services
+istioctl ztunnel-config service
+
+## Zertifikate
+istioctl ztunnel-config certificates --node <node-name>
+
+## Policies
+istioctl ztunnel-config policies
+
+## Logging
+istioctl ztunnel-config log <ztunnel-pod>.<ns>
+istioctl ztunnel-config log <ztunnel-pod>.<ns> --level debug
+
+## Alles (JSON-Dump)
+istioctl ztunnel-config all <ztunnel-pod>.<ns> -o json
+```
+
+---
+
+### Experimental (x) Kommandos
+
+```bash
+## AuthorizationPolicy eines Pods prüfen
+istioctl x authz check <pod>.<ns>
+
+## Pod beschreiben (mTLS-Status, Policies, Traffic)
+istioctl x describe pod <pod> -n <ns>
+
+## Sidecar-Injection-Status prüfen
+istioctl x check-inject <pod>.<ns>
+istioctl x check-inject deploy/<name> -n <ns>
+
+## Envoy-Stats abrufen
+istioctl x envoy-stats <pod>.<ns>
+istioctl x envoy-stats deploy/<name> --type clusters
+
+## Service-Metriken (benötigt Prometheus)
+istioctl x metrics productpage-v1.default
+
+## Root-CA vergleichen (Multi-Cluster)
+istioctl x rootca-compare <pod1>.<ns1> <pod2>.<ns2>
+
+## Internal Debug (Istiod xDS)
+istioctl x internal-debug syncz
+
+## VM-Workload konfigurieren
+istioctl x workload entry configure -f workloadgroup.yaml -o config
+istioctl x workload group create --name foo --namespace bar
+```
+
+---
+
+### Globale Flags
+
+| Flag | Beschreibung |
+|------|-------------|
+| `-n, --namespace` | Kubernetes Namespace |
+| `-c, --kubeconfig` | Kubeconfig-Datei |
+| `--context` | Kubernetes Context |
+| `--istioNamespace` | Istio Control Plane Namespace (default: `istio-system`) |
+| `--revision` | Istio Revision auswählen |
+| `-o, --output` | Ausgabeformat: `json`, `yaml`, `short` |
+
+---
+
+### Aliase & Kurzformen
+
+| Langform | Kurzform |
+|----------|----------|
+| `proxy-status` | `ps` |
+| `proxy-config` | `pc` |
+| `proxy-config listeners` | `pc l` |
+| `proxy-config routes` | `pc r` |
+| `proxy-config clusters` | `pc c` |
+| `proxy-config endpoints` | `pc ep` |
+| `proxy-config bootstrap` | `pc b` |
+| `dashboard` | `dash` / `d` |
+| `experimental` | `x` |
+| `validate` | `v` |
+
+---
+
+### Debugging-Workflow (Kurzreferenz)
+
+```
+1. istioctl ps                              # Proxies synced?
+2. istioctl analyze -n <ns>                 # Config-Fehler?
+3. istioctl x describe pod <pod> -n <ns>    # Pod-Details
+4. istioctl pc l <pod>.<ns> --port <port>   # Listener OK?
+5. istioctl pc r <pod>.<ns> --name <port>   # Routes OK?
+6. istioctl pc c <pod>.<ns> --fqdn <svc>    # Cluster/Upstream OK?
+7. istioctl pc ep <pod>.<ns> --cluster <c>  # Endpoints OK?
+```
+
+---
+
+*Quelle: [istio.io/latest/docs/reference/commands/istioctl](https://istio.io/latest/docs/reference/commands/istioctl/) — Stand: Istio v1.31*
+
+### Uebung: Workload ins Ambient-Mesh aufnehmen (statt Sidecar-Injection)
+
+
+  * Im Sidecar-Modus wird pro Pod ein Envoy-Container injiziert (`istioctl kube-inject`, `READY 2/2`)
+  * Im Ambient-Modus gibt es KEINE Injection - ein Namespace-Label reicht, der Pod bleibt `READY 1/1`
+  * Die Umleitung zum `ztunnel`-Agent des Nodes passiert transparent über das Istio-CNI-Plugin (kein Init-Container/Sidecar im Pod sichtbar)
+
+### 1. Verzeichnis anlegen
+
+```bash
+cd
+mkdir -p ~/manifests/nginx-ambient
+```
+
+### 2. Nginx-Deployment erstellen (Namespace direkt mit Ambient-Label)
+
+```bash
+cat <<'EOF' > ~/manifests/nginx-ambient/nginx.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx-ambient
+  labels:
+    istio.io/dataplane-mode: ambient
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: nginx-ambient
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: nginx-ambient
+spec:
+  selector:
+    app: nginx
+  ports:
+  - port: 80
+    targetPort: 80
+EOF
+```
+
+### 3. Anwenden (KEIN kube-inject nötig)
+
+```bash
+kubectl apply -f ~/manifests/nginx-ambient/nginx.yaml
+```
+
+### 4. Aufnahme ins Mesh prüfen
+
+```bash
+kubectl get pods -n nginx-ambient
+```
+
+Erwartetes Ergebnis: `READY 1/1` - kein zweiter Container, obwohl der Namespace im Mesh ist.
+
+```bash
+istioctl ztunnel-config workload -n istio-system | grep nginx-ambient
+```
+
+Erwartetes Ergebnis: Der Pod taucht mit Protokoll `HBONE` auf (vom `ztunnel` erfasst) und `WAYPOINT=None` (nur Layer 4, da kein Waypoint für diesen Namespace deployt wurde).
+
+```
+NAMESPACE       POD NAME                                                ADDRESS        NODE         WAYPOINT PROTOCOL
+nginx-ambient   nginx-xxxxxxxxxx-xxxxx                                  <pod-ip>       <node>       None     HBONE
+```
+
+### Zusammenfassung
+
+| | Sidecar | Ambient |
+|---|---|---|
+| Aktivierung | `istio-injection=enabled` + Injection (Webhook/`kube-inject`) | `istio.io/dataplane-mode=ambient` (Label reicht) |
+| Sichtbar im Pod | zusätzlicher Container `istio-proxy` (`READY 2/2`) | kein zusätzlicher Container (`READY 1/1`) |
+| Nachweis der Aufnahme | `kubectl get pods` | `istioctl ztunnel-config workload` |
+| Layer 7 (HTTP-Routing, Policies) | immer vorhanden (Envoy pro Pod) | erst mit zusätzlichem Waypoint-Proxy pro Namespace |
+
+### Demo-App bookinfo installieren (Ambient/Waypoint)
+
+
+### Überblick
+
+<img width="693" height="465" alt="image" src="https://github.com/user-attachments/assets/22cbf386-5a90-458b-8157-51620ef829ea" />
+
+### Vorbereitung
+
+  * Statt `istio-injection=enabled` (Sidecar) gibt es im Ambient-Mode das Label `istio.io/dataplane-mode=ambient` - Pods bekommen dadurch KEINEN Sidecar, sondern werden transparent über den `ztunnel`-Agent des Nodes geroutet (Layer 4, mTLS)
+
+```
+kubectl create ns bookinfo
+kubectl label namespace bookinfo istio.io/dataplane-mode=ambient
+```
+
+### Waypoint Proxy ausrollen
+
+  * Der Waypoint ist die Ambient-Entsprechung des Sidecars für alles, was Layer 7 braucht (HTTP-Routing, JWT/RBAC-Policies, Retries, ...) - `ztunnel` allein kann nur Layer 4
+
+```
+cd
+mkdir -p manifests/waypoint
+cd manifests/waypoint
+```
+
+```
+## YAML generieren (dry-run)
+istioctl waypoint generate --namespace bookinfo --for all > waypoint.yaml
+```
+
+```
+## Anschauen was passiert
+cat waypoint.yaml
+```
+
+```
+## Ausrollen
+kubectl apply -f waypoint.yaml
+kubectl label namespace bookinfo istio.io/use-waypoint=waypoint
+```
+
+```
+## Überprüfen
+kubectl -n bookinfo get gateways
+istioctl waypoint list --namespace bookinfo
+```
+
+Erwartetes Ergebnis: `PROGRAMMED=True` (kann ein paar Sekunden dauern)
+
+### Optional: Falls hier ~/istio - Ordner noch nicht existiert 
+
+```
+cd 
+## current version of istio is 1.31.0
+curl -L https://istio.io/downloadIstio | sh -
+ln -s ~/istio-1.31.0 ~/istio
+```
+
+### bookinfo App ausrollen
+
+```
+kubectl -n bookinfo apply -f ~/istio/samples/bookinfo/platform/kube/bookinfo.yaml
+kubectl -n bookinfo apply -f ~/istio/samples/bookinfo/platform/kube/bookinfo-versions.yaml
+kubectl -n bookinfo get pods
+```
+
+**Erwartetes Ergebnis:** `READY 1/1` bei allen Pods (kein Sidecar, anders als bei der Installation mit dem demo-Profil, wo `2/2` erwartet wird)
+
+### testen ob die app funktioniert
+
+```
+kubectl -n bookinfo exec deployments/ratings-v1 -c ratings -- curl -sS productpage:9080/productpage | grep -o "<title>.*</title>"
+```
+
+### App mit gateway api nach aussen öffnen
+
+```
+## That's what we do ....
+cat  ~/istio/samples/bookinfo/gateway-api/bookinfo-gateway.yaml
+```
+
+```
+kubectl -n bookinfo apply -f ~/istio/samples/bookinfo/gateway-api/bookinfo-gateway.yaml
+kubectl -n bookinfo get gateways
+kubectl -n bookinfo get httproutes -o yaml
+```
+
+```
+## note the external-ip from this output
+## gateway automatically creates a service
+kubectl -n bookinfo get svc bookinfo-gateway-istio
+```
+
+```
+http://<external-ip>/productpage
+## or in your browser
+```
+
+### Reference
+
+  * https://istio.io/latest/docs/ambient/getting-started/deploy-sample-app/
+
+### Uebung: Header-basiertes Routing (Gateway API HTTPRoute)
+
+
+### Prerequisites
+
+  * Bookinfo im Ambient-Mode aufgesetzt ([04-install-demo-app.md](../../installation/ambient/04-install-demo-app.md))
+  * Namespace `bookinfo` hat einen **Waypoint-Proxy** (`istio.io/use-waypoint=waypoint`)
+
+### Hintergrund: Warum hier ein Waypoint nötig ist
+
+  * Das HTTPRoute unten hängt (wie im Sidecar-Setup auch) direkt am Service (`parentRefs: kind: Service`, sog. "Mesh-Routing" / GAMMA) - kein eigenes Gateway nötig für diesen internen Traffic
+  * Im Sidecar-Modus wertet der Envoy-Sidecar jedes Pods das HTTPRoute aus
+  * Im Ambient-Modus kann `ztunnel` das NICHT - es arbeitet nur auf Layer 4 (TCP, mTLS) und kennt keine HTTP-Header. Header-basiertes Routing braucht deshalb zwingend den **Waypoint-Proxy** (Layer 7) im Namespace
+
+### Schritt 1: Vorbereitung: Status review-pods
+
+  * Status: alle Pods sind unter einem Service erreichbar
+
+```
+## Es gibt 3 verschieden review-pods (v1, v2, v3)
+kubectl -n bookinfo get pods --show-labels | grep review
+```
+
+```
+## Ein Service zeigt auf alle pods (Alle versionen der Review - Pods)
+kubectl -n bookinfo get svc | grep reviews
+```
+
+### Schritt 2: Vorher (ohne request routing)
+
+  * Es werden alle Pods angezeigt, die das Label: app:reviews haben
+  * D.h. jedesmal wenn ich die Seite öffne, wird eine andere Version angegezeigt (v1, v2 oder v3) - es werden ganz normal die Services von Kubernetes verwendet
+  * Service (selector: app:reviews)
+
+```
+kubectl -n bookinfo get svc reviews -o yaml
+kubectl -n bookinfo get pods -l app=reviews --show-labels
+```
+
+```
+## Gateway wurde in der Übung vorher angelegt
+## du findest so die IP des gateways raus
+kubectl -n bookinfo get svc bookinfo-gateway-istio
+```
+
+```
+GATEWAY_URL=<external-ip-aus-der-vorigen-Ausgabe-eintragen>
+```
+
+```
+## Im Browser mehrmals ausführen
+## Im Block mit den Reviews wechselt die Version
+$GATEWAY_URL/productpage
+```
+
+### Schritt 3: Übung (jetzt request - routing)
+
+**Voraussetzung:**
+
+- Bookinfo-App läuft bereits im Namespace `bookinfo` (Ambient + Waypoint)
+- Service Reviews existiert
+- Es gibt 3 verschieden Pods an Reviews (v1, v2 und v3)
+
+#### 0. Vorbereitung
+
+```bash
+mkdir -p ~/manifests/requests-ambient
+cd ~/manifests/requests-ambient
+```
+
+#### 1. HTTPRoute: Alle Requests → `reviews-v1`
+
+```bash
+cat <<EOF > ~/manifests/requests-ambient/httproute-reviews-v1.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reviews
+  namespace: bookinfo
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
+  rules:
+  - backendRefs:
+    - name: reviews-v1
+      port: 9080
+EOF
+
+kubectl apply -f httproute-reviews-v1.yaml
+kubectl -n bookinfo get httproute reviews
+```
+
+```
+## Anzeige im Browser - es ist immer die v1 (keine Sterne)
+http://$GATEWAY_URL/productpage
+```
+
+#### 2. HTTPRoute anpassen: User `jason` → `reviews-v2`, Rest → `reviews-v1`
+
+```bash
+cat <<EOF > ~/manifests/requests-ambient/httproute-reviews-jason-v2.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reviews
+  namespace: bookinfo
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
+  rules:
+  - matches:
+    - headers:
+      - name: end-user
+        value: jason
+    backendRefs:
+    - name: reviews-v2
+      port: 9080
+  - backendRefs:
+    - name: reviews-v1
+      port: 9080
+EOF
+
+kubectl apply -f httproute-reviews-jason-v2.yaml
+kubectl -n bookinfo get httproute reviews -o yaml
+```
+
+#### 3. Testen im Browser
+
+```
+echo "$GATEWAY_URL"
+
+## 1. Im Browser: $GATEWAY_URL/productpage aufrufen (nicht eingeloggt oder anderer User)
+##    → Reviews ohne Sterne (v1)
+
+## 2. Im Browser: als User "jason" einloggen
+##    → Reviews mit Sternen (v2)
+```
+
+#### 4. Testen direkt gegen den Reviews-Service (ohne Browser-Login)
+
+  * Der Header `end-user` wird sonst von `productpage` anhand des Login-Cookies gesetzt - für einen schnellen Test genügt ein Client-Pod im Mesh
+
+```bash
+kubectl -n bookinfo apply -f ~/istio/samples/sleep/sleep.yaml
+kubectl -n bookinfo wait --for=condition=ready pod -l app=sleep --timeout=60s
+```
+
+```bash
+## ohne Header -> reviews-v1 (keine "rating" im JSON)
+kubectl -n bookinfo exec deploy/sleep -- curl -sS http://reviews:9080/reviews/0
+
+## mit Header end-user: jason -> reviews-v2 (mit "rating"/Sternen)
+kubectl -n bookinfo exec deploy/sleep -- curl -sS -H "end-user: jason" http://reviews:9080/reviews/0
+```
+
+### 5. Aufräumen
+
+```bash
+kubectl delete -f httproute-reviews-v1.yaml --ignore-not-found
+kubectl delete -f httproute-reviews-jason-v2.yaml --ignore-not-found
+```
+
+### Reference:
+
+  * https://istio.io/latest/docs/examples/bookinfo/#define-the-service-versions
+  * https://istio.io/latest/docs/ambient/usage/l7-features/
+
+### Uebung: Traffic-Shifting (Gateway API HTTPRoute)
+
+
+  * Schrittweise Umleitung von Netzwerk-Traffic zwischen zwei Service-Versionen
+  * Voraussetzung wie bei [Request Routing](02-exercise-request-routing.md): Bookinfo im Ambient-Mode + Waypoint-Proxy im Namespace `bookinfo` (Layer 7 für HTTPRoute-Gewichtung)
+
+#### 0. Vorbereitung
+
+```bash
+mkdir -p ~/manifests/traffic-shifting-ambient
+cd ~/manifests/traffic-shifting-ambient
+```
+
+#### 1. 100% Traffic -> reviews.v1
+
+```
+cat <<'EOF' > ~/manifests/traffic-shifting-ambient/route-reviews-v1.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reviews
+  namespace: bookinfo
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
+  rules:
+  - backendRefs:
+    - name: reviews-v1
+      port: 9080
+EOF
+```
+
+```
+kubectl apply -n bookinfo -f route-reviews-v1.yaml
+kubectl get httproute -n bookinfo reviews -o yaml | less
+```
+
+#### 2. Testen
+
+```
+## Seite öffnen
+http://<deine-ip>/productpage
+
+## Egal wie oft du die Seite lädst, es bleibt immer v1
+```
+
+Direkt gegen den Service (schneller, ohne Browser):
+
+```bash
+kubectl -n bookinfo apply -f ~/istio/samples/sleep/sleep.yaml
+kubectl -n bookinfo wait --for=condition=ready pod -l app=sleep --timeout=60s
+
+for i in $(seq 1 5); do
+  kubectl -n bookinfo exec deploy/sleep -- curl -sS http://reviews:9080/reviews/0 | grep -o '"podname": "[a-z0-9-]*"'
+done
+```
+
+#### 3. 50% (v1) /50% (v3) Traffic
+
+```
+cat <<'EOF' > ~/manifests/traffic-shifting-ambient/route-reviews-50-50.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reviews
+  namespace: bookinfo
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
+  rules:
+  - backendRefs:
+    - name: reviews-v1
+      port: 9080
+      weight: 50
+    - name: reviews-v3
+      port: 9080
+      weight: 50
+EOF
+```
+
+```bash
+kubectl apply -n bookinfo -f route-reviews-50-50.yaml
+kubectl get httproute -n bookinfo reviews -o yaml | head -n 40
+```
+
+### 4. Testen
+
+```
+## Seite öffnen
+http://<deine-ip>/productpage
+
+## Abwechselnd bei mehrmals laden v1 (keine Sterne) und v3 (sterne)
+```
+
+```bash
+for i in $(seq 1 10); do
+  kubectl -n bookinfo exec deploy/sleep -- curl -sS http://reviews:9080/reviews/0 | grep -o '"podname": "[a-z0-9-]*"'
+done
+```
+
+Erwartetes Ergebnis: gemischt v1/v3, über 10 Requests ungefähr 50/50 verteilt.
+
+### 5. 100% auf v3
+
+```
+cat <<'EOF' > ~/manifests/traffic-shifting-ambient/route-reviews-v3.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: reviews
+  namespace: bookinfo
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
+  rules:
+  - backendRefs:
+    - name: reviews-v3
+      port: 9080
+EOF
+```
+
+```
+kubectl apply -n bookinfo -f route-reviews-v3.yaml
+kubectl get httproute -n bookinfo reviews -o yaml | head -n 50
+```
+
+```
+## Seite öffnen
+http://<deine-ip>/productpage
+
+## bei mehrmals laden immer v3
+```
+
+#### 6. Aufräumen
+
+```
+kubectl delete -n bookinfo httproute reviews --ignore-not-found
+```
+
+### Reference:
+
+ * https://istio.io/latest/docs/tasks/traffic-management/traffic-shifting/
+ * https://istio.io/latest/docs/ambient/usage/l7-features/
+
+### Debugging mit debug/run pod (Ambient: ztunnel + Waypoint)
+
+
+### Why like this ?
+
+  * Kein `istio-proxy`-Sidecar mehr im Pod (anders als im Sidecar-Modus) - ein Debug-Container läuft aber trotzdem im gleichen Pod-Netzwerk-Namespace und sieht damit denselben (durch `ztunnel` umgeleiteten) Traffic
+  * Zusätzlich gibt es Ambient-spezifische Debug-Kommandos, um zu prüfen, ob/wie ein Workload vom Mesh erfasst wird
+
+### Variante 1: Debug-Container zum Debuggen
+
+  * Debug Container in productpage - pod starten, um Verbindung zu pod -> Review zu debuggen
+
+```
+kubectl -n bookinfo get pods | grep productpage
+## diesen entsprechend hier verwenden
+kubectl -n bookinfo debug productpage-v1-54bb874995-rr7cv -it --image=busybox
+```
+
+```
+## in der bash
+wget -O - http://reviews:9080/reviews/1
+```
+
+```
+exit
+```
+
+**Erwartetes Ergebnis:** Die Antwort kommt trotz `READY 1/1` (kein Sidecar) korrekt zurück - `ztunnel` leitet den Traffic transparent über das Istio-CNI-Plugin um.
+
+### V2 - Eigener Pod - Podtester
+
+```
+kubectl -n bookinfo run --rm -it podtester --image=busybox --overrides='{ "spec": { "serviceAccount": "bookinfo-productpage" }  }'
+```
+
+### V3 - Ambient-Aufnahme prüfen (istioctl ztunnel-config)
+
+  * Zeigt an, welcher `ztunnel`-Pod (auf welchem Node) einen Workload erfasst hat und ob ein Waypoint zwischengeschaltet ist
+
+```
+istioctl ztunnel-config workload -n istio-system | grep bookinfo
+```
+
+  * Spalte `WAYPOINT`: `waypoint` = Layer 7 aktiv (HTTP-Routing/Policies möglich), `None` = nur Layer 4 (mTLS, aber kein HTTP-Verständnis)
+  * Spalte `PROTOCOL`: `HBONE` = über den Ambient-Tunnel geroutet, `TCP` = nicht vom Mesh erfasst (z.B. das Gateway selbst)
+
+### V4 - Ztunnel-Logs eines konkreten Nodes ansehen
+
+```
+NODE=$(kubectl -n bookinfo get pod -l app=productpage -o jsonpath='{.items[0].spec.nodeName}')
+ZPOD=$(kubectl -n istio-system get pod -l app=ztunnel --field-selector spec.nodeName=$NODE -o jsonpath='{.items[0].metadata.name}')
+echo "node=$NODE ztunnel=$ZPOD"
+
+istioctl ztunnel-config log $ZPOD.istio-system
+```
+
+### V5 - Waypoint-Proxy wie einen normalen Envoy debuggen
+
+  * Der Waypoint ist ein ganz normaler Envoy-Proxy - die klassischen `istioctl proxy-config`-Kommandos funktionieren genauso
+
+```
+WAYPOINT_POD=$(kubectl -n bookinfo get pod -l gateway.networking.k8s.io/gateway-name=waypoint -o jsonpath='{.items[0].metadata.name}')
+istioctl proxy-config routes $WAYPOINT_POD.bookinfo
+```
+
+### Reference
+
+  * https://istio.io/latest/docs/ambient/usage/observability/
+
+## GitOps mit Flux
 
 ### ArgoCD vs. Flux CD im Ueberblick
 
@@ -6357,772 +8069,1470 @@ Vorteile:
 | Multi-Cluster | Ja, zentrale Instanz kann viele Cluster bedienen | Ja, ueblicherweise 1 Flux pro Cluster |
 | Multi-Tenancy | Projects, RBAC, SSO in der UI | ueber Kubernetes-RBAC und Namespaces |
 | Image-Update-Automation | Separates Projekt (argocd-image-updater) | Eingebaut (Image Automation Controller) |
-| Bootstrapping | Manuell oder argocd-autopilot | flux bootstrap (legt Repo-Struktur an) |
+| Bootstrapping | Manuell (`kubectl apply` des Install-Manifests) oder argocd-autopilot | `flux bootstrap` (imperativer CLI-Befehl) oder Flux Operator + `FluxInstance` (deklarativ, **empfohlen** - siehe [Installation](flux/02-installation.md)) |
+| Selbst-Update (Tool + Version) | Kein eingebauter Mechanismus - ArgoCD wird klassisch per Manifest/Helm aktualisiert. Es gibt einen [argocd-operator](https://github.com/argoproj-labs/argocd-operator) (argoproj-labs, v.a. Basis fuer Red Hats OpenShift GitOps): vereinfacht die Installation ueber eine `ArgoCD`-CRD, **aber** `spec.version` ist ein fest gepinnter Image-Tag (kein Semver-Range-Autotracking wie bei Flux), und Operator-Selbst-Update gibt es nur ueber einen **OLM**-Auto-Update-Channel - OLM ist primaer ein OpenShift-Mechanismus, auf vanilla Kubernetes (wie unseren Clustern) zusaetzlicher Aufwand | Flux Operator haelt sowohl die Flux-Version (`FluxInstance.spec.distribution.version: "2.x"`) als auch sich selbst (per eigener `HelmRelease`) automatisch aktuell - kein wiederkehrender `flux bootstrap`- oder `helm upgrade`-Lauf noetig, siehe [Installation](flux/02-installation.md) |
 | Typische Zielgruppe | Teams, die eine UI fuer Devs/Ops wollen | Plattform-Teams, die alles deklarativ/headless wollen |
 
 ### Wann was?
 
-  * **ArgoCD**: Wenn eine grafische Oberflaeche fuer Sync-Status, Diffs und
-    Rollbacks gewuenscht ist und mehrere Teams/Cluster zentral bedient werden
-    sollen. Einstieg ist visuell und schnell verstaendlich.
-  * **Flux CD**: Wenn alles rein deklarativ ohne UI laufen soll, Helm-Releases
-    "richtig" (mit Helm-Lifecycle) verwaltet werden sollen oder automatische
-    Image-Updates gewuenscht sind.
+Ist das reine Geschmackssache? **Nein** - beide loesen das GitOps-Grundproblem
+gleich gut, aber es gibt reale technische Unterschiede, die die Wahl in
+konkreten Situationen vorwegnehmen. Nur ein Teil der Entscheidung ist
+tatsaechlich Praeferenz.
 
-Beide loesen dasselbe Grundproblem - die Wahl ist meist eine Frage von
-UI-Bedarf, Team-Struktur und vorhandener Toolchain.
+**Fuer ArgoCD spricht:**
 
-### Weiter geht es praktisch
+  * Eine Web-UI fuer Sync-Status, Diff und Rollback wird gebraucht (Devs ohne
+    CLI-Affinitaet, Trainings/Demos, schnelles visuelles Troubleshooting)
+  * Eine zentrale Instanz soll viele Teams/Cluster mit RBAC/SSO bedienen
+    (App Projects) - ein Ops-Team behaelt die UI-Uebersicht ueber alles
+  * PR-basierte Review-Workflows, bei denen der Diff am Ende auch visuell
+    bestaetigt werden soll
+  * Kubernetes-/GitOps-Neulinge im Team - die UI senkt die Einstiegshuerde
+    gegenueber "nur CLI + `kubectl get kustomization`" erheblich
 
-  * [Was ist ArgoCD?](#was-ist-argocd)
-  * [Hands-on: Deployment mit ArgoCD](#kleines-hands-on-deployment-mit-argocd)
+**Fuer Flux CD spricht - und mit Flux Operator noch mehr:**
 
-### Was ist ArgoCD?
+  * Komplett deklarativ/headless gewuenscht, keine zusaetzliche UI-Komponente
+    im Cluster
+  * Die Plattform soll sich selbst warten: Der Flux Operator haelt sowohl die
+    Flux-Version als auch sich selbst automatisch aktuell, ohne dass jemand
+    `flux bootstrap` erneut anstossen oder ein manuelles `helm upgrade` fahren
+    muss (siehe [Installation](flux/02-installation.md)). Das zahlt sich
+    besonders aus, wenn es **viele gleichartige Cluster** gibt (wie hier: ein
+    Cluster pro Teilnehmer) - zentrale, manuelle Wartung pro Cluster skaliert
+    dann nicht
+  * Helm-Releases sollen "echt" mit Helm-Lifecycle laufen (nicht nur
+    gerenderte Manifeste wie bei ArgoCD)
+  * Automatische Image-Updates ohne Zusatzprojekt gewuenscht
 
+**Tatsaechlich Geschmackssache/Kontext:**
 
-### Was ist ArgoCD?
-
-ArgoCD ist ein deklarativer GitOps-Controller für Kubernetes. Er überwacht Git-Repositories und synchronisiert den dort definierten Soll-Zustand automatisch mit dem Cluster. Abweichungen (Drift) werden erkannt, gemeldet und optional selbstständig korrigiert.
-
-Kernprinzip: **Git ist die Single Source of Truth** – kein `kubectl apply` oder `helm install` mehr von Hand.
-
-### Architektur-Übersicht
-
-![ArgoCD + Istio GitOps Architektur](/images/argocd-istio-overview.svg)
-
-### Warum ArgoCD für Istio?
-
-Istio bringt eine Vielzahl an Custom Resources mit (VirtualService, DestinationRule, AuthorizationPolicy, Gateway, PeerAuthentication, EnvoyFilter, WasmPlugin …). Diese manuell über mehrere Cluster oder Namespaces konsistent zu halten, ist fehleranfällig. ArgoCD löst genau dieses Problem.
-
-#### Konkrete Einsatzszenarien
-
-| Szenario | Ohne ArgoCD | Mit ArgoCD |
-|---|---|---|
-| **Istio-Installation & Upgrades** | `istioctl install` oder Helm manuell ausführen, Version im Cluster unklar | Istio Helm Charts im Git versioniert, Upgrade = Commit + PR |
-| **Traffic Management** | VirtualServices per `kubectl apply` deployen, kein Review-Prozess | Canary Releases, Traffic Shifting als PR reviewbar und auditierbar |
-| **Security Policies** | AuthorizationPolicy/PeerAuthentication ad hoc anwenden, Drift möglich | Zero-Trust-Policies versioniert, Drift wird erkannt und korrigiert |
-| **Multi-Cluster / Multi-Env** | Copy-Paste von Manifests zwischen Staging und Prod | Kustomize-Overlays pro Umgebung, ein Git-Repo als Quelle |
-| **Observability-Stack** | Kiali, Prometheus, Grafana manuell installieren | Gesamter Observability-Stack deklarativ verwaltet |
-
-### Vorteile im Überblick
-
-- **Auditierbarkeit** – Jede Änderung an Istio-Konfiguration ist ein Git-Commit mit Autor, Timestamp und Diff.
-- **Rollback in Sekunden** – Git revert → ArgoCD synchronisiert den vorherigen Zustand.
-- **Drift Detection** – Manuelle Änderungen im Cluster (`kubectl edit`) werden erkannt und gemeldet.
-- **Self-Healing** – Optional: ArgoCD stellt den Git-Zustand automatisch wieder her.
-- **PR-basierte Workflows** – Istio-Konfigurationsänderungen durchlaufen Code Review, bevor sie live gehen.
-- **Multi-Cluster-Fähigkeit** – Ein ArgoCD verwaltet Istio-Konfiguration über mehrere Cluster hinweg.
-- **Helm & Kustomize nativ** – Istio Helm Charts und Kustomize-Overlays werden direkt unterstützt.
-
-### ArgoCD vs. Flux CD
-
-| Kriterium | ArgoCD | Flux CD |
-|---|---|---|
-| UI | Vollständiges Web-UI mit Ressourcen-Baum | Kein eigenes UI (Weave GitOps als Add-on) |
-| Architektur | Zentraler Server + Application CRD | Dezentrale Controller (source, kustomize, helm) |
-| Multi-Tenancy | App Projects mit RBAC | Namespace-basierte Isolation |
-| Sync-Modell | Pull + manueller/automatischer Sync | Reiner Pull-basierter Reconciliation-Loop |
-| Istio-Kompatibilität | Volle CRD-Unterstützung, Resource Hooks für Reihenfolge | Volle CRD-Unterstützung, Depends-on für Reihenfolge |
-
-Beide Tools sind für Istio gleich gut geeignet. ArgoCD punktet durch das UI (hilfreich für Trainings und Troubleshooting), Flux CD durch geringere Komplexität und bessere Composability.
-
-### Typische Repo-Struktur für Istio + ArgoCD
-
-```
-gitops-repo/
-├── base/
-│   ├── istio/
-│   │   ├── istio-base/          # Helm values für istio/base
-│   │   ├── istiod/              # Helm values für istiod
-│   │   └── gateway/             # Helm values für Istio Gateway
-│   ├── bookinfo/
-│   │   ├── deployment.yaml
-│   │   ├── virtualservice.yaml
-│   │   └── destinationrule.yaml
-│   └── policies/
-│       ├── authz-deny-all.yaml
-│       └── peer-authn-strict.yaml
-├── overlays/
-│   ├── staging/
-│   │   └── kustomization.yaml
-│   └── production/
-│       └── kustomization.yaml
-└── argocd/
-    ├── app-istio.yaml           # ArgoCD Application für Istio
-    ├── app-bookinfo.yaml
-    └── app-policies.yaml
-```
+  * Multi-Tenancy: beide loesen das (ArgoCD ueber Projects+RBAC in der UI,
+    Flux ueber Kubernetes-Bordmittel/Namespaces) - was passender ist, haengt
+    vom bereits vorhandenen RBAC-Modell im Team ab
+  * Vorhandenes Know-how/Toolchain im Team (schon Erfahrung mit dem einen
+    oder anderen Tool vorhanden)
 
 ### Fazit
 
-ArgoCD ist kein Muss für Istio, aber ein starker Enabler: Es macht Istio-Konfiguration nachvollziehbar, reviewbar und reproduzierbar. Gerade bei komplexeren Setups (Multi-Cluster, viele Policies, häufige Traffic-Shifts) reduziert es Fehler und erhöht die Geschwindigkeit.
+Der Flux Operator veraendert vor allem die **Betriebs-Story** von Flux
+(Selbstwartung von Tool und Version), nicht das GitOps-Grundprinzip selbst.
+Wer eine UI braucht oder zentral viele Cluster/Teams bedienen muss, greift
+weiterhin eher zu ArgoCD. Wer moeglichst wenig manuellen Betriebsaufwand fuer
+das GitOps-Tool selbst haben will - kein wiederkehrendes `flux bootstrap`,
+kein manuelles Upgrade des Tools - fuer den macht der Flux Operator Flux CD
+gegenueber ArgoCD noch einmal deutlicher attraktiver als vorher.
 
-### Kleines Hands-on: Deployment mit ArgoCD
+### Weiter geht es praktisch
 
+  * [Flux Ueberblick - Controller, CRDs und Ablauf](flux/01-overview.md)
+  * [Flux Installation mit dem Flux Operator](flux/02-installation.md)
+  * [Was ist ArgoCD?](/istio/argocd/was-ist-argocd.md)
+  * [Hands-on: Deployment mit ArgoCD](/istio/argocd/argocd-istio-bookinfo.md)
 
-### 1. Architektur-Überblick
-
-#### Istio Ambient Mode – Komponenten
-
-Im Gegensatz zum Sidecar-Modus gibt es bei Ambient Mode **kein Envoy-Sidecar** pro Pod.
-Stattdessen wird die Mesh-Funktionalität in zwei Schichten aufgeteilt:
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Kubernetes Cluster                           │
-│                                                                     │
-│  ┌───────────────────────────────────────────────────────────────┐  │
-│  │                    Control Plane (istio-system)               │  │
-│  │                                                               │  │
-│  │   ┌─────────┐     ┌──────────────┐     ┌──────────────────┐  │  │
-│  │   │ istiod  │     │  istio-cni   │     │   Gateway API    │  │  │
-│  │   │ (xDS)   │     │  (DaemonSet) │     │     CRDs         │  │  │
-│  │   └────┬────┘     └──────────────┘     └──────────────────┘  │  │
-│  │        │  xDS-Config                                          │  │
-│  └────────┼──────────────────────────────────────────────────────┘  │
-│           │                                                         │
-│  ┌────────┼──────────────────────────────────────────────────────┐  │
-│  │  L4    │   Data Plane – ztunnel (DaemonSet, pro Node)        │  │
-│  │        ▼                                                      │  │
-│  │   ┌─────────┐          ┌─────────┐          ┌─────────┐     │  │
-│  │   │ ztunnel │          │ ztunnel │          │ ztunnel │     │  │
-│  │   │ Node 1  │◄─HBONE──►│ Node 2  │◄─HBONE──►│ Node 3  │     │  │
-│  │   └────┬────┘          └────┬────┘          └────┬────┘     │  │
-│  │        │                    │                    │           │  │
-│  └────────┼────────────────────┼────────────────────┼───────────┘  │
-│           │                    │                    │               │
-│  ┌────────┼────────────────────┼────────────────────┼───────────┐  │
-│  │  L7    │   Optional: Waypoint Proxies (Envoy, pro Namespace) │  │
-│  │        ▼                    ▼                                 │  │
-│  │   ┌──────────┐        ┌──────────┐                           │  │
-│  │   │ Waypoint │        │ Waypoint │   ← Nur bei L7-Bedarf    │  │
-│  │   │ ns: app  │        │ ns: web  │     (AuthzPolicy, Retry) │  │
-│  │   └──────────┘        └──────────┘                           │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-│                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │  Application Pods (KEIN Sidecar!)                            │   │
-│  │   ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐             │   │
-│  │   │App A│  │App B│  │App C│  │App D│  │App E│             │   │
-│  │   └─────┘  └─────┘  └─────┘  └─────┘  └─────┘             │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-**Zusammenfassung der Komponenten:**
-
-| Helm Chart   | Funktion                                  | Typ        |
-|-------------|-------------------------------------------|------------|
-| `istio/base`  | CRDs (VirtualService, DestinationRule...) | Cluster    |
-| `istio/istiod`| Control Plane (xDS, Cert-Mgmt)           | Cluster    |
-| `istio/cni`   | CNI Plugin, Traffic-Redirect zu ztunnel  | DaemonSet  |
-| `istio/ztunnel`| L4-Proxy, mTLS, HBONE-Tunnel            | DaemonSet  |
-| Gateway API   | CRDs für Waypoint/Ingress-Konfiguration  | Cluster    |
+### Flux Ueberblick - Controller, CRDs und Ablauf
 
 
----
+### Hintergrund
 
-### 2. Wie ArgoCD mit Istio Ambient zusammenspielt
+Flux ist neben ArgoCD das zweite grosse GitOps-Tool fuer Kubernetes (Vergleich
+siehe [argocd-vs-flux.md](../argocd-vs-flux.md)). Flux arbeitet "pull-based":
 
-#### GitOps-Workflow
+1. Quelle beobachten (Git/OCI/Helm-Repo/S3-Bucket)
+2. Artefakt bauen (z.B. tar.gz mit Repo-Snapshot oder Helm-Chart-Artifact)
+3. Zielzustand ableiten (Kustomize oder Helm)
+4. Ist-Zustand im Cluster angleichen (apply/upgrade)
+5. Wiederholen (in Intervallen), inkl. Status/Events
 
-```
-┌──────────────┐    Push     ┌──────────────┐    Sync     ┌──────────────┐
-│              │────────────►│              │────────────►│              │
-│   Developer  │             │   Git Repo   │             │   ArgoCD     │
-│              │◄────────────│              │◄────────────│   Controller │
-│              │    PR/Review│  (Source of   │   Diff/     │              │
-└──────────────┘             │   Truth)     │   Status    └──────┬───────┘
-                             └──────────────┘                    │
-                                                                 │ Helm
-                                                                 │ Template
-                                                                 │ + Apply
-                                                                 ▼
-                             ┌────────────────────────────────────────────┐
-                             │          Kubernetes Cluster                │
-                             │                                            │
-                             │  ┌─────────┐ ┌────────┐ ┌───────────┐    │
-                             │  │istio-   │ │istiod  │ │ztunnel    │    │
-                             │  │base     │ │        │ │+ istio-cni│    │
-                             │  │(CRDs)   │ │(CP)    │ │(DP)       │    │
-                             │  └─────────┘ └────────┘ └───────────┘    │
-                             │                                            │
-                             │  ┌──────────────────────────────────┐     │
-                             │  │  App-Namespace (ambient labeled) │     │
-                             │  │  ┌──────┐ ┌──────┐ ┌──────────┐ │     │
-                             │  │  │App A │ │App B │ │Waypoint  │ │     │
-                             │  │  └──────┘ └──────┘ └──────────┘ │     │
-                             │  └──────────────────────────────────┘     │
-                             └────────────────────────────────────────────┘
-```
+Flux "macht nichts einmalig", sondern reconciled immer wieder, bis Ist = Soll.
 
-#### Install-Reihenfolge (kritisch!)
+### Die Flux-Controller und ihre Aufgaben
 
-ArgoCD deployed Helm Charts. Bei Istio Ambient gibt es **Abhängigkeiten**:
+Flux besteht aus mehreren Controllern (Deployments), die jeweils bestimmte
+CRDs beobachten und reconciled ausfuehren:
 
-```
-  Sync Wave 0        Sync Wave 1       Sync Wave 2        Sync Wave 3
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│  Gateway API │  │  istio-base  │  │   istiod     │  │  istio-cni   │
-│  CRDs        │──►│  (CRDs)      │──►│  (profile:   │──►│  (profile:   │
-│              │  │              │  │   ambient)   │  │   ambient)   │
-└──────────────┘  └──────────────┘  └──────┬───────┘  └──────┬───────┘
-                                           │                  │
-                                           │                  ▼
-                                           │          ┌──────────────┐
-                                           └─────────►│   ztunnel    │
-                                                      │              │
-                                                      └──────────────┘
-                                                              │
-                                                              ▼
-                                                      ┌──────────────┐
-                                                      │  Apps +      │
-                                                      │  Namespace   │
-                                                      │  Labeling    │
-                                                      └──────────────┘
-```
+#### source-controller (Quellen + Artefakte)
 
-**Reihenfolge:** Gateway API CRDs → istio-base → istiod → cni → ztunnel → Apps
+- Holt Inhalte aus Git, OCI, HelmRepositories oder Buckets
+- Erzeugt versionierte Artefakte und stellt sie fuer andere Controller bereit
+- CRDs: `GitRepository`, `OCIRepository`, `HelmRepository`, `Bucket`, `HelmChart`
 
----
+#### helm-controller (Helm Releases)
 
-### 3. Gotchas & Fallstricke
+- Installiert/Upgraded/Uninstallt Helm Releases anhand von `HelmRelease`
+- Nutzt Chart-Artefakte aus dem source-controller als Input
+- CRD: `HelmRelease`
 
-#### NetworkPolicy + HBONE Port 15008
+#### kustomize-controller (YAML / Kustomize)
 
-Das ist der häufigste Fehler! Ambient Mode nutzt HBONE (HTTP/2 + mTLS) über **Port 15008**.
-Bestehende NetworkPolicies blockieren diesen Port oft.
+- Rendert und applied Kubernetes-Ressourcen aus einem Source-Artefakt
+- Unterstuetzt Kustomize (Overlays, Patches, Images)
+- CRD: `Kustomization`
 
-```
-  PROBLEM:                                  LÖSUNG:
-┌───────────────┐                        ┌───────────────┐
-│  NetworkPolicy│                        │  NetworkPolicy│
-│               │                        │               │
-│  ingress:     │                        │  ingress:     │
-│  - port: 8080 │  ← blockiert 15008!   │  - port: 8080 │
-│               │                        │  - port: 15008│  ← HBONE erlauben!
-└───────────────┘                        └───────────────┘
-```
+#### notification-controller (Events/Alerts/Webhooks)
 
-#### ArgoCD HA + Ambient Mode
+- Sendet Benachrichtigungen ueber Zustandsaenderungen (Slack/Webhook/Teams)
+- Kann Webhooks empfangen (GitHub/GitLab) und dadurch sofort reconcilen
+- CRDs: `Provider`, `Alert`, `Receiver`
 
-ArgoCD HA nutzt Redis-HA mit Sentinel. Wenn der ArgoCD-Namespace ins Ambient Mesh
-eingebunden wird, muss Port 15008 in **allen** ArgoCD-NetworkPolicies erlaubt werden.
+#### image-reflector-controller und image-automation-controller
 
-**Empfehlung:** ArgoCD-Namespace **NICHT** ins Ambient Mesh einbinden – ArgoCD ist die Management-Ebene für Istio und muss unabhängig davon funktionieren.
-ArgoCD verwaltet Istio – es muss nicht selbst im Mesh sein.
+- Scannen Container-Registries nach neuen Image-Tags (`ImageRepository`,
+  `ImagePolicy`) und schreiben Updates automatisiert zurueck ins Git-Repo
+  (`ImageUpdateAutomation`)
+- Sind Teil des Standard-Helm-Charts, werden in dieser Uebung aber nicht
+  konfiguriert
+
+### Ablauf am Beispiel Helm Chart
+
+Ziel: Ein Helm Chart (z.B. traefik) deklarativ ausrollen.
+
+Beteiligte Objekte:
+
+1. `HelmRepository` - Chart-Repo als Quelle
+2. `HelmRelease` - Release-Definition
+
+**A) source-controller:**
+1. `HelmRepository` wird reconciled: source-controller laedt `index.yaml`
+   des Chart-Repos, speichert Status/Revision
+2. Fuer eine `HelmRelease` wird intern ein `HelmChart`-Artifact erzeugt
+
+**B) helm-controller:**
+3. helm-controller reconciled die `HelmRelease`: holt das Chart-Artefakt,
+   rendert Templates mit `values`, fuehrt intern ein `helm upgrade --install`
+   aus
+4. Status wird im `HelmRelease`-Objekt aktualisiert (Conditions, letzte
+   erfolgreiche Revision)
+
+**C) Wiederholung:**
+5. Neue Chart-Version im Repo oder Werte-Aenderung -> naechster Reconcile
+6. Flux sorgt dafuer, dass der Cluster-Zustand wieder dem gewuenschten
+   Zustand entspricht
+
+Die folgenden Uebungen bauen genau diesen Ablauf Schritt fuer Schritt auf:
+Installation, `HelmRepository`, `HelmRelease`, `OCIRepository` und ein
+eigenes Chart aus einem Git-Repo.
+
+### Flux Installation und GitOps-Sync mit dem Flux Operator
 
 
-### 4. Initiales Ausrollen – Schritt für Schritt
+### Hintergrund
+
+Frueher haette man Flux imperativ per `flux bootstrap gitlab ...` installiert:
+Ein einmaliger CLI-Befehl generiert die Controller-Manifeste, committed sie
+ins Git-Repo, installiert die Controller und richtet ein `GitRepository` +
+eine `Kustomization` als Git-Sync ein. Inzwischen wird stattdessen der Flux
+Operator **empfohlen** (siehe auch [ArgoCD vs. Flux CD](../argocd-vs-flux.md)):
+
+In dieser Uebung macht das stattdessen der **Flux Operator** (von
+ControlPlane, https://fluxoperator.dev): Ihr installiert per Helm nur einen
+kleinen Operator. Der Operator liest daraus eine `FluxInstance` Custom
+Resource - deklarativ, per `kubectl apply`/Git statt per CLI-Befehl - und
+rollt darauf basierend die eigentlichen Flux-Controller samt Git-Sync aus.
+
+Das bringt zwei Automatik-Effekte, die `flux bootstrap` nicht hat:
+
+1. **Flux selbst aktualisiert sich automatisch:** `spec.distribution.version:
+   "2.x"` in der `FluxInstance` heisst "immer die neueste 2.x-Version" - der
+   Operator rollt neue Flux-Patches/Minor-Releases selbststaendig aus, ohne
+   dass ihr `flux bootstrap` erneut ausfuehren muesst.
+2. **Der Operator aktualisiert sich selbst:** Sobald der Git-Sync steht,
+   committen wir eine `HelmRelease`, die den Flux-Operator-Chart selbst per
+   Semver-Range trackt. Ab dann uebernimmt Flux die eigene Operator-Version -
+   ein neuer Chart-Release wird automatisch ausgerollt, ganz ohne erneuten
+   `helm upgrade`.
+
+| Komponente | Version |
+|------------|---------|
+| Flux CLI | 2.9.5 (Stand 10.09.2026) |
+| Flux Operator (Helm Chart) | 0.59.0 (Stand 09.09.2026) |
+| Flux Distribution (ueber FluxInstance) | 2.9.5 (Stand 09.09.2026) |
+
+### Voraussetzungen
+
+- Eigenes Kubernetes-Cluster (jeder Teilnehmer hat sein eigenes)
+- kubectl und helm konfiguriert
+- Eigener GitLab.com-Account `training.tn<deine-nr>` (vom Trainer angelegt)
+
+### Schritt 1: Flux CLI installieren
+
+Wird hier nicht fuer die Installation gebraucht, aber fuer Reconcile-/Status-
+Befehle in den naechsten Uebungen:
 
 ```
-Was Du tust (manuell)              Was ArgoCD tut (automatisch)
-─────────────────────              ────────────────────────────
-
-Schritt 1: Cluster + ArgoCD
-  bereitstellen
-         │
-         ▼
-Schritt 2: Git-Repo anlegen
-  mit allen Application-YAMLs
-         │
-         ▼
-Schritt 3: root-app.yaml
-  kubectl apply (1× manuell!)
-         │                         ArgoCD liest apps/ aus Git
-         └────────────────────────►      │
-                                         ├─► erstellt gateway-api-crds App
-                                         ├─► erstellt istio-base App
-                                         ├─► erstellt istiod App
-                                         ├─► erstellt istio-cni App
-                                         ├─► erstellt ztunnel App
-                                         └─► erstellt bookinfo App
-                                                     │
-                                              Sync Waves steuern
-                                              die Reihenfolge
-                                                     │
-                                                     ▼
-                                              Istio Ambient läuft!
-
-Ab jetzt: Änderungen NUR noch über Git-Commits.
+curl -s https://fluxcd.io/install.sh | sudo bash
 ```
 
-#### Schritt 1: Voraussetzungen prüfen
-
-```bash
-## Kubernetes >= 1.28
-kubectl version
-
-## Helm >= 3.6 (nur zum Prüfen, ArgoCD nutzt Helm intern)
-helm version
+```
+flux version --client
 ```
 
-#### Schritt 2: ArgoCD installieren
+### Schritt 2: Personal Access Token erstellen
 
-```bash
-## Falls noch kein ArgoCD im Cluster:
-kubectl create namespace argocd
-kubectl apply -n argocd -f \
-  https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+Auf gitlab.com unter `https://gitlab.com/-/user_settings/personal_access_tokens`
+(als `training.tn<deine-nr>` eingeloggt):
 
-## Warten bis alles läuft:
-kubectl wait --for=condition=available deployment/argocd-server \
-  -n argocd --timeout=120s
+- Scope: `api` (**legacy - token**)
+- Name z.B. `flux-sync`
 
-## Admin-Passwort holen:
-kubectl -n argocd get secret argocd-initial-admin-secret \
-  -o jsonpath='{.data.password}' | base64 -d; echo
+Token kopieren und als Umgebungsvariable setzen:
 
-## Optional: Port-Forward für UI
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-## → https://localhost:8080  (User: admin)
+```
+export GITLAB_TOKEN=<dein-personal-access-token>
 ```
 
-#### Schritt 3: Git-Repo anlegen und befüllen
+### Schritt 3: GitLab-Repo einrichten und lokal klonen
 
-```bash
-## Neues Repo erstellen (z.B. auf GitHub/GitLab)
-mkdir istio-ambient-gitops && cd istio-ambient-gitops
-git init
+Neues, leeres Projekt anlegen: `https://gitlab.com/projects/new#blank_project`,
+Name z.B. `flux-<dein-kuerzel>`.
 
-## Verzeichnisstruktur anlegen
-mkdir -p apps/istio/values apps/bookinfo
+```
+cd
+git clone https://gitlab.com/training.tn<deine-nr>/flux-<dein-kuerzel>.git
+cd flux-<dein-kuerzel>
 ```
 
-Jetzt alle Application-YAMLs und Values-Dateien erstellen
-(siehe Abschnitt 4.5 für den Inhalt jeder Datei):
+```
+git config user.email "training@example.com"
+git config user.name "training.tn<deine-nr>"
+```
 
-```bash
-## Dateien erstellen:
-touch apps/istio/gateway-api-crds.yaml
-touch apps/istio/istio-base-app.yaml
-touch apps/istio/istiod-app.yaml
-touch apps/istio/istio-cni-app.yaml
-touch apps/istio/ztunnel-app.yaml
-touch apps/istio/values/istiod-values.yaml
-touch apps/bookinfo/bookinfo-app.yaml
+**Unterschied zu `flux bootstrap`:** Dort generiert der CLI-Befehl die
+Manifeste automatisch und committed sie ins Repo. Hier legt ihr die
+Manifeste selbst an und committet sie - genau der Workflow, den ihr auch in
+den naechsten Uebungen (`HelmRepository`, `HelmRelease`, ...) verwendet.
 
-## Alles committen und pushen:
+### Schritt 4: Flux Operator per Helm installieren
+
+Der Operator kommt als Helm Chart aus einer OCI-Registry - kein
+zusaetzliches Repo hinzufuegen noetig:
+
+```
+helm install flux-operator oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator \
+  -n flux-system --create-namespace --wait --timeout 3m
+```
+
+```
+kubectl get pods -n flux-system
+```
+
+Erwartete Ausgabe (nur der Operator, noch keine Flux-Controller):
+
+```
+NAME                            READY   STATUS    RESTARTS   AGE
+flux-operator-xxxxxxxxxx-xxxxx   1/1     Running   0          20s
+```
+
+### Schritt 5: Pull-Secret fuer den Git-Sync anlegen
+
+Damit der Operator euer GitLab-Repo lesen kann, braucht er ein Secret mit
+Benutzername + Token:
+
+```
+kubectl create secret generic flux-system \
+  --namespace=flux-system \
+  --from-literal=username=training.tn<deine-nr> \
+  --from-literal=password=$GITLAB_TOKEN
+```
+
+### Schritt 6: FluxInstance mit Git-Sync anlegen
+
+Die `FluxInstance` beschreibt, welche Flux-Version, welche Controller UND
+welches Git-Repo als Sync-Quelle gewuenscht sind:
+
+```
+cd
+mkdir -p flux-<dein-kuerzel>/clusters/production/flux-system
+cd flux-<dein-kuerzel>/clusters/production/flux-system
+```
+
+```
+## vi fluxinstance.yml
+apiVersion: fluxcd.controlplane.io/v1
+kind: FluxInstance
+metadata:
+  name: flux
+  namespace: flux-system
+spec:
+  distribution:
+    version: "2.x"
+    registry: "ghcr.io/fluxcd"
+  components:
+    - source-controller
+    - kustomize-controller
+    - helm-controller
+    - notification-controller
+  cluster:
+    type: kubernetes
+    multitenant: false
+    networkPolicy: true
+    domain: "cluster.local"
+  sync:
+    kind: GitRepository
+    url: "https://gitlab.com/training.tn<deine-nr>/flux-<dein-kuerzel>.git"
+    ref: "refs/heads/main"
+    path: "clusters/production"
+    pullSecret: "flux-system"
+```
+
+Diese allererste Anwendung muss per `kubectl apply` passieren - es laeuft ja
+noch kein Flux, das einen Git-Commit einlesen koennte:
+
+```
+kubectl apply -f fluxinstance.yml
+```
+
+Danach committen wir dieselbe Datei in den Pfad, den die `FluxInstance`
+gerade als Sync-Quelle eingerichtet hat - ab jetzt verwaltet Flux sich damit
+selbst weiter, jede kuenftige Aenderung an der `FluxInstance` laeuft ueber
+`git commit` + `git push`:
+
+```
+cd
+cd flux-<dein-kuerzel>
 git add -A
-git commit -m "Initial Istio Ambient + ArgoCD setup"
-git remote add origin https://github.com/DEIN-USER/istio-ambient-gitops.git
+git commit -m "Added FluxInstance with git sync"
+git push
+```
+
+### Schritt 7: Operator-Selbst-Update einrichten
+
+Jetzt richten wir den zweiten Automatik-Effekt ein: Der Flux-Operator-Chart
+selbst wird ab sofort per `HelmRelease` von Flux verwaltet, mit einer
+Semver-Range, die neue Chart-Releases automatisch uebernimmt.
+
+```
+cd flux-<dein-kuerzel>/clusters/production/flux-system
+```
+
+```
+## vi flux-operator-source.yml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: flux-operator
+  namespace: flux-system
+spec:
+  interval: 30m
+  url: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
+  ref:
+    semver: ">=0.59.0"
+```
+
+```
+## vi flux-operator-release.yml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: flux-operator
+  namespace: flux-system
+spec:
+  interval: 30m
+  releaseName: flux-operator
+  chartRef:
+    kind: OCIRepository
+    name: flux-operator
+    namespace: flux-system
+```
+
+**Wichtig:** Der Release-Name (`releaseName: flux-operator`) ist bewusst
+identisch mit der Helm-Installation aus Schritt 4. Flux erkennt die
+bestehende Helm-Release-Storage und uebernimmt sie nahtlos - ohne
+Neuinstallation.
+
+```
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Added self-update HelmRelease for flux-operator"
+git push
+```
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+### Schritt 8: Installation verifizieren
+
+```
+kubectl get pods -n flux-system
+```
+
+Erwartete Ausgabe (Operator + 4 Flux-Controller):
+
+```
+NAME                                       READY   STATUS    RESTARTS   AGE
+flux-operator-xxxxxxxxxx-xxxxx              1/1     Running   0          3m
+helm-controller-xxxxxxxxxx-xxxxx           1/1     Running   0          90s
+kustomize-controller-xxxxxxxxxx-xxxxx      1/1     Running   0          90s
+notification-controller-xxxxxxxxxx-xxxxx   1/1     Running   0          90s
+source-controller-xxxxxxxxxx-xxxxx         1/1     Running   0          90s
+```
+
+Status der `FluxInstance` und des Git-Syncs:
+
+```
+kubectl get fluxinstance -n flux-system
+flux get sources git
+flux get kustomizations
+```
+
+Erwartete Ausgabe der `FluxInstance`:
+
+```
+NAME   AGE   READY   STATUS                           REVISION
+flux   3m    True    Reconciliation finished in 21s   v2.9.5@sha256:...
+```
+
+Status des Operator-Selbst-Updates:
+
+```
+kubectl get ocirepository,helmrelease -n flux-system flux-operator
+```
+
+### Was wurde eingerichtet?
+
+1. Der Flux Operator (Schritt 4) plus die 4 Flux-Controller, die er anhand
+   der `FluxInstance` ausgerollt hat
+2. Ein `GitRepository`- und `Kustomization`-Objekt `flux-system`, das auf
+   euer eigenes GitLab-Repo zeigt (von der `FluxInstance` per `spec.sync`
+   erzeugt - dieselben Namen wie bei `flux bootstrap`)
+3. Eine `OCIRepository` + `HelmRelease`, die den Flux-Operator-Chart selbst
+   per Semver-Range trackt und bei neuen Releases automatisch upgraded
+
+Im naechsten Schritt legt ihr ein `HelmRepository` an - nicht per
+`kubectl apply`, sondern per Commit in dieses Repo (genau wie in Schritt 6/7
+gerade schon gemacht).
+
+### Vergleich zu `flux bootstrap`
+
+| | `flux bootstrap` | Flux Operator + `FluxInstance` |
+|---|---|---|
+| Installation | Imperativer CLI-Befehl | Deklarative Custom Resource |
+| Manifeste ins Repo committen | Automatisch durch den CLI-Befehl | Selbst angelegt und committed |
+| Flux-Version aktuell halten | `flux bootstrap` erneut ausfuehren | Automatisch (`version: "2.x"`) |
+| Operator/Werkzeug selbst aktuell halten | Entfaellt (kein separater Operator) | Automatisch (eigene `HelmRelease`) |
+| Voraussetzung | Flux CLI + Git-Token | Helm + Git-Token |
+
+### HelmRepository - Helm Chart Repositories verwalten
+
+
+### Hintergrund
+
+`HelmRepository` ist die Flux-CRD, die ein Helm-Chart-Repository als Quelle
+definiert. Der source-controller ueberwacht diese Ressource und laedt
+periodisch den Repository-Index (`index.yaml`).
+
+| Eigenschaft | Beschreibung |
+|-------------|--------------|
+| API Group | `source.toolkit.fluxcd.io/v1` |
+| Controller | source-controller |
+| Funktion | Helm-Chart-Repository-Index bereitstellen |
+| Update | Periodisch (`interval`) |
+
+### Voraussetzungen
+
+- Flux Operator installiert, Git-Sync eingerichtet (siehe [02-installation.md](02-installation.md))
+- Euer Repo `flux-<dein-kuerzel>` lokal geklont
+
+### Schritt 1: Vorbereitung
+
+```
+cd
+cd flux-<dein-kuerzel>
+mkdir -p clusters/production/infrastructure
+cd clusters/production/infrastructure
+```
+
+### Schritt 2: HelmRepository fuer Traefik erstellen
+
+```
+## vi 01-traefik-repo.yml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: traefik
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: https://traefik.github.io/charts
+```
+
+Nicht `kubectl apply` - stattdessen committen und pushen:
+
+```
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Added HelmRepository traefik"
+git push
+```
+
+### Schritt 3: Reconciliation abwarten
+
+Flux zieht Aenderungen automatisch (Standard-Intervall der Kustomization).
+Fuer die Uebung koennt ihr das manuell anstossen:
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+```
+kubectl get helmrepository -n flux-system
+```
+
+Erwartete Ausgabe:
+
+```
+NAME      URL                                AGE   READY   STATUS
+traefik   https://traefik.github.io/charts   15s   True    stored artifact: revision 'sha256:...'
+```
+
+**Erklaerung:**
+
+| Feld | Wert | Bedeutung |
+|------|------|-----------|
+| `interval` | `10m` | Alle 10 Minuten Index neu laden |
+| `url` | `https://...` | Helm-Chart-Repository-URL |
+| `READY` | `True` | Repository-Index erfolgreich geladen |
+
+### Was passiert im Hintergrund?
+
+1. `git push` bringt die Aenderung ins GitLab-Repo
+2. Der source-controller im Cluster erkennt (per `GitRepository`
+   `flux-system`) den neuen Commit
+3. Der kustomize-controller wendet die neuen Manifeste aus
+   `clusters/production/` an (das erstellt hier das `HelmRepository`-Objekt)
+4. Der source-controller laedt daraufhin `index.yaml` vom Traefik-Repo
+
+### Naechster Schritt
+
+Im naechsten Schritt ([04-helmrelease.md](04-helmrelease.md)) nutzt ihr
+dieses `HelmRepository`, um tatsaechlich ein Helm Chart mit `HelmRelease`
+auszurollen.
+
+### Aufraeumen
+
+Nicht ausfuehren, falls ihr direkt mit der naechsten Uebung weitermacht -
+die `HelmRelease` braucht das `HelmRepository` als Quelle.
+
+```
+rm clusters/production/infrastructure/01-traefik-repo.yml
+git add -A
+git commit -m "Removed HelmRepository traefik"
+git push
+```
+
+### HelmRelease - Helm Charts deklarativ ausrollen
+
+
+### Hintergrund
+
+`HelmRelease` ist die zentrale Flux-CRD zum Ausrollen von Helm Charts. Der
+helm-controller reconciled diese Ressource und fuehrt intern
+`helm upgrade --install` aus.
+
+| Eigenschaft | Beschreibung |
+|-------------|--------------|
+| API Group | `helm.toolkit.fluxcd.io/v2` |
+| Controller | helm-controller |
+| Funktion | Helm Release deklarativ verwalten |
+| Reconciliation | Automatische Upgrades bei Aenderungen |
+
+### Voraussetzungen
+
+- `HelmRepository` `traefik` existiert (siehe [03-helmrepository.md](03-helmrepository.md))
+
+### Schritt 1: Namespace anlegen
+
+Der Namespace fuer das `HelmRelease`-Objekt muss existieren, bevor Flux das
+Objekt darin anlegen kann - das ist reines Kubernetes-Verhalten und gilt
+unabhaengig von GitOps:
+
+```
+kubectl create namespace ingress
+```
+
+### Schritt 2: HelmRelease fuer Traefik erstellen
+
+```
+cd
+cd flux-<dein-kuerzel>/clusters/production/infrastructure
+```
+
+```
+## vi 02-traefik-release.yml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: ingress
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: traefik
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: flux-system
+  values:
+    replicas: 2
+```
+
+```
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Added HelmRelease traefik"
+git push
+```
+
+### Schritt 3: Status pruefen
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+```
+kubectl get helmrelease -n ingress
+```
+
+**Erwarteter Fehler:**
+
+```
+NAME      AGE   READY   STATUS
+traefik   30s   False   Helm install failed for release ingress/traefik with chart traefik@41.4.0: ...
+```
+
+```
+kubectl -n ingress describe helmrelease traefik
+```
+
+```
+Warning  InstallFailed  ...  helm-controller  Helm install failed for release ingress/traefik with chart traefik@41.4.0: values don't meet the specifications of the schema(s) in the following chart(s):
+traefik:
+- at '': additional properties 'replicas' not allowed
+```
+
+Das Traefik-Chart erwartet `deployment.replicas`, nicht `replicas` auf
+oberster Ebene. Um das richtige Feld zu finden, hilft ein Blick auf
+[artifacthub.io](https://artifacthub.io/packages/helm/traefik/traefik)
+(Values-Schema des Charts).
+
+### Schritt 4: Values korrigieren
+
+```
+## vi 02-traefik-release.yml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: ingress
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: traefik
+      sourceRef:
+        kind: HelmRepository
+        name: traefik
+        namespace: flux-system
+  values:
+    deployment:
+      replicas: 2
+```
+
+```
+git add -A
+git commit -m "Fixed values schema for traefik"
+git push
+```
+
+### Schritt 5: Erfolg pruefen
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+```
+kubectl get helmrelease -n ingress
+kubectl -n ingress get pods
+helm -n ingress list
+```
+
+Erwartete Ausgabe:
+
+```
+NAME      AGE   READY   STATUS
+traefik   63s   True    Helm install succeeded for release ingress/traefik.v1 with chart traefik@41.4.0
+
+NAME                       READY   STATUS    RESTARTS   AGE
+traefik-...                1/1     Running   0          27s
+traefik-...                1/1     Running   0          27s
+```
+
+**Erklaerung:**
+
+| Feld | Wert | Bedeutung |
+|------|------|-----------|
+| `interval` | `5m` | Pruefe alle 5 Minuten auf Drift/Updates |
+| `chart` | `traefik` | Chart-Name aus dem Repository |
+| `sourceRef` | `traefik` | Referenz auf das `HelmRepository` |
+| `values` | ... | Ueberschreibt die Chart-Default-Values |
+
+### Details des HelmRelease anzeigen
+
+```
+kubectl get helmrelease traefik -n ingress -o yaml | grep -A 10 status
+```
+
+Wichtige Felder: `lastAttemptedRevision` (letzte versuchte Version),
+`conditions` (Status der Reconciliation).
+
+### Naechster Schritt
+
+Im naechsten Schritt ([05-oci-helm-chart.md](05-oci-helm-chart.md)) rollt
+ihr ein Helm Chart aus einer OCI-Registry aus.
+
+### Aufraeumen
+
+```
+rm clusters/production/infrastructure/02-traefik-release.yml
+git add -A
+git commit -m "Removed HelmRelease traefik"
+git push
+kubectl delete namespace ingress
+```
+
+### OCI-Helm-Chart verwenden
+
+
+### Hintergrund
+
+Helm Charts koennen auch direkt aus einer OCI-Registry (z.B. Docker Hub,
+GHCR) bezogen werden - ohne klassisches HTTP-Chart-Repository. Flux bildet
+das mit der CRD `OCIRepository` ab.
+
+| Eigenschaft | Beschreibung |
+|-------------|--------------|
+| API Group | `source.toolkit.fluxcd.io/v1` |
+| Controller | source-controller |
+| Funktion | OCI-Artifact (Helm Chart) als Quelle bereitstellen |
+
+### Voraussetzungen
+
+- Flux Operator installiert, Git-Sync eingerichtet (siehe [02-installation.md](02-installation.md))
+
+### Schritt 1: OCIRepository einrichten
+
+```
+cd
+cd flux-<dein-kuerzel>/clusters/production/infrastructure
+```
+
+```
+## vi 03-mariadb-ocirepo.yml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: cloudpirates-mariadb
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: oci://registry-1.docker.io/cloudpirates/mariadb
+  ref:
+    version: "0.14.1"
+```
+
+```
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Added OCIRepository cloudpirates-mariadb"
+git push
+```
+
+### Schritt 2: Funktioniert nicht - warum?
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+```
+kubectl -n flux-system get ocirepositories
+```
+
+**Erwarteter Fehler:**
+
+```
+Error from server (BadRequest): OCIRepository in version "v1" cannot be handled as a OCIRepository: strict decoding error: unknown field "spec.ref.version"
+```
+
+Das Feld heisst nicht `version`, sondern `tag`. Nachschauen, welche Felder
+unter `ref` erlaubt sind:
+
+```
+kubectl explain OCIRepository.spec.ref
+```
+
+Ausgabe zeigt u.a. `tag`, `semver`, `digest` - aber kein `version`.
+
+### Schritt 3: Feld korrigieren
+
+```
+## vi 03-mariadb-ocirepo.yml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: cloudpirates-mariadb
+  namespace: flux-system
+spec:
+  interval: 10m
+  url: oci://registry-1.docker.io/cloudpirates/mariadb
+  ref:
+    tag: "0.14.1"
+```
+
+```
+git add -A
+git commit -m "Fixed OCIRepository ref field"
+git push
+```
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+```
+kubectl -n flux-system get ocirepositories
+```
+
+Erwartete Ausgabe:
+
+```
+NAME                   URL                                               READY   STATUS
+cloudpirates-mariadb   oci://registry-1.docker.io/cloudpirates/mariadb   True    stored artifact for digest '0.14.1@sha256:...'
+```
+
+### Schritt 4: HelmRelease anlegen
+
+Bei einem `OCIRepository` wird `chartRef` statt `chart.spec` verwendet, weil
+die Chart-Version bereits im `OCIRepository` festgelegt ist.
+
+```
+## vi 04-mariadb-release.yml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: mariadb
+  namespace: default
+spec:
+  interval: 10m
+  chartRef:
+    kind: OCIRepository
+    name: cloudpirates-mariadb
+    namespace: flux-system
+  values:
+    persistence:
+      enabled: false
+```
+
+**Hinweis:** `persistence.enabled: false` ist hier bewusst gesetzt - ohne
+StorageClass im Cluster wuerde der Pod sonst mit einer unbound
+PersistentVolumeClaim in `Pending` haengen bleiben. Fuer eine echte
+Persistence-Uebung braeuchte es eine StorageClass (z.B. per NFS-CSI-Treiber)
+- das ist fuer diese Uebung bewusst ausgeklammert.
+
+```
+git add -A
+git commit -m "Added HelmRelease mariadb"
+git push
+```
+
+### Schritt 5: War die Installation erfolgreich?
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+```
+kubectl get helmrelease -n default
+kubectl get pods -n default
+helm -n default status mariadb
+```
+
+Erwartete Ausgabe:
+
+```
+NAME      AGE   READY   STATUS
+mariadb   90s   True    Helm install succeeded for release default/mariadb.v1 with chart mariadb@0.14.1+...
+
+NAME        READY   STATUS    RESTARTS   AGE
+mariadb-0   1/1     Running   0          44s
+```
+
+### Naechster Schritt
+
+Im naechsten Schritt ([06-eigenes-helmchart.md](06-eigenes-helmchart.md))
+rollt ihr ein eigenes Helm Chart aus einem eigenen Git-Repository aus.
+
+### Aufraeumen
+
+```
+rm clusters/production/infrastructure/03-mariadb-ocirepo.yml
+rm clusters/production/infrastructure/04-mariadb-release.yml
+git add -A
+git commit -m "Removed mariadb OCIRepository and HelmRelease"
+git push
+```
+
+### Eigenes Helm Chart aus Git-Repository ausrollen
+
+
+### Hintergrund
+
+`GitRepository` ist die Flux-CRD fuer Git als Quelle - damit koennt ihr auch
+ein eigenes, selbst geschriebenes Helm Chart per Flux ausrollen, ohne es
+vorher in eine Chart-Registry zu veroeffentlichen.
+
+| Eigenschaft | Beschreibung |
+|-------------|--------------|
+| API Group | `source.toolkit.fluxcd.io/v1` |
+| Controller | source-controller |
+| Funktion | Git-Repository als Quelle bereitstellen |
+
+### Voraussetzungen
+
+- Flux Operator installiert, Git-Sync eingerichtet (siehe [02-installation.md](02-installation.md))
+
+### Schritt 1: Chart erstellen
+
+```
+cd
+mkdir helm-chart-test
+cd helm-chart-test
+helm create final-chart
+```
+
+### Schritt 2: Neues, leeres GitLab-Repo anlegen
+
+Auf gitlab.com als `training.tn<deine-nr>`: neues Projekt
+`final-chart-<dein-kuerzel>` anlegen, **Sichtbarkeit: Public** (der
+source-controller braucht sonst Zugangsdaten fuer dieses zweite Repo, was
+wir uns fuer die Uebung sparen).
+
+### Schritt 3: Chart lokal committen und pushen
+
+```
+cd final-chart
+git init
+git config user.email "training@example.com"
+git config user.name "training.tn<deine-nr>"
+git remote add origin https://gitlab.com/training.tn<deine-nr>/final-chart-<dein-kuerzel>.git
+git add -A
+git commit -m "Chart hochschicken"
+git branch -M main
 git push -u origin main
 ```
 
-#### Schritt 4: root-app.yaml erstellen und anwenden
+Bei der ersten Push-Authentifizierung: Username `training.tn<deine-nr>`,
+Passwort der Personal Access Token aus [02-installation.md](02-installation.md).
 
-Diese Datei liegt NICHT im Git-Repo – sie ist der einzige manuelle Schritt:
+### Schritt 4: GitRepository im Flux-Repo anlegen
 
-```bash
-cat <<'EOF' | kubectl apply -f -
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+```
+cd
+cd flux-<dein-kuerzel>
+mkdir -p clusters/production/apps
+cd clusters/production/apps
+```
+
+```
+## vi 01-final-chart-gitrepo.yml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
 metadata:
-  name: root
-  namespace: argocd
+  name: final-chart-source
+  namespace: flux-system
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/DEIN-USER/istio-ambient-gitops.git
-    targetRevision: main
-    path: apps/
-  destination:
-    server: https://kubernetes.default.svc
-  syncPolicy:
-    automated:
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-EOF
+  interval: 1m
+  url: https://gitlab.com/training.tn<deine-nr>/final-chart-<dein-kuerzel>.git
+  ref:
+    branch: main
 ```
 
-#### Schritt 5: Zuschauen und verifizieren
-
-```bash
-## ArgoCD Applications beobachten:
-kubectl get applications -n argocd -w
-
-## Erwartete Ausgabe nach ein paar Minuten:
-## NAME                STATUS   HEALTH
-## root                Synced   Healthy
-## gateway-api-crds    Synced   Healthy
-## istio-base          Synced   Healthy
-## istiod              Synced   Healthy
-## istio-cni           Synced   Healthy
-## ztunnel             Synced   Healthy
-
-## Istio-Pods prüfen:
-kubectl get pods -n istio-system
-
-## CRDs prüfen:
-kubectl get crds | grep -E 'istio|gateway'
 ```
-
-#### Ab jetzt: Alles über Git
-
-```bash
-## Beispiel: Neue App hinzufügen
-vim apps/bookinfo/bookinfo-app.yaml
-git add -A && git commit -m "Add bookinfo app"
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Added GitRepository for own chart"
 git push
-## → ArgoCD erkennt die Änderung und deployed automatisch
+```
 
-## Beispiel: Istio upgraden
-## In apps/istio/*-app.yaml: targetRevision von 1.24.2 auf 1.25.0 ändern
-git add -A && git commit -m "Upgrade Istio to 1.25.0"
+### Schritt 5: Ueberpruefen
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+```
+flux get sources git
+```
+
+Erwartete Ausgabe (Auszug):
+
+```
+NAME                 REVISION                                          READY
+final-chart-source   main@sha1:...                                     True
+```
+
+### Schritt 6: HelmRelease einpflegen
+
+```
+cd flux-<dein-kuerzel>/clusters/production/apps
+```
+
+```
+## vi 02-final-chart-release.yml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: final-chart
+  namespace: flux-system
+spec:
+  interval: 1m
+  targetNamespace: final-chart-demo
+  install:
+    createNamespace: true
+  chart:
+    spec:
+      chart: ./
+      sourceRef:
+        kind: GitRepository
+        name: final-chart-source
+        namespace: flux-system
+  values:
+    replicaCount: 2
+```
+
+```
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Added HelmRelease for own chart"
 git push
-## → ArgoCD rolled die neuen Versionen aus
 ```
 
----
+**Erklaerung:** `chart.spec.chart: ./` verweist auf das Wurzelverzeichnis des
+`GitRepository` - das Chart liegt hier direkt im Repo-Root. Liegt das Chart
+in einem Unterordner (z.B. `charts/final-chart`), muss der Pfad entsprechend
+angepasst werden.
 
-#### 4.4 Git-Repo Struktur
+### Schritt 7: Ueberpruefen
 
 ```
-istio-ambient-gitops/
-├── apps/
-│   ├── istio/
-│   │   ├── gateway-api-crds.yaml       # ArgoCD Application
-│   │   ├── istio-base-app.yaml         # ArgoCD Application
-│   │   ├── istiod-app.yaml             # ArgoCD Application
-│   │   ├── istio-cni-app.yaml          # ArgoCD Application
-│   │   ├── ztunnel-app.yaml            # ArgoCD Application
-│   │   └── values/
-│   │       ├── istiod-values.yaml
-│   │       ├── cni-values.yaml
-│   │       └── ztunnel-values.yaml
-│   ├── bookinfo/
-│   │   └── bookinfo-app.yaml           # ArgoCD Application
-│   └── root-app.yaml                   # App-of-Apps
+flux reconcile kustomization flux-system --with-source
 ```
 
-#### 4.5 ArgoCD Application Manifeste
+```
+flux get source git
+flux get helmrelease -A
+helm list -A
+kubectl -n final-chart-demo get pods
+```
 
-##### Gateway API CRDs (Sync Wave -3)
+Erwartete Ausgabe:
 
-```yaml
-## apps/istio/gateway-api-crds.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+```
+NAME          AGE   READY   STATUS
+final-chart   ...   True    Helm install succeeded for release final-chart-demo/final-chart-demo-final-chart.v1 with chart final-chart@0.1.0
+
+NAME                                           READY   STATUS    RESTARTS   AGE
+final-chart-demo-final-chart-...               1/1     Running   0          28s
+final-chart-demo-final-chart-...               1/1     Running   0          28s
+```
+
+### Zusammenfassung der gesamten Uebungsreihe
+
+| CRD | Zweck |
+|-----|-------|
+| `HelmRepository` | HTTP-Chart-Repository als Quelle |
+| `HelmRelease` (mit `chart.spec`) | Helm Release aus `HelmRepository` |
+| `OCIRepository` | Helm Chart aus OCI-Registry als Quelle |
+| `HelmRelease` (mit `chartRef`) | Helm Release aus `OCIRepository` |
+| `GitRepository` | Eigenes/fremdes Git-Repo als Quelle |
+| `HelmRelease` (mit `chart.spec` + `GitRepository`) | Helm Release aus einem Chart-Pfad im Git-Repo |
+
+Der gesamte Workflow lief dabei ausschliesslich ueber `git commit` +
+`git push` in euer Flux-Repo - kein einziges `kubectl apply` fuer die
+eigentlichen GitOps-Objekte. Genau das ist der Kern von GitOps: Git ist die
+"Source of Truth", Flux gleicht den Cluster automatisch daran an.
+
+### Aufraeumen
+
+```
+cd flux-<dein-kuerzel>
+rm clusters/production/apps/01-final-chart-gitrepo.yml
+rm clusters/production/apps/02-final-chart-release.yml
+git add -A
+git commit -m "Removed own chart GitRepository and HelmRelease"
+git push
+```
+
+Das GitLab-Repo `final-chart-<dein-kuerzel>` koennt ihr danach in den
+Projekt-Einstellungen loeschen.
+
+### Uebung: Flux-Operator Web-UI mit Ingress und HTTPS absichern
+
+
+### Hintergrund
+
+Der Flux Operator bringt seit Version 0.59 eine eingebaute Web-UI mit
+("Flux Status Page") - sie ist per Default aktiv (`web.enabled: true`),
+laeuft im selben Pod wie der Operator und ist ueber den Service
+`flux-operator` auf Port `9080` (Name `http-web`) erreichbar. Ohne Ingress
+ist das nur clusterintern nutzbar.
+
+Wir machen die UI von aussen erreichbar - genau wie bei
+[Prometheus/Grafana](../../prometheus-grafana/prometheus-grafana/install-with-helm-traefik-letsencrypt-basic-auth.md):
+Traefik als Ingress-Controller, TLS von Letsencrypt, Zugriff per basic-auth.
+
+**Der Punkt dabei:** Fuer die Zertifikats-Ausstellung braucht es keinen
+neuen `ClusterIssuer` - das Objekt aus der Prometheus/Grafana-Uebung
+(`letsencrypt-prod`) ist nicht an einen Host gebunden, sondern gilt
+clusterweit fuer jeden Ingress mit `ingressClassName: traefik`. Derselbe
+"Handler" validiert also auch dieses Zertifikat per HTTP01-Challenge.
+
+**Nebeneffekt:** Was die UI anzeigt, ist keine eigene Datensammlung,
+sondern die `FluxReport`-Custom-Resource des Operators - dieselbe, die man
+auch per `kubectl` abfragen kann. Die UI ist im Kern also nur eine
+Visualisierung von Schritt 5 dieser Uebung.
+
+### Voraussetzungen
+
+- Flux Operator + Git-Sync laufen ([02-installation.md](02-installation.md)),
+  inklusive Schritt 7 (Operator verwaltet sich selbst per `HelmRelease`)
+- Traefik laeuft ueber die `HelmRelease` aus
+  [04-helmrelease.md](04-helmrelease.md)
+- cert-manager + `ClusterIssuer` `letsencrypt-prod` aus der
+  Prometheus/Grafana-Uebung sind noch vorhanden:
+
+```
+kubectl get clusterissuer letsencrypt-prod
+```
+
+  Falls nicht mehr da (z.B. schon aufgeraeumt): dort Schritt 5+6
+  nachholen, bevor es hier weitergeht.
+
+- Wildcard-DNS `*.<du>.do.t3isp.de` aus derselben Uebung zeigt schon auf
+  die Traefik-IP - deckt automatisch auch `flux.<du>.do.t3isp.de` ab, kein
+  neuer DNS-Eintrag noetig
+- `htpasswd` ist installiert (`apt install apache2-utils`, siehe
+  Prometheus/Grafana-Uebung)
+
+### Schritt 1: basic-auth-Secret anlegen
+
+Das Secret legen wir bewusst per `kubectl` an, nicht per Git-Commit -
+Passwoerter gehoeren nicht im Klartext ins Git-Repo, auch nicht in ein
+privates.
+
+```
+htpasswd -c auth admin  # Wunsch-Passwort eingeben
+kubectl create secret generic flux-web-basic-auth --from-file=users=auth -n flux-system
+```
+
+### Schritt 2: Middleware fuer Traefik committen
+
+Anders als das Secret enthaelt die `Middleware` keine Geheimnisse, nur
+eine Referenz auf den Secret-Namen - die kann ganz normal ueber Git
+laufen, wie alles andere in diesem Kapitel.
+
+```
+cd
+cd flux-<dein-kuerzel>/clusters/production/flux-system
+```
+
+```
+## vi flux-web-middleware.yml
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
 metadata:
-  name: gateway-api-crds
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-3"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  name: flux-web-auth
+  namespace: flux-system
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/kubernetes-sigs/gateway-api.git
-    targetRevision: v1.4.0
-    path: config/crd/standard
-  destination:
-    server: https://kubernetes.default.svc
-  syncPolicy:
-    automated:
-      selfHeal: true
-    syncOptions:
-      - ServerSideApply=true
-      - CreateNamespace=false
+  basicAuth:
+    secret: flux-web-basic-auth
 ```
 
-##### istio-base (Sync Wave -2)
+```
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Added basic-auth middleware for flux-operator web UI"
+git push
+```
 
-```yaml
-## apps/istio/istio-base-app.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+### Schritt 3: Ingress fuer die Web-UI ueber das bestehende HelmRelease aktivieren
+
+Wir tragen die Ingress-Konfiguration im `values`-Feld genau der
+`HelmRelease` ein, die den Flux-Operator-Chart schon selbst verwaltet
+(aus [02-installation.md](02-installation.md), Schritt 7) - bisher hatte
+sie noch kein `values`-Feld.
+
+```
+cd flux-<dein-kuerzel>/clusters/production/flux-system
+```
+
+```
+## vi flux-operator-release.yml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
 metadata:
-  name: istio-base
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-2"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  name: flux-operator
+  namespace: flux-system
 spec:
-  project: default
-  source:
-    repoURL: https://istio-release.storage.googleapis.com/charts
-    chart: base
-    targetRevision: 1.24.2     # oder 1.29.x je nach Version
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: istio-system
-  syncPolicy:
-    automated:
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true    # wichtig für CRDs!
+  interval: 30m
+  releaseName: flux-operator
+  chartRef:
+    kind: OCIRepository
+    name: flux-operator
+    namespace: flux-system
+  values:
+    web:
+      ingress:
+        enabled: true
+        className: traefik
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+          traefik.ingress.kubernetes.io/router.middlewares: flux-system-flux-web-auth@kubernetescrd
+        hosts:
+          - host: flux.<du>.do.t3isp.de
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - flux.<du>.do.t3isp.de
+            secretName: flux-web-tls
 ```
 
-##### istiod (Sync Wave -1)
+**Achtung, Stolperstein:** Das Feld heisst hier `className`, nicht
+`ingressClassName` wie bei jedem anderen Chart in diesem Training
+(Prometheus, Grafana, Alertmanager, Traefik selbst). Jedes Helm Chart
+definiert sein eigenes values-Schema - es gibt dafuer keine
+Kubernetes-weite Konvention. Im Zweifel im Chart selbst nachsehen:
+[fluxoperator.dev/docs/charts/flux-operator](https://fluxoperator.dev/docs/charts/flux-operator/)
+bzw. [artifacthub.io](https://artifacthub.io/packages/helm/flux-operator/flux-operator).
 
-```yaml
-## apps/istio/istiod-app.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+```
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Added ingress for flux-operator web UI"
+git push
+```
+
+```
+flux reconcile kustomization flux-system --with-source
+```
+
+### Schritt 4: Status pruefen
+
+```
+kubectl -n flux-system get helmrelease flux-operator
+kubectl -n flux-system get ingress
+kubectl -n flux-system get certificate flux-web-tls
+```
+
+Der `Ingress` steht sofort. Das Zertifikat bleibt aber haengen:
+
+```
+NAME           READY   SECRET         AGE
+flux-web-tls   False   flux-web-tls   3m
+```
+
+### Schritt 5: Erwarteter Fehler - Challenge haengt fest
+
+```
+kubectl -n flux-system get challenges
+kubectl -n flux-system describe challenge <name-aus-get-challenges>
+```
+
+Erwarteter Auszug:
+
+```
+Status:
+  Reason:  Waiting for HTTP-01 challenge propagation: failed to perform
+           self check GET request '.../.well-known/acme-challenge/...':
+           context deadline exceeded (Client.Timeout exceeded while
+           awaiting headers)
+  State:   pending
+```
+
+**Ursache:** Der Flux Operator legt (weil die `FluxInstance` aus
+[02-installation.md](02-installation.md) `spec.cluster.networkPolicy: true`
+setzt) automatisch mehrere `NetworkPolicy`-Objekte im Namespace
+`flux-system` an - unter anderem `allow-egress`, die per
+`podSelector: {}` fuer JEDEN Pod im Namespace gilt und eingehenden
+Traffic nur noch von Pods **im selben Namespace** erlaubt.
+
+Genau das trifft den temporaeren `cm-acme-http-solver-...`-Pod, den
+cert-manager fuer die Challenge in `flux-system` anlegt: Traefik sitzt im
+Namespace `traefik` und darf ihn deshalb nicht mehr erreichen - anders
+als bei Prometheus/Alertmanager, wo bisher keine NetworkPolicy im Weg
+stand.
+
+```
+kubectl -n flux-system get networkpolicy
+```
+
+```
+NAME                POD-SELECTOR                                                                    AGE
+allow-egress        <none>                                                                          ...
+allow-scraping      <none>                                                                          ...
+allow-webhooks      app=notification-controller                                                     ...
+flux-operator-web   app.kubernetes.io/instance=flux-operator,app.kubernetes.io/name=flux-operator   ...
+```
+
+`flux-operator-web` erlaubt die Web-UI selbst zwar schon von ueberall auf
+Port `9080` - aber der ACME-Solver-Pod ist ein voellig anderer Pod ohne
+passende Labels und faellt deshalb unter die restriktive
+`allow-egress`-Regel.
+
+### Schritt 6: Fix - gezielte NetworkPolicy fuer den ACME-Solver
+
+Statt die vorhandenen Policies aufzuweichen, erlauben wir gezielt nur den
+Solver-Pods (erkennbar am Label `acme.cert-manager.io/http01-solver`)
+Traffic auf ihrem Port von ueberall:
+
+```
+cd flux-<dein-kuerzel>/clusters/production/flux-system
+```
+
+```
+## vi 03-allow-acme-http01-solver.yml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
 metadata:
-  name: istiod
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  name: allow-acme-http01-solver
+  namespace: flux-system
 spec:
-  project: default
-  sources:
-    - repoURL: https://istio-release.storage.googleapis.com/charts
-      chart: istiod
-      targetRevision: 1.24.2
-      helm:
-        valueFiles:
-          - $values/apps/istio/values/istiod-values.yaml
-    - repoURL: https://github.com/DEIN-USER/istio-ambient-gitops.git
-      targetRevision: main
-      ref: values
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: istio-system
-  syncPolicy:
-    automated:
-      selfHeal: true
+  podSelector:
+    matchLabels:
+      acme.cert-manager.io/http01-solver: "true"
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8089
 ```
 
-**istiod-values.yaml:**
-```yaml
-## apps/istio/values/istiod-values.yaml
-profile: ambient
-pilot:
-  resources:
-    requests:
-      cpu: 200m
-      memory: 256Mi
-meshConfig:
-  accessLogFile: /dev/stdout
+```
+cd
+cd flux-<dein-kuerzel>
+git add -A
+git commit -m "Allow ACME HTTP01 solver ingress from other namespaces"
+git push
 ```
 
-##### istio-cni (Sync Wave 0)
-
-```yaml
-## apps/istio/istio-cni-app.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: istio-cni
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
-    repoURL: https://istio-release.storage.googleapis.com/charts
-    chart: cni
-    targetRevision: 1.24.2
-    helm:
-      values: |
-        profile: ambient
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: istio-system       # oder kube-system je nach Setup
-  syncPolicy:
-    automated:
-      selfHeal: true
+```
+flux reconcile kustomization flux-system --with-source
 ```
 
-##### ztunnel (Sync Wave 1)
-
-```yaml
-## apps/istio/ztunnel-app.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: ztunnel
-  namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  project: default
-  source:
-    repoURL: https://istio-release.storage.googleapis.com/charts
-    chart: ztunnel
-    targetRevision: 1.24.2
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: istio-system
-  syncPolicy:
-    automated:
-      selfHeal: true
+```
+kubectl -n flux-system get certificate flux-web-tls
 ```
 
-##### Multi-Source Variante (alles in einer Application)
-
-Alternativ kann man alle Charts in einer einzigen Application mit `sources` bündeln.
-Das funktioniert, aber man verliert die Sync-Wave-Kontrolle:
-
-```yaml
-## Kompakte Variante – ACHTUNG: keine Reihenfolge-Garantie!
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: istio-ambient
-  namespace: argocd
-spec:
-  project: default
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: istio-system
-  sources:
-    - repoURL: https://istio-release.storage.googleapis.com/charts
-      chart: base
-      targetRevision: 1.24.2
-      helm:
-        releaseName: istio-base
-    - repoURL: https://istio-release.storage.googleapis.com/charts
-      chart: istiod
-      targetRevision: 1.24.2
-      helm:
-        releaseName: istiod
-        parameters:
-          - name: profile
-            value: ambient
-    - repoURL: https://istio-release.storage.googleapis.com/charts
-      chart: cni
-      targetRevision: 1.24.2
-      helm:
-        releaseName: istio-cni
-        parameters:
-          - name: profile
-            value: ambient
-    - repoURL: https://istio-release.storage.googleapis.com/charts
-      chart: ztunnel
-      targetRevision: 1.24.2
-      helm:
-        releaseName: ztunnel
-  syncPolicy:
-    automated:
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
-```
-
-#### 4.6 App-of-Apps (Root Application)
-
-```yaml
-## apps/root-app.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: root
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: https://github.com/DEIN-USER/istio-ambient-gitops.git
-    targetRevision: main
-    path: apps/
-  destination:
-    server: https://kubernetes.default.svc
-  syncPolicy:
-    automated:
-      selfHeal: true
-```
-
-#### 4.7 Namespace ins Ambient Mesh einbinden
-
-```yaml
-## bookinfo-namespace.yaml (im Git-Repo!)
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: bookinfo
-  labels:
-    istio.io/dataplane-mode: ambient    # ← Das ist der Schlüssel!
-```
-
-#### 4.8 Waypoint Proxy deployen (für L7-Features)
-
-```yaml
-## Nur nötig wenn AuthorizationPolicy, Retries, etc. auf L7 gebraucht werden
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: bookinfo-waypoint
-  namespace: bookinfo
-  labels:
-    istio.io/waypoint-for: service      # oder "all" für den ganzen Namespace
-spec:
-  gatewayClassName: istio-waypoint
-  listeners:
-    - name: mesh
-      port: 15008
-      protocol: HBONE
-```
-
-#### 4.9 Verifizierung
-
-```bash
-## Istio-Komponenten prüfen
-kubectl get pods -n istio-system
-## Erwartung: istiod-xxx, ztunnel-xxx (pro Node), istio-cni-node-xxx (pro Node)
-
-## CRDs prüfen
-kubectl get crds | grep -E 'istio|gateway'
-
-## Ambient-Enrollment prüfen
-kubectl get namespace bookinfo --show-labels | grep dataplane-mode
-
-## ztunnel-Logs: mTLS-Verbindungen sichtbar
-kubectl logs -n istio-system -l app=ztunnel --tail=20
-
-## Mesh-Status mit istioctl
-istioctl ztunnel-config workloads
-```
-
----
-
-### 5. Checkliste: Was muss ich beachten?
+Nach spaetestens 1-2 Minuten:
 
 ```
- ✓  Gateway API CRDs VOR Istio installieren (Sync Wave!)
- ✓  Helm Charts in korrekter Reihenfolge: base → istiod → cni → ztunnel
- ✓  ServerSideApply=true für CRD-haltige Charts setzen
- ✓  profile: ambient bei istiod und cni setzen
- ✓  NetworkPolicies: Port 15008 (HBONE) freigeben
- ✓  ArgoCD-Namespace NICHT ins Ambient Mesh (Management-Ebene bleibt unabhängig)
- ✓  Namespace-Label: istio.io/dataplane-mode=ambient
- ✓  Waypoint nur deployen, wenn L7-Features nötig sind
- ✓  Alle Istio-Versionen einheitlich halten (base, istiod, cni, ztunnel)
- ✓  Bei Upgrades: targetRevision in Git ändern → ArgoCD synced automatisch
+NAME           READY   SECRET         AGE
+flux-web-tls   True    flux-web-tls   ...
 ```
 
----
+### Schritt 7: Reports-Feature kennenlernen (FluxReport)
 
-### 6. Upgrade-Workflow
+Der Operator legt automatisch genau eine `FluxReport`-Ressource namens
+`flux` an und aktualisiert sie alle 5 Minuten - sie fasst den kompletten
+Zustand der Flux-Installation zusammen und ist die Datenquelle der
+Web-UI, die wir gleich im Browser oeffnen.
+
+| Abschnitt (`spec.`) | Inhalt |
+|----------------------|--------|
+| `cluster` | Kubernetes-Version, Plattform, Node-Anzahl |
+| `distribution` | Flux-Version, Installationsstatus |
+| `components` | Status je Flux-Controller (helm-controller, source-controller, ...) |
+| `operator` | Version des Flux Operators selbst |
+| `reconcilers` | Statistik je Ressourcentyp: wie viele failing/running/suspended |
+| `sync` | Kustomization-ID, Quelle, ausgerollte Revision, Sync-Status |
 
 ```
-┌────────────────┐     ┌────────────────┐     ┌────────────────┐
-│ 1. Git Branch  │     │ 2. PR Review   │     │ 3. Merge       │
-│                │     │                │     │                │
-│ targetRevision │────►│ Diff prüfen:   │────►│ ArgoCD synced  │
-│ 1.24.2 → 1.25.0│    │ - Release Notes│     │ automatisch    │
-│                │     │ - Breaking Ch. │     │                │
-└────────────────┘     └────────────────┘     └────┬───────────┘
-                                                    │
-                                        ┌───────────┼───────────┐
-                                        │           │           │
-                                        ▼           ▼           ▼
-                                    base CRDs    istiod     ztunnel
-                                    (update)    (rollout)  (rollout)
+kubectl get fluxreport -n flux-system
+kubectl -n flux-system get fluxreport flux -o yaml
 ```
 
-**Wichtig:** ztunnel ist ein DaemonSet – beim Upgrade gibt es einen kurzen
-Traffic-Umbruch pro Node. In Produktion: `maxUnavailable: 1` in den Values setzen.
+Manuelles Neu-Erstellen (statt auf die naechsten 5 Minuten zu warten):
+
+```
+kubectl -n flux-system annotate --overwrite fluxreport/flux \
+  reconcile.fluxcd.io/requestedAt="$(date +%s)"
+```
+
+### Schritt 8: Von aussen testen
+
+Gleiche curl-Pruefung wie bei Prometheus/Alertmanager - derselbe Handler,
+dieselbe Erwartung:
+
+```
+curl -s -o /dev/null -w "%{http_code}\n" https://flux.<du>.do.t3isp.de/
+## 401 (ohne Auth - gut so!)
+
+curl -s -o /dev/null -w "%{http_code}\n" -u admin:<dein-passwort> https://flux.<du>.do.t3isp.de/
+## 200 (mit Auth)
+```
+
+Im Browser: `https://flux.<du>.do.t3isp.de` -> Login-Popup (basic-auth),
+danach das Flux-Status-Dashboard - dieselben Infos wie eben im
+`FluxReport`, nur grafisch aufbereitet: `FluxInstance`, `GitRepository`
+und alle `Kustomization`/`HelmRelease`-Objekte in Echtzeit.
+
+![Flux-Operator Web-UI: Status-Dashboard mit Cluster Info, Cluster Sync und Flux-Komponenten](images/flux-web-ui-dashboard.jpg)
+
+### Aufraeumen
+
+```
+cd flux-<dein-kuerzel>/clusters/production/flux-system
+rm flux-web-middleware.yml 03-allow-acme-http01-solver.yml
+## in flux-operator-release.yml das values:-Feld (web:) wieder entfernen
+git add -A
+git commit -m "Removed ingress, basic-auth middleware and ACME solver policy for flux-operator web UI"
+git push
+```
+
+```
+flux reconcile kustomization flux-system --with-source
+kubectl delete secret flux-web-basic-auth flux-web-tls -n flux-system
+```
+
+Das Certificate-Objekt selbst entfernt cert-manager automatisch mit (per
+`ownerReference` an den Ingress gebunden) - nur das TLS-Secret bleibt
+stehen und muss von Hand weg.
+
+### Referenzen
+
+- https://fluxoperator.dev/docs/web-ui/ingress/
+- https://fluxoperator.dev/docs/charts/flux-operator/
+- https://artifacthub.io/packages/helm/flux-operator/flux-operator
 
 ## Abschluss
+
+## Autoscaling für fpm-php (Gedankenexperimente, nicht sinnvol)
