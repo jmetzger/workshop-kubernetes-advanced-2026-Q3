@@ -53,8 +53,9 @@ echten kubeadm-Clustern getestet:
 - **ipBlock-Uebung entfernt** (SNAT/NodePort nicht durchfuehrbar), spickzettel
   `kubectl run --image=` gefixt, Label `nginx:1.21`->`nginx`.
 - Noch OFFEN (aus dem Review): `service/feste-ip-beziehen.md` (Datei-Kollision
-  mit metallb.md, spec.loadBalancerIP deprecated) und Istio-Install
-  (`downloadIstio` ungepinnt vs. fester 1.28-Pfad). Details in der Befund-Datei.
+  mit metallb.md, spec.loadBalancerIP deprecated). Details in der Befund-Datei.
+  Der zweite Punkt aus dem Review (`downloadIstio` ungepinnt vs. fester
+  1.28-Pfad) ist am 11.09.2026 erledigt - siehe Istio-Ambient-Eintrag unten.
 
 ## Stand 06.09.2026 - DOKS-Cluster fuer Basics-Modul + Bastion-Zustand
 
@@ -153,6 +154,30 @@ dieses Repo ist die fuer das Training massgebliche Kopie.
   in DIESEM Modul bewusst keine Storage-Uebung, Uebungen mit PVC-Bedarf
   bleiben bei `persistence.enabled: false` (z.B. gitops/flux/05,
   Vault-MariaDB).
+- **Istio Ambient/Gateway-API-Block** (11.09.2026): Neuer Agenda-Abschnitt
+  "Service Mesh - Praktischer Aufbau mit Ambient-Mode (Gateway API statt
+  Sidecar)" gespiegelt aus dem bestehenden Sidecar-Block (Install, Injection/
+  Enrollment, Bookinfo+Waypoint, Header-Routing, Traffic-Shifting, Debugging).
+  Beide Bloecke end-to-end auf `tln18` durchgetestet, dabei `istioctl` auf
+  `client-bka` systemweit von 1.28.0 auf **1.31.0** aktualisiert (Gateway API
+  CRDs auf v1.6.2). tln18 steht danach wieder im **Ambient**-Zustand als
+  Referenz. Zwei Dinge fuer den Trainingstag im Hinterkopf behalten:
+  - Auf Calico-Clustern muss vor dem Ambient-Install
+    `bpfConnectTimeLoadBalancing` in der FelixConfiguration auf `Disabled`
+    gesetzt werden (Grund + Befehl steht in
+    `istio/installation/ambient/03-install-with-istioctl-ambient.md`) -
+    sonst funktioniert die ztunnel-Umleitung nicht zuverlässig, ohne dass
+    ein offensichtlicher Fehler auftaucht.
+  - **Kubernetes-Versionslücke:** `tln18` (und damit vermutlich auch die
+    echten Teilnehmer-Cluster, da `training-kubeadm-cluster` die neueste
+    stabile K8s-Version zu Trainingsbeginn pinnt) laeuft auf **Kubernetes
+    1.37.0**. Istios offizielle Kompatibilitaetsmatrix deckt fuer 1.31 nur
+    K8s 1.27-1.31 ab (1.32-1.36 "getestet, aber nicht offiziell
+    unterstuetzt") - 1.37 liegt sogar darueber hinaus. In der Praxis lief
+    auf tln18 alles fehlerfrei, aber offiziell ist das ausserhalb des von
+    Istio abgedeckten Bereichs. Vor dem echten Training pruefen, welche
+    K8s-Version die Teilnehmer-Cluster am 07.09. tatsaechlich bekommen, und
+    ggf. mit Istio-Support-Matrix/Discuss-Forum gegenchecken.
 
 ## GitOps-Kapitel (Tag 2) - FluxCD
 
