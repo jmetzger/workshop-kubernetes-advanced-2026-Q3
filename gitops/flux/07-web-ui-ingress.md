@@ -318,6 +318,8 @@ danach das Flux-Status-Dashboard - dieselben Infos wie eben im
 `FluxReport`, nur grafisch aufbereitet: `FluxInstance`, `GitRepository`
 und alle `Kustomization`/`HelmRelease`-Objekte in Echtzeit.
 
+![Flux-Operator Web-UI: Status-Dashboard mit Cluster Info, Cluster Sync und Flux-Komponenten](images/flux-web-ui-dashboard.jpg)
+
 ## Aufraeumen
 
 ```
