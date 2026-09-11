@@ -1,6 +1,6 @@
-# istioctl Cheatsheet (Istio v1.29)
+# istioctl Cheatsheet (Istio v1.31)
 
-> Ohne Install-/Uninstall-/Manifest-/Profile-Kommandos. Alle Kommandos verifiziert gegen die offizielle Istio v1.29 Referenz.
+> Ohne Install-/Uninstall-/Manifest-/Profile-Kommandos. Alle Kommandos verifiziert gegen die offizielle Istio v1.31 Referenz.
 
 ---
 
@@ -363,4 +363,4 @@ istioctl x workload group create --name foo --namespace bar
 
 ---
 
-*Quelle: [istio.io/latest/docs/reference/commands/istioctl](https://istio.io/latest/docs/reference/commands/istioctl/) — Stand: Istio v1.29*
+*Quelle: [istio.io/latest/docs/reference/commands/istioctl](https://istio.io/latest/docs/reference/commands/istioctl/) — Stand: Istio v1.31*

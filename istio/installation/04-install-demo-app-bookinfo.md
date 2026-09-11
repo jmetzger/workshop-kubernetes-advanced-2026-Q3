@@ -6,12 +6,13 @@
 
 ## Vorbereitung
 
-### Gateway API - CRD's installieren (Stand 2026-03-12)
+### Gateway API - CRD's installieren (Stand 2026-09-11)
 
    * falls nicht bereits vorher geschehen
 
 ```
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.0/standard-install.yaml
+kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.2/standard-install.yaml
 ```
 
 

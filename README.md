@@ -83,7 +83,7 @@
      * [Istio Proxy-Konzepte (Envoy als Sidecar)](istio/overview/07-istio-proxy-concepts-sidecar.md)
      * [Vergleich mit Linkerd, Cilium, Consul](istio/overview/05-vergleich-linkerd-cilium-consul.md)
 
-  1. Service Mesh - Praktischer Aufbau im Cluster
+  1. Service Mesh - Praktischer Aufbau im Cluster (Sidecar-Modus)
      * [Istio-Installation mit istioctl (demo-Profil)](istio/installation/03-install-with-istioctl-with-demo-profile.md)
      * [istioctl Cheatsheet zum Debuggen](/istio/istioctl-cheatsheet.md)
      * [Uebung: Sidecar-Injection](istio/exercises/01-exercise-injection.md)

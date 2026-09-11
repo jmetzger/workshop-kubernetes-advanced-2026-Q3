@@ -33,12 +33,15 @@ cat istio-manifest.yaml | grep -i -A20 "^Kind" | less
 
 ```
 cd 
-# current version of istio is 1.28.0
-curl -L https://istio.io/downloadIstio | sh -
-ln -s ~/istio-1.28.0 ~/istio
-echo "export PATH=~/istio-1.28.0/bin:$PATH" >> ~/.bashrc
+# aktuelle stabile Version ist 1.31.0 (Stand 2026-09)
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.31.0 sh -
+ln -s ~/istio-1.31.0 ~/istio
+echo "export PATH=~/istio-1.31.0/bin:$PATH" >> ~/.bashrc
 source ~/.bashrc 
 ```
+
+> [!TIP]
+> Istio empfiehlt, dass `istioctl` (Client) exakt dieselbe Version wie die Control-Plane (`istiod`) hat - "using matching versions helps avoid unforeseen issues". Prüfen mit `istioctl version` (zeigt Client-, Control-Plane- und Data-Plane-Version).
 
 ### Schritt 2: bash completion integrieren 
 
@@ -86,7 +89,7 @@ istioctl install -f ~/istio/samples/bookinfo/demo-profile-no-gateways.yaml -y
 
 ```
 kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
-{ kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd?ref=v1.4.0" | kubectl apply -f -; }
+kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.2/standard-install.yaml
 ```
 
 ## Reference: Get started 
