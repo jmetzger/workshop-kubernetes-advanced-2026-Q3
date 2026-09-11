@@ -47,6 +47,15 @@ istioctl waypoint list --namespace bookinfo
 
 Erwartetes Ergebnis: `PROGRAMMED=True` (kann ein paar Sekunden dauern)
 
+## Optional: Falls hier ~/istio - Ordner noch nicht existiert 
+
+```
+cd 
+# current version of istio is 1.31.0
+curl -L https://istio.io/downloadIstio | sh -
+ln -s ~/istio-1.31.0 ~/istio
+```
+
 ## bookinfo App ausrollen
 
 ```
