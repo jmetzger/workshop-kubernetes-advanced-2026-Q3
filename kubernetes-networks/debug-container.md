@@ -21,8 +21,9 @@ kubectl debug -it nginx --image=busybox
 ## Walkthrough Debug Node 
 
 ```
-kubectl get nodes 
-kubectl debug node/mynode -it --image=ubuntu
+kubectl get nodes
+# so auch root-rechte auf node 
+kubectl debug node/mynode -it --profile=sysadmin --image=ubuntu
 ```
 
 
