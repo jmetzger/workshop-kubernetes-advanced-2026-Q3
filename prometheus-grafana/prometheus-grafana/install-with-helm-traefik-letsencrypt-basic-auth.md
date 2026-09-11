@@ -293,13 +293,44 @@ curl -s -o /dev/null -w "%{http_code}\n" -u admin:<dein-passwort> https://promet
 # 302/200 (mit Auth)
 ```
 
+  * Ohne Auth kommt ein sauberes 401 vom Traefik-Middleware (nicht von Prometheus selbst):
+
+![Prometheus ohne Basic-Auth: 401 Unauthorized von Traefik](screenshots/04-prometheus-401.png)
+
+  * Mit Auth: unter `Status > Target health` siehst Du alle ServiceMonitor-Targets (hier
+    `kube-state-metrics` und `node-exporter` auf allen Workern, alle `UP`):
+
+![Prometheus Target health: alle Targets UP](screenshots/05-prometheus-targets.png)
+
+  * Beispiel-Query (Reiter "Query" -> Feld oben, danach auf "Graph" wechseln): CPU-Rate
+    pro Pod im eigenen `monitoring`-Namespace
+
+```
+sum(rate(container_cpu_usage_seconds_total{namespace="monitoring"}[5m])) by (pod)
+```
+
+![Prometheus: PromQL-Query mit Graph-Ansicht](screenshots/08-prometheus-query-graph.png)
+
 ## Schritt 11: Grafana von aussen erreichen
 
   * Browser: `https://grafana.<du>.do.t3isp.de` -> Login mit admin + deinem adminPassword
 
+![Grafana Login](screenshots/01-grafana-login.png)
+
+  * Der kube-prometheus-stack bringt fertige Dashboards mit (Ordner "Kubernetes" unter
+    "Dashboards"). Fuer Pods interessant: **Kubernetes / Compute Resources / Namespace (Pods)**
+    - Namespace-Variable oben auf `monitoring` stellen, dann siehst Du CPU- und
+    Memory-Verbrauch je Pod (hier die eigenen Prometheus/Grafana/Alertmanager-Pods):
+
+![Grafana Dashboard "Kubernetes / Compute Resources / Namespace (Pods)"](screenshots/07-grafana-pods-dashboard.png)
+
 ## Schritt 12: Alertmanager von aussen erreichen
 
   * Browser: `https://alertmanager.<du>.do.t3isp.de` -> Login-Popup (basic-auth)
+  * Der kube-prometheus-stack legt eine `Watchdog`-Alert an, die dauerhaft feuert (Beweis,
+    dass die Alerting-Pipeline lebt):
+
+![Alertmanager mit der staendig aktiven Watchdog-Alert](screenshots/06-alertmanager.png)
 
 ## Achtung: Kein persistenter Storage
 
