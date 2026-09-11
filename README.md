@@ -92,6 +92,15 @@
      * [Uebung: Traffic-Shifting / Load-Balancing](istio/exercises/04-traffic-shifting.md)
      * [Debugging mit debug/run pod](/istio/debug/01-debug-pod.md)
 
+  1. Service Mesh - Praktischer Aufbau mit Ambient-Mode (Gateway API statt Sidecar)
+     * [Istio-Installation mit istioctl (Ambient-Profil)](istio/installation/ambient/03-install-with-istioctl-ambient.md)
+     * [istioctl Cheatsheet zum Debuggen](/istio/istioctl-cheatsheet.md)
+     * [Uebung: Workload ins Ambient-Mesh aufnehmen (statt Sidecar-Injection)](istio/exercises/ambient/01-exercise-ambient-enrollment.md)
+     * [Demo-App bookinfo installieren (Ambient/Waypoint)](istio/installation/ambient/04-install-demo-app.md)
+     * [Uebung: Header-basiertes Routing (Gateway API HTTPRoute)](istio/exercises/ambient/02-exercise-request-routing.md)
+     * [Uebung: Traffic-Shifting (Gateway API HTTPRoute)](istio/exercises/ambient/04-traffic-shifting.md)
+     * [Debugging mit debug/run pod (Ambient: ztunnel + Waypoint)](/istio/debug/02-debug-pod-ambient.md)
+
   1. GitOps mit Flux
      * [ArgoCD vs. Flux CD im Ueberblick](gitops/argocd-vs-flux.md)
      * [Flux Ueberblick - Controller, CRDs und Ablauf](gitops/flux/01-overview.md)
